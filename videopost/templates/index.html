@@ -1,12 +1,28 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
+<!--ひとつ前のページへ戻る 好きに使って！-->
+<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+
 <html>
   <head>
-    <title>サンプルです。</title>
     <meta charset='utf-8'>
+    <title>サンプルページ</title>
   </head>
   <body>
-    <h1>サンプルアプリです。</h1>
+
+    <!--view.pyのget_context_data関数からデータを持ってくる-->
+    <h1>{{title}}</h1>
+    
+    <ul>
+      <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
+      <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
+      <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
+      <li><a href="{% url 'videopost:check' %}">確認html</a></li>
+    </ul>
   </body>
+
+    <!-- JavaScriptを読み込む -->
+    <script src="{% static 'js/script.js' %}"></script>
+
 </html>
