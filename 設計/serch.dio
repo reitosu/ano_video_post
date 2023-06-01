@@ -1,0 +1,31 @@
+<mxfile host="65bd71144e">
+    <diagram id="10aXvz-V2Dk6Xs__ae-u" name="Page-1">
+        <mxGraphModel dx="778" dy="568" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="60" width="300" height="530" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;b&gt;機能&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="425" y="60" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="検索ボックス" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="80" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="タグの一覧" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="100" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;b&gt;画面遷移&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="425" y="220" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="タグの押下（そのタグの動画のメイン画面へ）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="240" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="×ボタン（元のメイン画面へ）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="260" width="340" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
