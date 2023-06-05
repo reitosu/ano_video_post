@@ -1,0 +1,39 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<!--ひとつ前のページへ戻る 好きに使って！-->
+<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'js/infinite-scroll.pkgd.min.js' %}"></script>
+    <!--cloudinaryのjavascriptプラグインのインポート-->
+    <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script>
+    {% block extrajs %}{% endblock %}
+    <title>サンプルページ</title>
+  </head>
+  <body>
+
+    <ul>
+      <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
+      <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
+      <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
+      <li><a href="{% url 'videopost:check' %}">確認html</a></li>
+    </ul>
+    
+    <div class="container mt-3">
+      {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+            integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+            crossorigin="anonymous"></script>
+</body>
+</html>

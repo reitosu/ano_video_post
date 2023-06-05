@@ -1,0 +1,33 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>video Gallery</title>
+    <style>
+        .grid-container {
+          display: grid;
+          grid-template-columns: auto auto auto auto;
+          gap: 10px;
+          background-color: #dadada;
+          padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center;">video gallery</h1>
+    <div class="grid-container">
+        {% for video in videos %}
+            <img src={{ video.image.url }} alt="{{ video.alt }}" style="width: 100%;">
+        {% endfor %}
+    </div>
+    <br>
+    <center>
+        <h3>Upload your videos here.</h3>
+        <form method="POST" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Submit">
+        </form>
+    </center>
+</body>
+</html>

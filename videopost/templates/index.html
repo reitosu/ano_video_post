@@ -1,28 +1,52 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% extends "indexbase.html" %}
+{% block content %}
+<div class="infinite-container" id="container">
+    <div>
+        <p>タイトル</p>
+    </div>
 
-<!--ひとつ前のページへ戻る 好きに使って！-->
-<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+    {% for video in object_list %}
+    <div class="infinite-item">
+        <p>**************</p>
+        <p>{{ video.name }}</p>
+        <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
+        <video src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
+        <script>
+          const cld = cloudinary.Cloudinary.new({ cloud_name: 'dhlsaygev' });
+          cld.videoPlayer('video');
+        </script>
+        <br>
+        <br>
+    </div>
+    {% endfor %}
+    {% load static %}
+<script src="{% static 'js/scroll.js' %}"></script>
+</div>
 
-<html>
-  <head>
-    <meta charset='utf-8'>
-    <title>サンプルページ</title>
-  </head>
-  <body>
+<div class="loading" style="display: none;">
+    読み込み中...
+</div>
 
-    <!--view.pyのget_context_data関数からデータを持ってくる-->
-    <h1>{{title}}</h1>
-    
-    <ul>
-      <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
-      <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
-      <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
-      <li><a href="{% url 'videopost:check' %}">確認html</a></li>
-    </ul>
-  </body>
+{% if page_obj.has_next %}
+<a class="infinite-more-link" href="?page={{ page_obj.next_page_number }}">さらに読み込む</a>
+{% endif %}
+{% endblock %}
 
-    <!-- JavaScriptを読み込む -->
-    <script src="{% static 'js/script.js' %}"></script>
 
-</html>
+{% block extrajs %}
+<script>
+  $('.infinite-container').waypoint('infinite', {
+    container: 'auto',
+    items: '.infinite-item',
+    more: '.infinite-more-link',
+    offset: 'bottom-in-view',
+    loadingClass: 'infinite-loading',
+    onBeforePageLoad: function () {
+      $('.loading').show();
+      },
+      onAfterPageLoad: function ($items) {
+      $('.loading').hide();
+  }
+});
+</script>
+{% endblock %} 

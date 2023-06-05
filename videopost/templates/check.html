@@ -21,6 +21,13 @@
         <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
         <li><a href="{% url 'videopost:check' %}">確認html</a></li>
     </ul>
-    
+  <center>
+    {% for video in videos %}
+    <div>
+      <p>{{video.id}}:{{video.title}}:{{video.video}}:{{video.uploaded}}
+    </div>
+    {% endfor %}
+    <h3>Upload your videos here.</h3>
+    </center>
   </body>
 </html>

@@ -22,5 +22,13 @@
         <li><a href="{% url 'videopost:check' %}">確認html</a></li>
     </ul>
     
+    <center>
+    <form method="POST" action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form }}
+      <input type="submit" value="投稿">
+    </form>
+    </center>
+
   </body>
 </html>
