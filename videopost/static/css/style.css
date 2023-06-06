@@ -4,3 +4,10 @@ h1 {
 body {
     background: white url("../images/background.png") no-repeat;
 }
+.infinite-container {
+    overflow: auto;
+    scroll-snap-type: y mandatory;
+  }
+  .infinite-item {
+    scroll-snap-align: start;
+  }
