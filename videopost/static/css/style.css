@@ -5,9 +5,13 @@ body {
     background: white url("../images/background.png") no-repeat;
 }
 .infinite-container {
-    overflow: auto;
+    scroll-behavior: smooth;
+    width: 100%;
+    height: 800;
+    overflow: hidden;
     scroll-snap-type: y mandatory;
-  }
-  .infinite-item {
+}
+.infinite-item {
+    height: 800;
     scroll-snap-align: start;
-  }
+}

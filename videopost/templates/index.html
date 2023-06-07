@@ -1,16 +1,17 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
 <!--ひとつ前のページへ戻る 好きに使って！-->
 <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
 
 <html>
   <head>
     <meta charset='utf-8'>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
     <script src="{% static 'js/infinite-scroll.pkgd.min.js' %}"></script>
     <script src="{% static 'js/scroll.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullpage.js/dist/fullpage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <!--cloudinaryのjavascriptプラグインのインポート-->
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
@@ -27,19 +28,15 @@
     </ul>
 
     <div class="infinite-container" id="container">
-      <div>
-          <p>タイトル</p>
-      </div>
-  
       {% for video in object_list %}
-      <div class="infinite-item">
+      <section class="infinite-item">
           <p>**************</p>
           <p>{{ video.name }}</p>
           <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
           <video src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
           <br>
           <br>
-      </div>
+      </section>
       {% endfor %}
   </div>
 </body>
