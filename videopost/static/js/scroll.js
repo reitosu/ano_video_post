@@ -1,3 +1,5 @@
+$('body').addClass('no_scroll');
+
 $(function() {
   // スクロールスナップの対象となるセクションを取得
   var container = $('.infinite-container')
