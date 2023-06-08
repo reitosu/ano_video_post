@@ -1,5 +1,3 @@
-$('body').addClass('no_scroll');
-
 $(function() {
   // スクロールスナップの対象となるセクションを取得
   var container = $('.infinite-container')
@@ -7,7 +5,6 @@ $(function() {
 
   // wheelイベントにデバウンスを適用する
   container.on('wheel', _.debounce(scrolling, 200))
-  container.on('touchmove', _.debounce(scrolling, 200))
     
     function scrolling(e) {
     var sections = $('.infinite-item').map(function() {

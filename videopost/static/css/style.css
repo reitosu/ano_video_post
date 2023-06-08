@@ -9,7 +9,7 @@ body {
     scroll-behavior: smooth;
     width: 100%;
     height: 800;
-    overflow: hidden;
+    overflow: scroll;
     scroll-snap-type: y mandatory;
     position: relative;
 }
@@ -28,9 +28,6 @@ body {
     background-color: rbga(0,0,0,0.2);
     opacity: 0.8;
 }
-.infinite-item video {
-    display: block;
-}
 .serch {
     position: fixed;
     top: 30;left: 30;
@@ -46,4 +43,10 @@ body {
 }
 .edit img {
     width:6%;height:8%;
+}
+/*パソコン画面の設定*/
+@media screen and (min-width: 768px) {
+    .infinite-container {
+        overflow: hidden;
+    }
 }
