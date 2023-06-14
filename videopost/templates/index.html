@@ -1,28 +1,57 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
 <!--ひとつ前のページへ戻る 好きに使って！-->
 <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
 
 <html>
   <head>
     <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+    <script src="{% static 'js/scroll.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <!--cloudinaryのjavascriptプラグインのインポート-->
+    <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script>
     <title>サンプルページ</title>
   </head>
   <body>
 
-    <!--view.pyのget_context_data関数からデータを持ってくる-->
-    <h1>{{title}}</h1>
-    
+    <!--消して大丈夫！-->
     <ul>
       <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
       <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
       <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
       <li><a href="{% url 'videopost:check' %}">確認html</a></li>
     </ul>
-  </body>
+    
+    <!--cssで画面に固定-->
+    <div class="serch">
+    <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
+    </div>
+    <div class="edit">
+    <a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
+    </div>
 
-    <!-- JavaScriptを読み込む -->
-    <script src="{% static 'js/script.js' %}"></script>
 
+    <div class="infinite-container" id="container">
+      <!--動画要素の表示-->
+      {% for video in object_list %}
+      <section class="infinite-item">
+          <p>**************</p>
+          <p>{{ video.name }}</p>
+          <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
+          <video src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
+          <!--動画の上に画像の表示-->
+          <div class="overlay">
+            <a href="{% url 'videopost:edit' %}"><img src="{% static 'images/background.png'%}"></a>
+          </div>
+          <br>
+          <br>
+      </section>
+      {% endfor %}
+  </div>
+</body>
 </html>
