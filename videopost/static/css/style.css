@@ -17,6 +17,7 @@ body {
 .infinite-item {
     height: 800;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
     position: relative;
 }
 .infinite-item img {
@@ -49,7 +50,6 @@ body {
 @media screen and (min-width: 768px) {
     .infinite-container {
         overflow-y: hidden;
-        overflow-x: hidden;
     }
 
 }

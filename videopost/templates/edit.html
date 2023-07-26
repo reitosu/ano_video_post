@@ -1,34 +1,127 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-<!--ひとつ前のページへ戻る 好きに使って！-->
-<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
-
 <html>
-  <head>
-    <title>サンプルページ</title>
-    <meta charset='utf-8'>
-  </head>
-  <body>
+    <head>
+        <title>サンプルページ</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% load static %}
+        <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
+        <link rel="stylesheet" href="{% static 'css/edit.css' %}">
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <script src="https://unpkg.com/@vueuse/shared"></script>
+        <script src="https://unpkg.com/@vueuse/core"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="{% static 'js/edit.js' %}" defer></script>
+        <div id="sessions">
+            <div id="backupMaterials" data-materials="{{ request.session.backup_materials }}"></div>
+            <div id="backupPreviews" data-previews="{{ request.session.backup_previews }}"></div>
+            <div id="backupWidth" data-width="{{ request.session.backup_width }}"></div>
+        </div>
+        {% csrf_token %}
+    </head>
+    <body>
+        <div id="edit">
+            <section id='head'>
+                <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+                <button id='delete' @click="materialDelete">消去</button>
+            </section>
 
-    <!--view.pyのget_context_data関数からデータを持ってくる-->
-    <h1>{{title}}</h1>
+            <section id='previewsPadding'>
+                <div id='previews'>
+                    <div class="material_preview" v-for="preview in previews" :id="'preview'+preview.id" v-html="preview.element"></div>
+                </div>
+            </section>
 
-    <!--画面遷移-->
-    <ul>
-        <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
-        <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
-        <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
-        <li><a href="{% url 'videopost:check' %}">確認html</a></li>
-    </ul>
-    
-    <center>
-    <form method="POST" action="" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form }}
-      <input type="submit" value="投稿">
-    </form>
-    </center>
+            <section id='editting'>
+                <div class='tools'>
+                    <button id='play'>再生</button>
+                    <button id='stop' hidden>停止</button>
+                    <div id='timeparcurrent'>10/12</div>
+                    <button id='undo'>undo</button>
+                    <button id='redo'>redo</button>
+                </div>
+                
+                <div id="timelines">
+                    <div id="timeline" ref="timelineElement" @click="timelineClicked" @wheel.passive="timelineWheeled" :style="{width:timelineWidth}">
+                        <div id="currentTime" :style="{left:currentTimePosition+'%'}"></div>
+                        <div id="times">
+                            <div v-for="(item,index) in intervalList" :style="{left:item.left}" :id="'time'+index" class="time">
+                                [[item.displayTime]]
+                            </div>
+                        </div>
+                    </div>
 
-  </body>
+                    <div id="rows" @scroll="timelineScroll">
+                        <div id="materials">
+                            <div class="material" v-for="material in materials" :id="material.id" :style="material.style" :class="material.class" @mousedown.prevent="horizonMove($event, '.row')" v-longpress="dragNdrop" v-resize="{direction:'e,w',snap:[{element:'.material',mode:'outer'},{element:'.row'}]}">
+                            </div>
+                        </div>
+                        <div v-for="number in rownumbers" :key="number" class="row" :id="'row'+number" :style="{width:timelineWidth}"></div>
+                    </div>
+                </div>
+                    
+                <div class='icon'>
+                    <div id='pcIcon'>
+                        <button id='addvideobutton' class='addeditbutton' @click="slideUp('#recoding'), recorder()"><img src="{% static 'images/edit.png' %}" id='addvideo'></button>
+                        <button id='addimagebutton' class='addeditbutton' @click="slideUp('#photography'), startStream()"><img src="{% static 'images/edit.png' %}" id='addimage'></button>
+                        <button id='addtextbutton' class='addeditbutton' @click="slideUp()"><img src="{% static 'images/edit.png' %}" id='addtext'></button>
+                    </div>
+                    <div id='deviceIcon'>
+                        <input type='file' accept='video/*' @change="adjust">
+                    </div>
+                </div>
+            </section>
+
+            <section id='recoding'>
+                <div id='pcCamera'>
+                    <button id='vback' @click="slideDown('#recoding'), stopStream()">戻る</button>
+                    <br>
+                    <video id="videoElement" width="200" height="500" ref="videoVideo" :srcObject="mediastream" autoplay></video>
+                    <br>
+                    <button id="startrec" v-if="recFlag" @click="startRec">Start Recording</button>
+                    <button id="stoprec" v-else @click="stopRec">Stop Recording</button>
+                    <input type='file' accept='video/*' name='select' id='select' @change="adjust">
+                    <select v-model="selectedVideoInput" @change="changeVideoInput(videoVideo)" required>
+                        <option v-for="i of cameras" :key="i.deviceId" :id="i.label" :value="i.deviceId">
+                            [[ i.label ]]
+                        </option>
+                    </select>
+                </div>
+            </section>
+            
+            <div class='ajvideolength' :class="adjustClass" v-show="adjustFlag">
+                <div id="ajvideoContainer">
+                <video id="ajvideoPlayer" :src="selectVideoSrc" type="video/mp4" ref="selectVideo" controls></video>
+                </div>
+                    <p id='ajtimeparcurrent'>[[]]</p>
+                    <div id="adjust">
+                    <div id="ajtimeline" ref="ajtimelineElement" @click="ajtimelineClicked">
+                        <div id="ajcurrentTime" :style="{left:ajcurrentTimePosition+'%'}"></div>
+                        <div id="times">
+                            <div v-for="(item,index) in adjustIntervalList" :style="{left:item.left}" :id="'ajtime'+index" class="ajtime">
+                                [[item.displayTime]]
+                            </div>
+                        </div>
+                    </div>
+                    <div id='ajlength'></div>
+                </div>
+                <br>
+                <button id='correct'>おけ</button>
+            </div>
+
+            <section id='photography'>
+                <button id='iback' @click="slideDown('#photography'), stopStream()">戻る</button>
+                <br>
+                <button id="capture" @click="capture">take a photo</button>
+                <br>
+                <video id="video" ref="imgVideo" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </section>
+
+
+            <section id='text'>
+            </section>
+        </div>
+    </body>
+
 </html>
