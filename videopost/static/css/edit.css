@@ -1,0 +1,278 @@
+body {
+    /*overflow: hidden;*/
+    background-color: #444444;
+}
+#head {
+    height: 5%;
+}
+#previewsPadding {
+    overflow: hidden;
+    width: 100%;
+    height: 60%;
+    background-color: #777777;
+    z-index: 900;
+}
+#previews {
+    width: auto;
+    height: 100%;
+    aspect-ratio: 9 / 16;
+    background-color: #222222;
+    margin: 0 auto;
+}
+#preview {
+    position: relative;
+    height: 100%;
+    width: 56.25%;
+    background-color: black;
+}
+.material_preview {
+    position: absolute;
+    width: 50%;height: 50%;
+}
+.material_preview img, .material_preview video {
+    width: 100%;height: 100%;
+}
+#editting {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 35%;
+    background-color: #444444;
+}
+.timelines {
+    width: 100%;
+    height: 75%;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    z-index: 1;
+}
+.timelines::-webkit-scrollbar {
+    display: none;
+}
+#timeparcurrent {
+    display: inline;
+}
+#timeline {
+    width: 100%;
+    height: 22px;
+    background-color: #f1f1f1;
+    position: relative;
+    position: fixed;
+    left:20px;
+    cursor: pointer;
+    z-index: 2;
+}
+#times {
+    position: relative;
+    right: 15;
+}
+#timeline .time {
+    position: absolute;
+    height: 100%;
+    font-size: 12px;
+    line-height: 30px;
+}
+#time0 {
+    background-color:bisque;
+}
+#timeline #currentTime {
+    position: absolute;
+    left: 0%;
+    top: -5px;
+    width: 2px;
+    height: 200px;
+    background-color: red;
+}
+#rows {
+    position: relative;
+    padding-top:25;
+    height: 50%;
+    width: 100%;
+    overflow-x:scroll;
+    overflow-y:scroll;
+}
+#rows::-webkit-scrollbar {
+    display: none;
+}
+.row {
+    position: relative;
+    width: 97%;height: 28;
+    border-style:ridge;
+    border-color:dimgray;
+    left: 20;
+    margin-bottom: 5;
+}
+/*.row {
+    width: 100%;height: 23;
+    background-color: aliceblue;
+    top: 1;
+    position: relative;
+}*/
+.material {
+    position: absolute;
+    width: 100%;
+    height: 23px;
+    border: 1px solid #ddd;
+    color: #333;
+    cursor: pointer;
+    background-color: goldenrod;
+    z-index: 1;
+}
+.materials .selected {
+    background-color: yellow;
+}
+.icon {
+    width: 100%; height: 25%;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+.icon::-webkit-scrollbar {
+    display: none;
+}
+.addeditbutton {
+    position: relative;
+    top: 12%;
+    width: 5%; height: auto;
+}
+.icon img {
+    width: 100%; height: auto;
+    cursor: pointer;
+}
+#pcIcon {
+    display: none;
+}
+#deviceIcon {
+    display: block;
+}
+@keyframes slideUp {
+    from {
+        height: translateY(0%);
+    }
+    to {
+        transform: translateY(-99%);
+    }
+}
+.animateSlideUp {
+    animation:slideUp 0.6s ease 0s 1 normal forwards
+}
+@keyframes slideDown {
+    from {
+        transform: translateY(-99%);
+    }
+    to {
+        transform: translateY(0%);
+    }
+}
+.animateSlideDown {
+    animation: slideDown 0.6s ease 0s 1 normal forwards
+}
+#pcCamera {
+    display: none;
+}
+#recoding {
+    position: absolute;
+    left: 1;
+    background-color: #ccc;
+    height: 90%;
+    display: none;
+    z-index: 9998;
+}
+#photography {
+    position: absolute;
+    left: 1;
+    background-color: #ccc;
+    height: 90%;
+    display: none;
+    z-index: 9998;
+}
+#canvas {
+    display: none;
+}
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0%;
+    }
+    to {
+        opacity: 100%;
+    }
+}
+.animateFadeIn {
+    animation: fadeIn 0.3s ease 0s 1 normal forwards
+}
+.ajvideolength {
+    opacity: 0%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+}
+#adjust {
+    height: 70px;
+    position: relative;
+}
+#ajtimeline {
+    width: 600px;
+    height: 30px;
+    background-color: #f1f1f1;
+    position: relative;
+    cursor: pointer;
+}
+#ajtimeline .ajtime {
+    position: absolute;
+    height: 100%;
+    font-size: 12px;
+    line-height: 30px;
+}
+#ajtimeline #ajcurrentTime {
+    position: absolute;
+    top: -5px;
+    width: 2px;
+    height: 70px;
+    background-color: red;
+    z-index: 1;
+}
+#ajlength {
+    width: 600px;
+    height: 30px;
+    background-color: blanchedalmond;
+    position: absolute;
+}
+#ajvideoContainer {
+    width: 600px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+#ajvideoPlayer {
+    width: 100%;
+    height: 100%;
+}
+
+/*パソコン用表示*/
+@media screen and (min-width: 768px) {
+    #pcIcon {
+        display: block;
+    }
+    #deviceIcon {
+        display: none;
+    }
+    #pcCamera {
+        display: block;
+    }
+}

@@ -7,5 +7,5 @@ class VideoForm(ModelForm):
         model = Video
         fields = ['video']
         widgets = {
-            'video': forms.FileInput(attrs={'capture':'enbiroment'})
+            'video': forms.FileInput(attrs={'accept':'video/*','capture':'environment'})
             }

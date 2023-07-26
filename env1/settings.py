@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-%#p@83pg69ittv#71@thp5z2sw6!h3=!za)(k%xza#1g!*p2&y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.10.106','127.0.0.1','10.228.179.236']
+ALLOWED_HOSTS = ['192.168.10.106','127.0.0.1','10.228.179.236','10.0.54.27','192.168.2.208']
 
 
 # Application definition
@@ -64,7 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-            ],
+            ]
         },
     },
 ]
@@ -81,6 +81,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # Password validation
@@ -117,6 +119,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+STATIC_ROOT = path.join(BASE_DIR,'videopost','static')
 STATIC_URL = 'static/'
 
 # Default primary key field type

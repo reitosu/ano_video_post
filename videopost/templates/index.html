@@ -10,7 +10,6 @@
     <script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
     <script src="{% static 'js/scroll.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullpage.js/dist/fullpage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <!--cloudinaryのjavascriptプラグインのインポート-->
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
@@ -43,7 +42,7 @@
           <p>**************</p>
           <p>{{ video.name }}</p>
           <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
-          <video src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
+          <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
           <!--動画の上に画像の表示-->
           <div class="overlay">
             <a href="{% url 'videopost:edit' %}"><img src="{% static 'images/background.png'%}"></a>
