@@ -47,10 +47,24 @@ const timeline = createApp({
                         const targetEle = mutation.target
                         const targetId = targetEle.id
                         const index = materialIndex(targetId)
+                        const duration = materials.value[index].duration
+                        const maxWidth = timelineWidth.value * (duration/timeSettings.videoLength)
+                        console.log(maxWidth)
                         const materialStyle = materials.value[index].style
-                        materialStyle.left = parseFloat(targetEle.style.left)
-                        materialStyle.top = parseFloat(targetEle.style.top)
-                        materialStyle.width = parseFloat(targetEle.style.width)
+                        const materialLeft = parseFloat(targetEle.style.left)
+                        const materialWidth = parseFloat(targetEle.style.width)
+                        if (materialWidth <= maxWidth) {
+                            materialStyle.left = materialLeft
+                            materialStyle.width = materialWidth
+                        } else {
+                            materialStyle.width = maxWidth
+                        }
+                        const rowEle = document.querySelectorAll(".row")
+                        const rowTops = Array.from(rowEle).map(ele => { ele.offsetTop })
+                        const materialTop = parseFloat(targetEle.style.top)
+                        if (rowTops.includes(materialTop)) {
+                            materialStyle.top = materialTop
+                        }
                         console.log(materialStyle.left)
                     }
                 }
@@ -200,28 +214,39 @@ const timeline = createApp({
             }
             const onMouseUp = (event) => {
                 console.log("remove")
-                const inElement = document.elementsFromPoint(event.offsetX,event.clientY)[1]
-                console.log(rowElesArray.includes(inElement))
+                const inElement = document.elementsFromPoint(event.offsetX,event.clientY)
+                const result = inElement.filter((value) => {
+                    return rowElesArray.includes(value);
+                  });
+                console.log(result)
                 let spaceFlag = false
-                if (rowElesArray.includes(inElement)) {
+                let left = parseFloat(el.style.left)
+                const width = parseFloat(el.style.width)
+                let right = left + width
+                if (result) {
+                    spaceFlag = true
                     const rowLeft = rowElesArray[0].offsetLeft
                     const rowWidth = rowElesArray[0].offsetWidth
                     const rowRight = rowLeft + rowWidth
-                    let left = parseFloat(el.style.left)
-                    let right = left + parseFloat(el.style.width)
-                    spaceFlag = true
-                    const elementsInRow = document.querySelectorAll(`.${inElement.id}`)
+                    console.log(rowLeft, left)
+                    console.log(rowRight, right)
+                    if (rowLeft > left) {
+                        console.log("overLeft")
+                        left = rowLeft
+                        right = left + parseFloat(el.style.width)
+                    } else if (rowRight < right){
+                        console.log("overRight")
+                        left = rowRight - width
+                        right = rowRight
+                    }
+                    const elementsInRow = document.querySelectorAll(`.${result[0].id}`)
+                    console.log(elementsInRow)
                     elementsInRow.forEach(eleInRow => {
+                        console.log(el, eleInRow, el == eleInRow)
                         if (el != eleInRow) {
+                            console.log("another")
                             const inleft = parseFloat(eleInRow.style.left)
                             const inright = inleft + parseFloat(eleInRow.style.width)
-                            if (rowLeft > left) {
-                                left = rowLeft
-                                right = left + parseFloat(el.style.width)
-                            } else if (rowRight < right){
-                                left = rowRight - rowWidth
-                                right = rowRight
-                            }
                             if (right > inleft && left < inright) {
                                 spaceFlag = false
                             }
@@ -230,7 +255,15 @@ const timeline = createApp({
                 }
                 if (spaceFlag) {
                     el.style.left = left
-                    el.style.top = inElement.clientTop + inElement.offsetTop
+                    el.style.top = result[0].clientTop + result[0].offsetTop
+                    console.log(el.classList)
+                    rowElesArray.some(row => {
+                        if(el.classList.contains(row.id)){
+                            el.classList.remove(row.id)
+                            return
+                        }
+                    })
+                    el.classList.add(result[0].id)
                 }
                 else {
                     el.style.top = initialTop
@@ -250,23 +283,42 @@ const timeline = createApp({
             document.addEventListener('mouseup', onMouseUp)
         }
 
-        const horizonMove = (event, snap) => {
+        const horizonMove = (event, snaps) => {
             const el = event.target
             const elId = el.id
             const Index = materialIndex(elId)
             console.log(Index)
-            const snapElement = document.querySelector(snap)
+            const elLeft = el.offsetLeft
+            const elWidth = el.offsetWidth
+            const elRight = elLeft + elWidth
+            const rowEle = document.querySelector(".row")
+            const rowLeft = rowEle.offsetLeft
+            const rowRight = rowLeft + rowEle.offsetWidth
+            let max = rowRight - elWidth
+            let min = rowLeft
+            const snapElements = document.querySelectorAll(".material")
+            snapElements.forEach(snapEle => {
+                if (snapEle != el) {
+                    const snapLeft = snapEle.offsetLeft
+                    const snapRight = snapLeft + snapEle.offsetWidth
+                    console.log(snapLeft, elRight)
+                    console.log(snapRight, elLeft)
+                    if (snapLeft >= elRight) {
+                        console.log(snapLeft - elWidth, max)
+                        max = Math.min(snapLeft - elWidth, max)
+                    }
+                    if (snapRight <= elLeft) {
+                        console.log(snapRight, max)
+                        min = Math.max(snapRight, min)
+                    }
+                }
+            })
+            console.log(max,min)
 
             const onMove = (event) => {
-                console.log(materialHistory.value)
                 console.log(materials.value)
                 const movement = event.movementX
                 let afterLeft = parseFloat(el.style.left) + movement
-                const elWidth = el.offsetWidth
-                const snapLeft = snapElement.offsetLeft
-                const snapRight = snapElement.offsetWidth + snapLeft
-                const max = snapRight - elWidth
-                const min = snapLeft
                 console.log(max,min)
                 el.style.left = Math.min(Math.max(afterLeft,min),max)
             }
@@ -305,6 +357,7 @@ const timeline = createApp({
         const { videoInputs:cameras } = useDevicesList({requestPermissions: true,});
         const selectedVideoInput = ref('')
         const audioSettings = ref(false)
+        const chunks = ref([])
 
         const getmediastream = async () => {
             try {
@@ -323,19 +376,25 @@ const timeline = createApp({
             .then(() => {
                 console.log(mediastream)
                 videoVideo.value.srcObject = mediastream.value
-                mediaRecorder = new MediaRecorder(mediastream.value);
+                mediaRecorder = new MediaRecorder(mediastream.value, { mimeType: 'video/webm' });
                 
                 mediaRecorder.ondataavailable = (event) => {
-                    chunks.push(event.data);
+                    chunks.value.push(event.data);
                 };
 
                 mediaRecorder.onstop = () => {
                     // 録画されたデータをBlobオブジェクトとして作成
-                    var videoBlob = new Blob(chunks, { type: 'video/mp4' });
+                    const videoBlob = new Blob(chunks.value, { type: 'video/webm' });
+                    const videoUrl = useObjectUrl(videoBlob)
+                    document.querySelector("#testvideo").src = videoUrl.value
+                    document.querySelector("#testvideo").onloadedmetadata = () => {
+                        console.log(document.querySelector("#testvideo").duration)
+                    }
+                    console.log(mediaRecorder.stream.getVideoTracks()[0].getSettings())
         
-                    var id = Date.now().toString();
-                    var formData = new FormData();
-                    formData.append('videoData', videoBlob, id+'video.mp4');
+                    const id = Date.now().toString();
+                    const formData = new FormData();
+                    formData.append('videoData', videoBlob, id+'video.webm');
 
                     axios({
                         method: 'POST',
@@ -347,6 +406,8 @@ const timeline = createApp({
                         console.log('sucsess')
                         const path = response.data.path
                         const materialClass = ref()
+                        const duration = ref()
+                        const materialWidth = ref()
                         const list = []
                         for (let i=0; i<materialsLen.value; i++) {
                             console.log(materialsLen.value)
@@ -367,9 +428,21 @@ const timeline = createApp({
                             const rowTop = rowEle.clientTop + rowEle.offsetTop
                             const rowLeft = rowEle.getBoundingClientRect().left
                             console.log(rowTop, rowLeft)
-                            const materialStyle = reactive({width:timelineWidth.value/3,top:rowTop,left:rowLeft})
-                            previews.value.push({"id":path, "element":"<video src='"+path+"'></video>"})
-                            materials.value.push({"id":"material"+path, "style":materialStyle, "class":materialClass})
+                            previews.value.push({"id":path, "element":"<video preload='metadata'><source src='"+path+"' type='video/webm'></video>"})
+                            await nextTick();
+                            const videoElements = document.querySelector(`#previews`).children
+                            const videoEle = videoElements[videoElements.length-1].children[0]
+                            const getDuration = () => {
+                                duration.value = videoEle.duration
+                                materialWidth.value = timelineWidth.value * (duration.value/timeSettings.videoLength)
+                                console.log(duration.value)
+                                console.log(materialWidth.value)
+                            }
+                            console.log(videoEle)
+                            videoEle.addEventListener("loadedmetadata", getDuration)
+                            videoEle.addEventListener("error",() => {console.log(videoEle.error)})
+                            const materialStyle = reactive({width:materialWidth,top:rowTop,left:rowLeft})
+                            materials.value.push({"id":"material"+path, "style":materialStyle, "class":materialClass, "duration":duration})
                             console.log(materials.value)
                             await nextTick();
                             const observeElement = document.querySelector(`#materials`).children
@@ -384,11 +457,12 @@ const timeline = createApp({
         const recFlag = ref(true);
         const startRec = () => {
             recFlag.value = false
-            chunks = [];
+            chunks.value = [];
             mediaRecorder.start();
-            setTimeout(function() {
+            const limitTimer = setTimeout(() => {
+                clearTimeout(limitTimer)
                 recFlag.value = true
-            mediaRecorder.stop();
+                mediaRecorder.stop();
             }, 12000);
         };
         const stopRec = () => {

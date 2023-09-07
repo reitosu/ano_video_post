@@ -27,6 +27,7 @@
             </section>
 
             <section id='previewsPadding'>
+                <video id="testvideo" preload="metadata"></video>
                 <div id='previews'>
                     <div class="material_preview" v-for="preview in previews" :id="'preview'+preview.id" v-html="preview.element"></div>
                 </div>
@@ -53,7 +54,7 @@
 
                     <div id="rows" @scroll="timelineScroll">
                         <div id="materials">
-                            <div class="material" v-for="material in materials" :id="material.id" :style="material.style" :class="material.class" @mousedown.prevent="horizonMove($event, '.row')" v-longpress="dragNdrop" v-resize="{direction:'e,w',snap:[{element:'.material',mode:'outer'},{element:'.row'}]}">
+                            <div class="material" v-for="material in materials" :id="material.id" :style="material.style" :class="material.class" @mousedown.prevent="horizonMove($event, ['.row','.material'])" v-longpress="dragNdrop" v-resize="{direction:'e,w',snap:[{element:'.material',mode:'outer'},{element:'.row'}]}">
                             </div>
                         </div>
                         <div v-for="number in rownumbers" :key="number" class="row" :id="'row'+number" :style="{width:timelineWidth}"></div>

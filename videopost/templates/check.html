@@ -7,27 +7,57 @@
 <html>
   <head>
     <title>サンプルページ</title>
-    <meta charset='utf-8'>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
+    <link rel="stylesheet" href="{% static 'css/check.css' %}">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@vueuse/shared"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{% static 'js/check.js' %}" defer></script>
   </head>
   <body>
+    <div id="check">
+      <ul>
+          <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
+          <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
+          <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
+          <li><a href="{% url 'videopost:check' %}">確認html</a></li>
+      </ul>
 
-    <!--view.pyのget_context_data関数からデータを持ってくる-->
-    <h1>{{title}}</h1>
+      <section id="preview">
+        <video id="ajvideoPlayer" :src="videoSrc" ref="videoPreview" @loadedmetadata="loadVideo" @ended="pause" controls></video>
+      </section>
 
-    <!--画面遷移-->
-    <ul>
-        <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
-        <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
-        <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
-        <li><a href="{% url 'videopost:check' %}">確認html</a></li>
-    </ul>
-  <center>
-    {% for video in videos %}
-    <div>
-      <p>{{video.id}}:{{video.title}}:{{video.video}}:{{video.uploaded}}
+      <section id="timelines">
+        <div id="util">
+          <div id="play" v-show="!playFlag" @click.stop="playVideo"></div>
+          <div id="stop" v-show="playFlag" @click.stop="pauseVideo">
+            <div></div>
+            <div></div>
+          </div>
+          <p>[[ displayCurrentTime.current ]] / [[ displayCurrentTime.duration ]]</p>
+        </div>
+        <div id="timeline" ref="timelineElement" @mousedown.prevent="moveCurrent" :style="{width:timelineWidth, left:timelineLeft}">
+          <div id="currentTime" :style="{left:currentTimePosition+'%'}"></div>
+          <div id="times">
+              <div v-for="(item,index) in intervalList" :style="{left:item.left}" :id="'time'+index" class="time">
+                  [[item.displayTime]]
+              </div>
+          </div>
+        </div>
+        <div id="material" ref="material" :style="{width:materialWidth, left:materialLeft}" @mousedown.prevent="move">
+          <div id="leftHandle" class="handle" ref="leftHandle" :style="{left:handleLefts.l}" @mousedown.prevent.stop="resize"></div>
+          <div id="rightHandle" class="handle" ref="rightHandle" :style="{left:handleLefts.r}" @mousedown.prevent.stop="resize"></div>
+        </div>
+      </section>
+      
+      <section id="footer">
+        <input id="videoInput" type='file' accept='video/*' @change="selectVideo">
+      </section>
     </div>
-    {% endfor %}
-    <h3>Upload your videos here.</h3>
-    </center>
   </body>
 </html>

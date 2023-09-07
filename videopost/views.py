@@ -65,7 +65,6 @@ class CheckView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(CheckView, self).get_context_data(**kwargs)
-        context['videos'] = Video.objects.all().order_by('-uploaded')
         context['title'] = "チェック"
         return context
 
@@ -89,6 +88,12 @@ def video_post(request):
             fs = FileSystemStorage(location=path)
             fs.save(video_file.name,video_file)
             path = fs.path(video_file.name)
+            """
+            video_clip = moviepy.editor.VideoFileClip(path)
+            path = path.replace('.mp4', '.wav')
+            video_clip.moviepy.editor.write_videofile(path, codec='libx264')
+            video_clip.close()
+            """
             if 'starttime' in list(request.POST):
                 start_time = request.POST.get('starttime')
                 end_time = request.POST.get('endtime')
