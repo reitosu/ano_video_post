@@ -2,6 +2,7 @@
   <head>
     <title>サンプルページ</title>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> cedf199cb3e896a44663605c1013de472d640073
@@ -20,11 +21,59 @@
 =======
     <script src="{% static 'js/check.js' %}" defer></script>
 =======
+=======
+>>>>>>> 8bd16c2 (サーチ画面の追加)
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <meta charset='utf-8'>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/search.css' %}">  
+<<<<<<< HEAD
+=======
+    
+  </head>
+
+  <body>
+
+    <!--view.pyのget_context_data関数からデータを持ってくる-->
+    <h1>検索</h1>
+    
+    <form action ="video_test.db" method = "get"></form>
+    <button onclick="cancel"><img src= {% static "images/X.svg" %} alt="キャンセル" width="12" height="12"></button>
+    <input type="text" id="search-input" placeholder="タグを入力してください">
+    <button onclick="search"><img src={% static "images/search.svg" %} alt="検索" width="15" height="15"></button>
+
+    <ul id="dropdown-menu">
+    </ul>
+
+    <ul id = "tag-list">
+    </ul>
+
+    <script src="search.js"></script>
+
+
+
+      <ul id = "tag_all">
+        <li>タグ一覧</li>
+        <li></li>
+      </ul>
+
+      <ul id = "tag_hot">
+        <li>人気タグ</li>
+        <li></li>
+
+      </ul>
+
+      <ul tag = "tag_new">
+        <li>急上昇</li>
+        <li></li>
+
+      </ul>
+
+    <script src = "{%static 'js/search.js'%}"></script>
+
+
+>>>>>>> 8bd16c2 (サーチ画面の追加)
     
 >>>>>>> 8bd16c2b38cc1145473527c1d1f92774e97751ef
 >>>>>>> cedf199cb3e896a44663605c1013de472d640073
