@@ -1,8 +1,4 @@
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
 <!--ひとつ前のページへ戻る 好きに使って！-->
-<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
 
 <html>
   <head>
@@ -11,16 +7,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
+    {% csrf_token %}
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/check.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="{% static 'js/check.js' %}" defer></script>
+    <script type="module" src="{% static 'js/check.js' %}" defer></script>
+    <div id="sessions">
+      <div id="draft" data-draft="{{ request.session.draft }}"></div>
+    </div>
   </head>
+
   <body>
     <div id="check">
+      <div id="header">
+        <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+        <div id="tags" :style="{width:tagsWidth}">
+          <div v-for="name in tags" class="tag">
+            [[ name ]]
+            <p @click="tagDelete">×</p>
+          </div>
+        </div>
+        <a href="{% url 'videopost:index' %}">×</a>
+      </div>
       <ul>
           <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
           <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
@@ -56,8 +68,23 @@
       </section>
       
       <section id="footer">
-        <input id="videoInput" type='file' accept='video/*' @change="selectVideo">
+        <input id="videoInput" type='file' accept='video/*' @change="selectVideo" style="display: none;">
+        <label for="videoInput" class="custom-file-upload"><img src="{% static 'images/edit.png'%}" style="height: 20;"></label>
+        <button id="tagButton" @click="slideUp(inputTagContainer)">タグ</button>
+        <button id="post">投稿</button>
       </section>
+
+      <div id="inputTagContainer" ref="inputTagContainer">
+        <button @click="slideDown(inputTagContainer)">閉じる</button>
+        <div id="fuzzySearch">
+          <input type="text" v-model="inputTag" id="tagInput" ref="tagInputElement">
+          <button @click="addTag">追加</button>
+          <ul id="searchPrediction" @click="predict">
+            <li v-for="history in historys" v-show="inputTag"><div id="historyMark"></div>[[ history ]]</li>
+            <li v-for="tag in searchResult">[[ tag.item ]]</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </body>
 </html>

@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.db import connection
 from django.views.generic import CreateView,ListView
-from .models import Video
+from .models import Video,Tag
 from .forms import VideoForm
 import os
 import base64
@@ -67,6 +67,18 @@ class CheckView(TemplateView):
         context = super(CheckView, self).get_context_data(**kwargs)
         context['title'] = "チェック"
         return context
+    
+def save_draft(request):
+    if request.method == "POST":
+        print(request.POST.get("draft"))
+        request.session["draft"] = request.POST.get("draft")
+    return JsonResponse({"draft":"success"})
+
+def get_tags(request):
+    tags = list(Tag.objects.values_list("name", flat=True))
+    print(tags)
+    print(Tag.objects.filter(name__contains="test1"))
+    return JsonResponse({"tags":tags})
 
 class VideoView(TemplateView):
     template_name = 'video.html'
@@ -88,12 +100,6 @@ def video_post(request):
             fs = FileSystemStorage(location=path)
             fs.save(video_file.name,video_file)
             path = fs.path(video_file.name)
-            """
-            video_clip = moviepy.editor.VideoFileClip(path)
-            path = path.replace('.mp4', '.wav')
-            video_clip.moviepy.editor.write_videofile(path, codec='libx264')
-            video_clip.close()
-            """
             if 'starttime' in list(request.POST):
                 start_time = request.POST.get('starttime')
                 end_time = request.POST.get('endtime')
