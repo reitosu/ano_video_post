@@ -1,0 +1,27 @@
+{% load static %}
+
+<!--ひとつ前のページへ戻る 好きに使って！-->
+<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
+
+<html>
+  <head>
+    <title>サンプルページ</title>
+    <meta charset='utf-8'>
+    <link rel="stylesheet" href="{% static 'css/video.css' %}">
+    <script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+    <script src="{% static 'js/video.js' %}"></script>
+  </head>
+  <body>
+    <button id="startButton">Start Recording</button>
+    <button id="stopButton" disabled>Stop Recording</button>
+    <br>
+    <video id="videoElement" width="400" height="300" autoplay></video>
+
+    <form id="uploadForm" method="post" action="{% url 'videopost:video_post' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="videoData" id="videoData">
+        <input type='hidden' name='tempdir' id='tempdir' value="{{ tempdir }}">
+        <input type="submit" value="Submit" hidden>
+    </form>
+  </body>
+</html>

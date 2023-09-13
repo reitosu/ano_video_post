@@ -1,54 +1,56 @@
 <html>
   <head>
     <title>サンプルページ</title>
-    <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <meta charset='utf-8'>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/search.css' %}">  
-    
+    <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
+    <link rel="stylesheet" href="{% static 'css/search.css' %}"> 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@vueuse/shared"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{% static 'js/search.js' %}" defer></script>    
   </head>
 
   <body>
-
-    <!--view.pyのget_context_data関数からデータを持ってくる-->
-    <h1>検索</h1>
-    
-    <form action ="video_test.db" method = "get"></form>
-    <button onclick="cancel"><img src= {% static "images/X.svg" %} alt="キャンセル" width="12" height="12"></button>
-    <input type="text" id="search-input" placeholder="タグを入力してください">
-    <button onclick="search"><img src={% static "images/search.svg" %} alt="検索" width="15" height="15"></button>
-
-    <ul id="dropdown-menu">
-    </ul>
-
-    <ul id = "tag-list">
-    </ul>
-
-    <script src="search.js"></script>
+    <div id="search">
+      <h1>検索</h1>
+      
+      <button @click="cancel('clicked')"><img src= {% static "images/X.svg" %} alt="キャンセル" width="12" height="12"></button>
+      <input type="text" id="search-input" placeholder="タグを入力してください" @change="change('change-dayo')" v-model="input">
+      <button @click="search"><img src={% static "images/search.svg" %} alt="検索" width="15" height="15"></button>
 
 
+      <p>[[ input ]]</p>
 
-      <ul id = "tag_all">
-        <li>タグ一覧</li>
-        <li></li>
+      
+      <ul id = "tag-searched">
+        <li v-for="item in items">
+        <p>[[items]]</p>
       </ul>
 
-      <ul id = "tag_hot">
-        <li>人気タグ</li>
-        <li></li>
+        <p>タグ一覧</p>
+        <ul id = "tag_all">
+            [[ item_all ]]
+          </li>
+        </ul>
 
-      </ul>
+        <p>人気タグ</p>
+        <ul id = "tag_hot">
+          <li>
+            [[ item_hot ]]
+          </li>
+        </ul> 
 
-      <ul tag = "tag_new">
-        <li>急上昇</li>
-        <li></li>
+        <p>急上昇</p>
+        <ul tag = "tag_new">
+          <li>
+            [[ item_new ]]
+          </li>
+        </ul>
 
-      </ul>
-
-    <script src = "{%static 'js/search.js'%}"></script>
-
-
-    
+    </div>
   </body>
 </html>
