@@ -81,7 +81,7 @@
           <button @click="addTag">追加</button>
           <ul id="searchPrediction" @click="predict">
             <li v-for="history in historys" v-show="inputTag"><div id="historyMark"></div>[[ history ]]</li>
-            <li v-for="tag in searchResult">[[ tag.item ]]</li>
+            <li v-for="tag in results">[[ tag.item ]]</li>
           </ul>
         </div>
       </div>

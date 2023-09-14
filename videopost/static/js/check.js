@@ -2,6 +2,7 @@ const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, n
 const { useIntervalFn } = VueUse;
 import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js'
 import { useModal } from './modalComponent.js'
+import { useFuse } from './fuseComponent.js'
 
 const noscroll = (e) => {
     e.preventDefault()
@@ -225,27 +226,22 @@ const check = createApp({
         const inputTagContainer = ref()
         const tagInputElement = ref()
         const inputTag = ref("")
-        const searchResult = ref()
         const historys = reactive([])
+        const tagDatas = reactive([])
 
         const getTagDatas = () => {
             axios({
-                method: 'POST',
                 url: '/videopost/getTags/',
                 responseType: 'json',
             })
                 .then(async response => {
                     console.log('sucsess')
-                    const tags = response.data.tags
-                    console.log(tags)
-                    fuse.value = new Fuse(tags)
+                    tagDatas.push(...response.data.tags)
                 }).catch(error => console.log('タグデータの取得に失敗しました。: ', error))
         }
 
         const slideUp = (element) => {
-            if (!fuse.value) {
-                getTagDatas()
-            }
+            if (tagDatas.length === 0) getTagDatas();
             tagInputElement.value.focus({ preventScroll: true })
             element.style.transform = "translateY(0%)"
         }
@@ -265,13 +261,10 @@ const check = createApp({
             inputTag.value = ""
         }
 
-        const fuse = ref()
-
-        watch(inputTag, async (next, prev) => {
-            searchResult.value = fuse.value.search(next)
-        })
+        const { results } = useFuse(inputTag, tagDatas)
 
         return {
+            results,
             loadDraft,
             tags,
             tagsWidth,
@@ -303,7 +296,6 @@ const check = createApp({
             inputTagContainer,
             tagInputElement,
             inputTag,
-            searchResult,
             historys,
             slideUp,
             slideDown,

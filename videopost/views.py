@@ -6,10 +6,11 @@ from django.urls import reverse
 from django.core.signals import request_finished
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
-from django.db import connection
 from django.views.generic import CreateView,ListView
-from .models import Video,Tag
+from django.db.models import Count
+from .models import Video,Tag,whenClick,TagMap
 from .forms import VideoForm
+from django.utils import timezone
 import os
 import base64
 import moviepy.editor
@@ -77,7 +78,7 @@ def save_draft(request):
 def get_tags(request):
     tags = list(Tag.objects.values_list("name", flat=True))
     print(tags)
-    print(Tag.objects.filter(name__contains="test1"))
+    print(TagMap.objects.filter(tagid__exact="test1(t100,c1500)").count())
     return JsonResponse({"tags":tags})
 
 class VideoView(TemplateView):
