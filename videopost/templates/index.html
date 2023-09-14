@@ -1,5 +1,4 @@
 <!--ひとつ前のページへ戻る 好きに使って！-->
-<a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
 
 <html>
   <head>
@@ -21,15 +20,10 @@
   <body>
     <div id="scroll">
       <!--消して大丈夫！-->
-      <ul>
-        <li><a href="{% url 'videopost:index' %}">メインhtml</a></li>
-        <li><a href="{% url 'videopost:serch' %}">検索html</a></li>
-        <li><a href="{% url 'videopost:edit' %}">編集html</a></li>
-        <li><a href="{% url 'videopost:check' %}">確認html</a></li>
-      </ul>
+
       
       <div id="fixed">
-        <div id="leftMenu" ref="menu" @touchstart="">
+        <div id="leftMenu" ref="menu">
           <div id="menuContainer">
             <div id="relations"></div>
             <div id="tags"></div>
@@ -45,21 +39,15 @@
           </div>
         </div>
       </div>
-
+      
       <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
         <!--動画要素の表示-->
         {% for video in object_list %}
         <section class="infinite-item">
-            <p>**************</p>
-            <p>{{ video.name }}</p>
             <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
-            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls width="500" height="700"></video>
+            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" controls height="100%"></video>
             <!--動画の上に画像の表示-->
-            <div class="overlay">
-              <a href="{% url 'videopost:edit' %}"><img src="{% static 'images/background.png'%}"></a>
-            </div>
-            <br>
-            <br>
+            <div class="overlay"></div>
         </section>
         {% endfor %}
       </div>
