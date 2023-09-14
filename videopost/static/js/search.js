@@ -2,13 +2,27 @@ const { createApp, ref, reactive, watch, computed, onMounted } = Vue;
 const { useFuse } = VueUse;
 
 const search = createApp({
-  setup() {
+  setup() {        
+    const getTagDatas = () => {
+      axios({
+          method: 'POST',
+          url: '/videopost/getTags/',
+          responseType: 'json',
+      })
+          .then(async response => {
+              const tagsNameList = response.data.tags
+              return tagsNameList
+          }).catch(error => console.log('タグデータの取得に失敗しました。: ', error))
+  }
     onMounted(() => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     });
 
-    const items = reactive(["test1","test2","test3"])
+
+
+    const items = reactive(["1","テスト1","ヤドン"],["2","テスト2","カビゴン"],["3","テスト3","リオル"])
+
     const item_all = reactive(["all1","all2","all3"])
     const item_hot = reactive(["hot1","hot2","hot3"])
     const item_new = reactive(["new1","new2","new3"])
@@ -27,6 +41,12 @@ const search = createApp({
     }
     
     const input = ref("")
+    computed:[
+      search=function(){
+
+      }
+
+    ]
 
     return {
       items,
@@ -38,6 +58,7 @@ const search = createApp({
       search,
       change,
       input,
+      testdata,
     }
   }
 });
