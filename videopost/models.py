@@ -27,11 +27,8 @@ class whenClick(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 <<<<<<< HEAD
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
-<<<<<<< HEAD
 =======
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
-=======
->>>>>>> cedf199 (fuse.jsの関数の作成、データベースの拡張)
     
     def get_tag_click_value_per_day(self,tag_name=""):
         now = timezone.now()
@@ -50,9 +47,5 @@ class whenClick(models.Model):
             list(map(lambda x: di.update({x["tagid"]:x["tagid__count"]}),list(self.objects.values('tagid').annotate(models.Count("tagid")))))
             return di
         else:
-<<<<<<< HEAD
             self.objects.filter(tagid__exact=tag_name).count()
 >>>>>>> cedf199cb3e896a44663605c1013de472d640073
-=======
-            self.objects.filter(tagid__exact=tag_name).count()
->>>>>>> cedf199 (fuse.jsの関数の作成、データベースの拡張)
