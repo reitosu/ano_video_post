@@ -1,6 +1,5 @@
 const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
 const { useIntervalFn } = VueUse;
-import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js'
 import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
