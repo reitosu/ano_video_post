@@ -1,9 +1,10 @@
-const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
+const { createApp, ref, onMounted } = Vue;
 const { useDebounceFn } = VueUse;
+
 
 const infiniteScroll = createApp({
   setup() {
-    onMounted(() => {
+    onMounted(async () => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       videos.value = document.querySelectorAll(".infinite-item")
@@ -32,7 +33,7 @@ const infiniteScroll = createApp({
         top: videos.value[currentVideo.value].offsetTop,
         behavior: "smooth",
       });
-    }, 200)
+    }, 1)
 
     const onWheel = (event) => {
       wheelDebounce(event)
@@ -147,7 +148,17 @@ const infiniteScroll = createApp({
       window.addEventListener("touchstart", onTouchStart)
     }
 
+    const toggle = () => {
+      if (menu.value.style.left == 50 + "%") {
+        menu.value.style.left = 100 + "%"
+      } else {
+        menu.value.style.left = 50 + "%"
+      }
+    }
+
     return {
+      test,
+      toggle,
       container,
       videos,
       onWheel,

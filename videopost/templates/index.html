@@ -5,13 +5,18 @@
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width">
     {% load static %}
+    <script src="https://cdn.jsdelivr.net/npm/helia@1.0.3/dist/index.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@helia/unixfs@^1.1.0/dist/index.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockstore-core@^4.0.1/dist/index.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/datastore-core@^9.0.3/dist/index.min.js" defer></script>
+    <script src="https://unpkg.com/ipfs-unixfs-importer/dist/index.min.js" defer></script>
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="{% static 'js/scroll.js' %}" defer></script>
+    <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script>
@@ -20,7 +25,7 @@
   <body>
     <div id="scroll">
       <!--消して大丈夫！-->
-
+      <button @click="test" style="position:fixed; z-index:99999;">tests</button>
       
       <div id="fixed">
         <div id="leftMenu" ref="menu">
