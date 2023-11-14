@@ -1,0 +1,18 @@
+{% load static %}
+{% for nft in nft_list %}
+    <div class="card {{ nft.video }}" @click="playVideo">
+        <div class="metadata">
+            <image src="{% static 'images/nameplate.svg' %}" style="height: 60%;">
+            <div>{{ nft.title }}</div>
+            <image src="{% static 'images/message-circle.svg' %}" style="height: 50%;">
+            <div>{{ nft.description }}</div>
+            <image src="{% static 'images/thumbs-up.svg' %}" style="height: 50%">
+            <div>{{ nft.thumbsup }}</div>
+            <image src="{% static 'images/play-count.svg' %}" style="height: 60%">
+            <div>{{ nft.views }}</div>
+        </div>
+        <div style="aspect-ratio: 9 / 16; height: 100%;">
+            <video class="videos" src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ nft.video }}.mp4"></video>
+        </div>
+    </div>
+{% endfor %}

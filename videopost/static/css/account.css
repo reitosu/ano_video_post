@@ -1,0 +1,157 @@
+.tab-wrap {
+    background: black;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .1);
+    display: flex;
+    flex-wrap: wrap;
+    overflow: clip;
+    padding: 0 0 20px;
+}
+
+.tab-label {
+    background-color: black;
+    color: Gray;
+    cursor: pointer;
+    flex: 1;
+    font-weight: bold;
+    order: -1;
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    text-align: center;
+    transition: cubic-bezier(0.4, 0, 0.2, 1) .2s;
+    user-select: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    justify-content: center;
+    z-index: 80;
+}
+
+.tab-label:hover {
+    background: rgba(0, 191, 255, .1);
+}
+
+.tab-switch:checked+.tab-label {
+    color: DeepSkyBlue;
+}
+
+.tab-label::after {
+    background: DeepSkyBlue;
+    bottom: 0;
+    content: '';
+    display: block;
+    height: 3px;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: translateX(100%);
+    transition: cubic-bezier(0.4, 0, 0.2, 1) .2s 80ms;
+    width: 100%;
+    z-index: 1;
+}
+
+.tab-switch:checked~.tab-label::after {
+    transform: translateX(-100%);
+}
+
+.tab-switch:checked+.tab-label::after {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.tab-content {
+    height: 0;
+    opacity: 0;
+    padding: 0 20px;
+    pointer-events: none;
+    transform: translateX(-30%);
+    transition: transform .3s 80ms, opacity .3s 80ms;
+    width: 100%;
+}
+
+.tab-switch:checked~.tab-content {
+    transform: translateX(30%);
+}
+
+.tab-switch:checked+.tab-label+.tab-content {
+    height: auto;
+    opacity: 1;
+    order: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+.tab-wrap::after {
+    content: '';
+    height: 20px;
+    order: -1;
+    width: 100%;
+}
+
+.tab-switch {
+    display: none;
+}
+
+.tab-label img:where(img, picture, svg, video) {
+    max-inline-size: 10%;
+    block-size: auto;
+}
+
+.card {
+    display: grid;
+    grid-template-columns: 1.618fr 1fr;
+    grid-template-rows: 80% 20%;
+    aspect-ratio: 1.414/1;
+    height: 1fr;
+    margin: 1%;
+    background-color: dimgrey;
+    border-radius: 10px;
+    box-shadow: 10px 10px 15px -10px;
+    overflow: auto;
+    transition: transform .1s 80ms ease-out, background-color .15s 80ms ease-out;
+    cursor: pointer;
+}
+
+.card:hover {
+    z-index: 9999;
+    transform: scale(1.1);
+    background-color: #3770bf;
+}
+
+.card .metadata {
+    grid-column: 1/2;
+    grid-row: 1/2;
+    display: grid;
+    grid-template-columns: 0.5fr 2fr;
+    align-items: center;
+    justify-items: stretch;
+    align-content: center;
+}
+
+.videos {
+    aspect-ratio: 9 / 16;
+    height: 100%;
+    padding-right: 8;
+}
+
+input {
+    width: 400;
+    margin: 6;
+    outline: none;
+    border: none;
+    border-bottom: 3px solid #3770bf;
+    transition: border-bottom 0.25s ease-out;
+}
+
+textarea {
+    outline: none;
+    border: none;
+    border: 3px solid #3770bf;
+}
+
+.nonSelectInput {
+    border: none;
+    border-bottom: 3px solid #b4b4b4;
+    cursor: default;
+}

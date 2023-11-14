@@ -32,7 +32,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.10.106', '127.0.0.1',
-                 '10.228.179.236', '10.0.54.27', '192.168.2.208']
+                 '10.228.179.236', '10.0.54.27', '192.168.2.208', "*"]
 
 
 # Application definition
@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'videopost.middleware.CheckUserIdMiddleware',
 ]
 
 ROOT_URLCONF = 'env1.urls'
@@ -90,7 +91,8 @@ DATABASES = {
     }
 }
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_SAVE_EVERY_REQUEST = True
 
 
 # Password validation

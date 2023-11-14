@@ -2,6 +2,7 @@
     <head>
         <meta charset='utf-8'>
         <meta name="viewport" content="width=device-width">
+        {% csrf_token %}
         {% load static %}
         <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
         <link rel="stylesheet" href="{% static 'css/account.css' %}">
@@ -10,14 +11,43 @@
         <script src="https://unpkg.com/@vueuse/shared"></script>
         <script src="https://unpkg.com/@vueuse/core"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script src="{% static 'js/account.js' %}" defer></script>
+        <script type="module" src="{% static 'js/account.js' %}" defer></script>
         <title>サンプルページ</title>
+        <div>
+            <div id="load" data-name="{{ name }}" data-address="{{ address }}" data-list="{{ video_list }}"></div>
+        </div>
     </head>
     <body>
         <div id="account">
+            <button @click="test">test</button>
             <button @click="request">request</button>
-            <div id="profile">
+
+            <div id="profile" style="height:30%;">
+                <div style="display: flex;">
+                    <image src="{% static 'images/name.svg' %}" style="width: 4%;">
+                    <input ref="nameElement" :class="{'nonSelectInput': !isSelected}" type="text" :readonly="!isSelected" v-model="name" @change="change"></input>
+                    <image src="{% static 'images/edit.svg' %}" @click="changeName">
+                </div>
+                <div style="display: flex;">
+                    <image src="{% static 'images/wallet.svg' %}" style="width: 4%;">
+                    <input class="nonSelectInput" v-model="address" readonly></input>
+                    <image src="{% static 'images/plus.svg' %}" @click="request">
+                </div>
             </div>
+
+            <div id="videos">
+                <div class="tab-wrap">
+                    <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" /><label class="tab-label" for="TAB-01"><img src="{% static 'images/video-icon.svg' %}"/></label>
+                    <div class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 4fr 1fr;">
+                        {% include "video_card.html" %}
+                    </div>
+                    <input id="TAB-02" type="radio" name="TAB" class="tab-switch" /><label class="tab-label" for="TAB-02"><img src="{% static 'images/nft-icon.svg' %}"/></label>
+                    <div class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr;">
+                        {% include "nft_card.html" %}
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </body>
 </html>

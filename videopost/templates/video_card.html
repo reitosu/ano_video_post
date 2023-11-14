@@ -1,0 +1,23 @@
+{% load static %}
+{% for video in video_list %}
+    <div class="card {{ video.video }}" @click="playVideo">
+        <div class="metadata">
+            <image src="{% static 'images/nameplate.svg' %}" style="height: 60%;">
+            <div>{{ video.title }}</div>
+            <image src="{% static 'images/message-circle.svg' %}" style="height: 50%;">
+            <div>{{ video.description }}</div>
+            <image src="{% static 'images/thumbs-up.svg' %}" style="height: 50%">
+            <div>{{ video.thumbsup }}</div>
+            <image src="{% static 'images/play-count.svg' %}" style="height: 60%">
+            <div>{{ video.views }}</div>
+        </div>
+        <div class="utils" style="grid-row: 2/3; display:flex; justify-content: space-evenly;">
+            <button @click.stop="changePublicNPrivate" v-if="publicFlag">public</button><button @click.stop="changePublicNPrivate" v-if="!publicFlag">private</button>
+            <button @click.stop="deleteVideo">delete</button>
+            <button @click.stop="mint">mint NFT</button>
+        </div>
+        <div style="grid-row: 1/3; aspect-ratio: 9 / 16; height: 100%;">
+            <video class="videos" src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4"></video>
+        </div>
+    </div>
+{% endfor %}

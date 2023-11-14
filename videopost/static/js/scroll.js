@@ -157,7 +157,6 @@ const infiniteScroll = createApp({
     }
 
     return {
-      test,
       toggle,
       container,
       videos,
