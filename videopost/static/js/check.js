@@ -25,7 +25,7 @@ const check = createApp({
 
         const loadDraft = (event) => {
             console.log(event)
-            if (event.detail.result === "復元") {
+            if (event.detail.result.select === "復元") {
                 console.log(draft.value)
                 const beforeWidth = draft.value.position.timelineWidth
                 tags.value = draft.value.tags
@@ -48,12 +48,12 @@ const check = createApp({
             axios.defaults.xsrfCookieName = 'csrftoken'
             axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
             console.log(document.querySelector("#draft").getAttribute("data-draft"))
-            //draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
+            draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
             console.log(draft.value)
             const width = timelineElement.value.clientWidth
             timelineWidth.value = width
             materialWidth.value = width
-            if (draft.value) {
+            if (draft.value.video) {
                 openModal()
                 document.addEventListener("result", loadDraft)
             }

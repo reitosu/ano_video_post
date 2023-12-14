@@ -13,14 +13,14 @@
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script type="module" src="{% static 'js/account.js' %}" defer></script>
         <title>サンプルページ</title>
-        <div>
-            <div id="load" data-name="{{ name }}" data-address="{{ address }}" data-list="{{ video_list }}"></div>
-        </div>
     </head>
     <body>
         <div id="account">
-            <button @click="test">test</button>
-            <button @click="request">request</button>
+            <button @click="shareLink">share</button>
+            [[canshare]]
+            <div>
+                <div ref="loadElement" id="load" data-name="{{ name }}" data-address="{{ address }}" data-list="{{ video_list }}" data-nft="{{ nft_list }}" data-test="{{ test }}"></div>
+            </div>
 
             <div id="profile" style="height:30%;">
                 <div style="display: flex;">
@@ -38,16 +38,16 @@
             <div id="videos">
                 <div class="tab-wrap">
                     <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" /><label class="tab-label" for="TAB-01"><img src="{% static 'images/video-icon.svg' %}"/></label>
-                    <div class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 4fr 1fr;">
+                    <div class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr;">
                         {% include "video_card.html" %}
                     </div>
                     <input id="TAB-02" type="radio" name="TAB" class="tab-switch" /><label class="tab-label" for="TAB-02"><img src="{% static 'images/nft-icon.svg' %}"/></label>
-                    <div class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr;">
+                    <div id="tab-content2" class="tab-content" style="display: grid; grid-template-columns: 1fr 1fr;">
                         {% include "nft_card.html" %}
                     </div>
                 </div>
             </div>
-            
+
         </div>
     </body>
 </html>

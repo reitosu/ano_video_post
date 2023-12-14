@@ -1,18 +1,42 @@
 {% load static %}
-{% for nft in nft_list %}
-    <div class="card {{ nft.video }}" @click="playVideo">
-        <div class="metadata">
-            <image src="{% static 'images/nameplate.svg' %}" style="height: 60%;">
-            <div>{{ nft.title }}</div>
-            <image src="{% static 'images/message-circle.svg' %}" style="height: 50%;">
-            <div>{{ nft.description }}</div>
-            <image src="{% static 'images/thumbs-up.svg' %}" style="height: 50%">
-            <div>{{ nft.thumbsup }}</div>
-            <image src="{% static 'images/play-count.svg' %}" style="height: 60%">
-            <div>{{ nft.views }}</div>
-        </div>
-        <div style="aspect-ratio: 9 / 16; height: 100%;">
-            <video class="videos" src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ nft.video }}.mp4"></video>
+<div class="card" v-for="(video, index) in nftList" @click="playVideo" v-cloak>
+    <div class="metadata">
+        <image src="{% static 'images/nameplate.svg' %}" style="height: 60%;">
+        <div>[[ video.title ]]</div>
+        <image src="{% static 'images/message-circle.svg' %}" style="height: 50%;">
+        <div>[[ video.description ]]</div>
+        <image src="{% static 'images/thumbs-up.svg' %}" style="height: 50%">
+        <div>[[ video.thumbsup ]]</div>
+        <image src="{% static 'images/play-count.svg' %}" style="height: 60%">
+        <div>[[ video.views ]]</div>
+        <div>tag</div>
+        <div style="display: flex;">
+            <div v-for="tag in video.tags">
+                [[ tag ]]
+            </div>
         </div>
     </div>
-{% endfor %}
+    <div class="utils" style="grid-row: 2/3; display:flex; justify-content: space-evenly;">
+        <div>
+            <label class="spinner-wrap">
+                <input class="input-number" type="number" inputmode="numeric" min="0" step="0.1" ref="inputMaticElement" v-model="inputMatic[index]" @input="validate(index)" @click.stop="" :readonly="video.price">
+                <p>MATIC</p>
+                <span class="input-number-decrement" @click.stop="decreaseNumber(index)" v-if="!video.price">–</span>
+                <span class="input-number-increment" @click.stop="increaseNumber(index)" v-if="!video.price">+</span>
+            </label>
+        </div>
+        <div>
+            <button @click.stop="sellNft(index)" v-if="!video.price">list</button>
+            <button @click.stop="cancelSellNft(index)" v-if="video.price">cancel</button>
+        </div>
+        <div>
+            <button @click.stop=""></button>
+        </div>
+        <div>
+            <button @click.stop=""></button>
+        </div>
+    </div>
+    <div style="grid-row: 1/3; aspect-ratio: 9 / 16; height: 100%;">
+        <video class="videos" :src="blobNfts[index]" ref="videoElements"></video>
+    </div>
+</div>

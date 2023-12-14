@@ -2,8 +2,10 @@ from django.db import models
 from cloudinary.models import CloudinaryField
 from django.utils import timezone
 # Create your models here.
+
+
 class TagQuerySet(models.QuerySet):
-    def append_tag(self,tag):
+    def append_tag(self, tag):
         """
         append tag to TagModel
 
@@ -42,18 +44,22 @@ class VideoClickQuerySet(models.QuerySet):
         else:
             return query_set.filter(tagid__exact=tag_name).count()
 
+
 class Account(models.Model):
     accountid = models.CharField(max_length=400, primary_key=True)
     walletaddress = models.CharField(max_length=50, blank=True, null=True)
     name = models.CharField(max_length=30, blank=True)
 
+
 class DeviceMap(models.Model):
     accountid = models.ForeignKey(Account, on_delete=models.CASCADE)
     device = models.CharField(max_length=15)
 
+
 class BrowserMap(models.Model):
     accountid = models.ForeignKey(Account, on_delete=models.CASCADE)
     browser = models.CharField(max_length=15)
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, primary_key=True)
@@ -62,22 +68,26 @@ class Tag(models.Model):
 
     objects = TagQuerySet.as_manager()
 
+
 class VideoQuerySet(models.QuerySet):
     def get_nft_metadata(self):
         """
         get nft metadata
         """
-        return 
+        return
+
 
 class Video(models.Model):
     title = models.CharField(max_length=200, blank=True)
-    description = models.CharField(max_length=1000,blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     video = CloudinaryField(resource_type='video')
     tags = models.ManyToManyField(Tag, related_name="tags", blank=True)
     uploaded = models.DateTimeField(auto_now_add=True)
-    uploader = models.ManyToManyField(Account, related_name="uploader", blank=True)
+    uploader = models.ManyToManyField(
+        Account, related_name="uploader", blank=True)
     tokenid = models.IntegerField(null=True, blank=True)
     address = models.CharField(max_length=200, blank=True)
+    price = models.FloatField(default=0)
     onedaydelete = models.BooleanField(default=False)
     ispublic = models.BooleanField(default=True)
     views = models.IntegerField(default=0)
