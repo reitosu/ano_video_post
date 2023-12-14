@@ -5,6 +5,7 @@ from .models import Video,Tag,TagMap,whenClick,Account,DeviceMap
 class VideoAdmin(admin.ModelAdmin):
     filter_horizontal = ('tags', 'uploader')
 
+
 admin.site.register(Video, VideoAdmin)
 admin.site.register(Tag)
 admin.site.register(TagMap)

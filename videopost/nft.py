@@ -31,9 +31,9 @@ class Nft:
     
     def get_nft_metadata(self, token_id):
         uri = self.contract.get_tokenURI(token_id)
-        print(uri)
         print(uri[7:])
         uri = f"https://nftstorage.link/ipfs/{uri[7:]}"
+        print(uri)
         response = requests.get(uri)
         pprint(json.loads(response.content.decode()))
         return json.loads(response.content.decode())
@@ -56,7 +56,7 @@ class Nft:
             self.create_matadata(video, name, description, json_path)
             cid = self.store_ipfs(json_path)
         reciept = self.contract.mint_nft(nft_owner_address, cid)
-        token_id = int(dict(dict(reciept)["logs"][1])["data"], 16)
+        token_id = int.from_bytes(dict(dict(reciept)["logs"][1])["data"], 'big')
         address = dict(dict(reciept)["logs"][1])["address"]
         return token_id, address
 

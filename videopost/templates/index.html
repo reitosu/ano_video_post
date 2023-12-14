@@ -5,11 +5,6 @@
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width">
     {% load static %}
-    <script src="https://cdn.jsdelivr.net/npm/helia@1.0.3/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@helia/unixfs@^1.1.0/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/blockstore-core@^4.0.1/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/datastore-core@^9.0.3/dist/index.min.js" defer></script>
-    <script src="https://unpkg.com/ipfs-unixfs-importer/dist/index.min.js" defer></script>
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -24,8 +19,9 @@
   </head>
   <body>
     <div id="scroll">
-      <!--消して大丈夫！-->
-      <button @click="test" style="position:fixed; z-index:99999;">tests</button>
+      <div>
+        <div ref="loadElement" data-video="{{ videos }}"></div>
+      </div>
       
       <div id="fixed">
         <div id="leftMenu" ref="menu">
@@ -45,16 +41,19 @@
         </div>
       </div>
       
-      <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
+      <div class="infinite-container" id="container" ref="container" @scrollend="ifLoad">
         <!--動画要素の表示-->
-        {% for video in object_list %}
+        <div v-for="(video,index) in dataList" class="infinite-item" :ref="videosRef">
+          <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
+        </div>
+        {% comment %} {% for video in object_list %}
         <section class="infinite-item">
             <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
-            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" height="100%"></video>
+            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" height="100%" autoplay></video>
             <!--動画の上に画像の表示-->
             <div class="overlay"></div>
         </section>
-        {% endfor %}
+        {% endfor %} {% endcomment %}
       </div>
     </div>
   </body>
