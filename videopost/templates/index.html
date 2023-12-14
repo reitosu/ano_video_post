@@ -1,34 +1,38 @@
-<!--ひとつ前のページへ戻る 好きに使って！-->
-
 <html>
   <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width">
     {% load static %}
-    <script src="https://cdn.jsdelivr.net/npm/helia@1.0.3/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@helia/unixfs@^1.1.0/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/blockstore-core@^4.0.1/dist/index.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/datastore-core@^9.0.3/dist/index.min.js" defer></script>
-    <script src="https://unpkg.com/ipfs-unixfs-importer/dist/index.min.js" defer></script>
+    <link rel="icon" href="{% static 'images/main-logo.svg' %}">
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script>
-    <title>サンプルページ</title>
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script> {% endcomment %}
+    <title>トップページ</title>
   </head>
   <body>
+
     <div id="scroll">
-      <!--消して大丈夫！-->
-      <button @click="test" style="position:fixed; z-index:99999;">tests</button>
+      <div class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
+        <div class="scrolldown2">
+          {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
+        </div>
+          <div class="rippless_btn">
+            <div></div>
+          </div>
+      </div>
       
       <div id="fixed">
-        <div id="leftMenu" ref="menu">
+        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
           <div id="menuContainer">
             <div id="relations"></div>
             <div id="tags"></div>
@@ -44,7 +48,8 @@
           </div>
         </div>
       </div>
-      
+      {% comment %} <button class="next-video" @click="nextVideo">次の動画</button>
+      <button class="prev-video" @click="prevVideo">前の動画</button> {% endcomment %}
       <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
         <!--動画要素の表示-->
         {% for video in object_list %}
@@ -55,7 +60,19 @@
             <div class="overlay"></div>
         </section>
         {% endfor %}
+        
+        <div class="pickupblock">
+          <input type="button" class="bt" value="対象のボタン">
+          <div id="setsumeitext">
+          </div>
+      </div>
+    
+        
       </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/js/modaal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
   </body>
 </html>

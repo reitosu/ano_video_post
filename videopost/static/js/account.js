@@ -19,6 +19,7 @@ const account = createApp({
         const loadAddress = ref()
         const saveNameOrAdress = () => {
             const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]').value
+            console.log(csrf)
             const data = new FormData();
             console.log(address.value, loadAddress.value !== address.value)
             data.append('csrfmiddlewaretoken', csrf)
@@ -41,6 +42,7 @@ const account = createApp({
         const address = ref()
 
         const request = () => {
+            console.log(typeof window.ethereum)
             if (typeof window.ethereum !== "undefined") {
                 ethereum
                     .request({ method: "eth_requestAccounts" })
@@ -123,7 +125,7 @@ const account = createApp({
                 metadataModal.close()
                 const name = event.target.childNodes[1].value
                 const description = event.target.childNodes[3].value
-                console.log(name, description)
+                console.log(name, description, videoName)
                 const data = new FormData()
                 data.append("videoName", videoName)
                 data.append("name", name)
@@ -137,7 +139,7 @@ const account = createApp({
                     if (metadataCheckModal.result.value.select == "ok") {
                         console.log("mint")
                         console.log(Object.fromEntries(data.entries()))
-                        //axios.post('/videopost/mintvideo/', data)
+                        axios.post('/videopost/mintvideo/', data)
                     }
                 })
             }

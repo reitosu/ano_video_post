@@ -11,6 +11,13 @@ const infiniteScroll = createApp({
       onSwipe()
     });
 
+    const tutorialFlag = ref(true)
+    const onTutorialClick = () => {
+
+      
+      tutorialFlag.value = false;
+    }
+
     const container = ref()
     const videos = ref()
     const currentVideo = ref(0)
@@ -75,6 +82,7 @@ const infiniteScroll = createApp({
     const menu = ref()
     const movementRatio = ref(100)
     const menuMoveFrag = ref("close")
+    const MenuOpenlimit = 50
 
     const onSwipe = () => {
       const onTouchStart = (event) => {
@@ -93,7 +101,7 @@ const infiniteScroll = createApp({
           console.log(menu.value.offsetLeft, screenSize)
           console.log(100 - (-movement / screenSize * 100))
           console.log(openDistance, menu.value.style.left)
-          movementRatio.value = 100 - (-movement / screenSize * 100)
+          movementRatio.value = Math.max(100 - (-movement / screenSize * 100), MenuOpenlimit)
           console.log(Math.abs(movement), moveDistance)
           if (Math.abs(movement) >= moveDistance && ScreenHeight / 4 >= moveY - startY) {
             if (movement < 0 && parseFloat(menu.value.style.left) <= openDistance) {
@@ -157,6 +165,8 @@ const infiniteScroll = createApp({
     }
 
     return {
+      tutorialFlag,
+      onTutorialClick,
       toggle,
       container,
       videos,
