@@ -1,50 +1,33 @@
-
 body {
-    /* background: white url("../images/background.png") no-repeat; */
-    overflow: hidden;
+  overflow: hidden;
 }
+
 .tutorial {
-  position:absolute; 
-  background-color:gray; 
-  height:100%; 
-  width:100%; 
-  z-index:99999; 
-  opacity:0.6;
-  /* animation: fadeOut 0.7s cubic-bezier(0.4, 0.3, 0.2, 1) 0s 1 normal forwards; */
+  position: absolute;
+  background-color: gray;
+  height: 100%;
+  width: 100%;
+  z-index: 99999;
+  opacity: 0.6;
 }
+
 @keyframes fadeOut {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
 }
-/*スクロール全体の場所*/
-.scrolldown2{
-  /*描画位置*/
-position:absolute;
-top:50%;
-left:70%;
-transform:translate(-50%,-50%);
-}
 
-/*Scrollテキストの描写*/
-.scrolldown2 span{
+/*スクロール全体の場所*/
+.scrolldown2 {
   /*描画位置*/
-position: relative;
-left:10px;
-bottom:10px;
-  /*テキストの形状*/
-color: #eee;
-/* font-size: 1rem;
-letter-spacing: 0.05em; */
-  /*横書き設定*/
-  writing-mode: horizontal-tb;
-/*縦書き設定*/
-/* -ms-writing-mode: tb-rl;
-  -webkit-writing-mode: vertical-rl;
-  writing-mode: vertical-rl; */
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  transform: translate(-50%, -50%);
 }
 
 /* 丸の描写 */
@@ -52,180 +35,211 @@ letter-spacing: 0.05em; */
   content: "";
   /*描画位置*/
   position: absolute;
-  top:-8.5px;
+  top: -8.5px;
   /*丸の形状*/
-  width:20px;
-  height:20px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background:#eee;
+  background: #eee;
   z-index: 99999999;
   animation:
     /* circlemove 1.6s ease-in-out infinite, */
     circlemoveright 1.5s ease-in-out infinite,
     circlemovehide 1.5s ease-out infinite;
 }
-@keyframes circlemove{
-    0%{bottom:45px;}
-   100%{bottom:-5px;}
+
+@keyframes circlemove {
+  0% {
+    bottom: 45px;
+  }
+
+  100% {
+    bottom: -5px;
+  }
 }
 
 /*右から左にかけて丸が透過→不透明→透過する*/
-@keyframes circlemovehide{
-    0%{opacity:0}
-   50%{opacity:1;}
-  80%{opacity:0.9;}
-100%{opacity:0;}
-}
-
-@keyframes circlemoveright{
-  0%{right:-8;}
- 100%{right:202px;}
-}
-
-
-.scrolldown2:after{
-  content:"";
-  /*描画位置*/
-  position: absolute;
-  top:50%;
-  right:0;
-  /*線の形状*/
-  width:210px;
-  height: 2px;
-  background:#eee;
+@keyframes circlemovehide {
+  0% {
+    opacity: 0
   }
 
+  50% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes circlemoveright {
+  0% {
+    right: -8;
+  }
+
+  100% {
+    right: 202px;
+  }
+}
+
+
+.scrolldown2:after {
+  content: "";
+  /*描画位置*/
+  position: absolute;
+  top: 50%;
+  right: 0;
+  /*線の形状*/
+  width: 210px;
+  height: 2px;
+  background: #eee;
+}
+
 .infinite-container {
-    scroll-behavior: smooth;
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scroll-snap-type: y mandatory;
-    position: relative;
+  scroll-behavior: smooth;
+  width: 100%;
+  height: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  position: relative;
+}
+
+.infinite-container::-webkit-scrollbar {
+  display: none;
 }
 
 .infinite-item {
-    height: 100%;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    position: relative;
-    display: flex;
-    justify-content: center;
+  margin-bottom: 4px;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .infinite-item video {
-    aspect-ratio: 9/16;
-    height: 100%;
-    overflow: hidden;
+  aspect-ratio: 9/16;
+  height: 100%;
+  overflow: hidden;
 }
 
 .infinite-item p {
-    position: absolute;
+  position: absolute;
 }
 
 @keyframes slideIn {
-    from {
-        left: 100%;
-    }
+  from {
+    left: 100%;
+  }
 
-    to {
-        opacity: 50%;
-    }
+  to {
+    opacity: 50%;
+  }
 }
 
 .animateSlideIn {
-    animation: slideIn 0.3s ease 0s 1 normal forwards
+  animation: slideIn 0.3s ease 0s 1 normal forwards
 }
 
 #leftMenu {
-    position: fixed;
-    height: 97%;
-    width: 48%;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: darkgray;
-    z-index: 9999;
-    border: 2px solid black;
-    border-radius: 10px;
-    /* display: flex; */
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5%;
-    box-sizing: border-box;
-    overflow: hidden;
-    transition: 0.5s;
+  position: fixed;
+  height: 97%;
+  width: 48%;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: darkgray;
+  z-index: 9999;
+  border: 2px solid black;
+  border-radius: 10px;
+  /* display: flex; */
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: 0.5s;
 }
+
 .menuInTutorial {
   animation: leftMenuOpen 1.5s ease-in-out infinite;
 }
+
 @keyframes leftMenuOpen {
-    0% {
-        left: 100%;
-    }
-    85% {
-        left: 70%;
-    }
-    100% {
-        left: 100%;
-    }
+  0% {
+    left: 100%;
+  }
+
+  85% {
+    left: 70%;
+  }
+
+  100% {
+    left: 100%;
+  }
 
 }
 
 
 #menuContainer {
-    position: relative;
-    height: 96%;
-    width: 98%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%)
+  position: relative;
+  height: 96%;
+  width: 98%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%)
 }
 
 #relations {
-    height: 80%;
-    border: 2px solid black;
-    margin-bottom: 0.3%;
+  height: 80%;
+  border: 2px solid black;
+  margin-bottom: 0.3%;
 }
 
 #tags {
-    height: 10%;
-    border: 2px solid black;
+  height: 10%;
+  border: 2px solid black;
 }
 
 #buttons {
-    height: 10%;
-    border: 2px solid black;
-    margin-top: 0.3%;
-    display: flex;
-    justify-content: space-around;
+  height: 10%;
+  border: 2px solid black;
+  margin-top: 0.3%;
+  display: flex;
+  justify-content: space-around;
 }
 
 .serch {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .serch img {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .edit {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .edit img {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .delete {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 /* body {
@@ -261,7 +275,8 @@ letter-spacing: 0.05em; */
   width: 60%;
 }
 
-.rippless_btn::before, .rippless_btn::after {
+.rippless_btn::before,
+.rippless_btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -298,222 +313,230 @@ letter-spacing: 0.05em; */
 /*パソコン画面の設定*/
 @media screen and (min-width: 768px) {
 
-    body {
-        font-family: TikTokFont, Arial, Tahoma, PingFangSC, sans-serif;
-        font-size: 14px;
-        color: rgb(22, 24, 35);
-        background-color: rgb(255, 255, 255);
-        overscroll-behavior: contain;
-        direction: ltr;
-        -webkit-font-smoothing: antialiased;
-        min-height: 100vh;
-        text-rendering: optimizespeed;
-        line-height: 1.5;
-    }
-    @keyframes circlemoveright{
-      0%{right:0;}
-     100%{right:250px;}
-    }
-    .scrolldown2:after{
-      content:"";
-      /*描画位置*/
-      position: absolute;
-      top:50%;
-      right:0;
-      /*線の形状*/
-      width:250px;
-      height: 2px;
-      background:#eee;
-      }
+  body {
+    font-family: TikTokFont, Arial, Tahoma, PingFangSC, sans-serif;
+    font-size: 14px;
+    color: rgb(22, 24, 35);
+    background-color: rgb(255, 255, 255);
+    overscroll-behavior: contain;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    text-rendering: optimizespeed;
+    line-height: 1.5;
+  }
 
-    .infinite-container {
-        scroll-behavior: smooth;
-        width: 100%;
-        height: 100%;
-        overflow-y: scroll;
-        overflow-x: hidden;
-        scroll-snap-type: y mandatory;
-        position: relative;
-        left: 0;
-      }
-      
-      .infinite-item {
-        height: 100%;
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
-        position: relative;
-        width: 100%;
-      }
-      
-      .infinite-item video {
-        aspect-ratio: 9/16;
-        height: 100%;
-      }
-      
-      .infinite-item p {
-        position: absolute;
-      }
-      
-      @keyframes slideIn {
-        from {
-          left: 100%;
-        }
-      
-        to {
-          opacity: 50%;
-        }
-      }
-      
-      .animateSlideIn {
-        animation: slideIn 0.3s ease 0s 1 normal forwards;
-      }
-      
-      .rippless_btn {
-        padding: 0;
-        margin: auto;
-        box-sizing: border-box;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #1da1f2;
-        box-shadow: 0 0 20px #1da1f2;
-        cursor: pointer;
-      }
-      
-      .rippless_btn img {
-        width: 60%;
-      }
-      
-      .rippless_btn::before, .rippless_btn::after {
-        content: "";
-        display: block;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        width: 100%;
-        height: 100%;
-        border: 1px solid #1da1f2;
-        border-radius: 50%;
-        box-sizing: border-box;
-        pointer-events: none;
-        animation: rippleEffect 2s linear infinite;
-      }
-      
-      .rippless_btn::after {
-        animation-delay: 1s;
-      }
-      
-      @keyframes rippleEffect {
-        0% {
-          transform: scale(1);
-          opacity: 1;
-        }
-      
-        100% {
-          transform: scale(2);
-          opacity: 0;
-        }
-      }
+  @keyframes circlemoveright {
+    0% {
+      right: 0;
+    }
 
-      #leftMenu {
-        position: fixed;
-        height: 97%;
-        width: 20%;
-        right: 0;
-        left: 80%;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: darkgray;
-        z-index: 9999;
-        border: 2px solid black;
-        border-radius: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5%;
-        box-sizing: border-box;
-      }
-      
-      
-      #menuContainer {
-        position: relative;
-        height: 96%;
-        width: 98%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-      }
-      
-      #relations {
-        height: 80%;
-        border: 2px solid black;
-        margin-bottom: 0.3%;
-      }
-      
-      #tags {
-        height: 10%;
-        border: 2px solid black;
-      }
-      
-      #buttons {
-        height: 10%;
-        border: 2px solid black;
-        margin-top: 0.3%;
-        display: flex;
-        justify-content: space-around;
-      }
-      
-      .serch {
-        position: relative;
-        z-index: 1;
-      }
-      
-      .serch img {
-        width: 100%;
-        height: 100%;
-      }
-      
-      .edit {
-        position: relative;
-        z-index: 1;
-      }
-      
-      .edit img {
-        width: 100%;
-        height: 100%;
-      }
-      
-      .delete {
-        position: relative;
-        z-index: 1;
-      }
+    100% {
+      right: 250px;
+    }
+  }
+
+  .scrolldown2:after {
+    content: "";
+    /*描画位置*/
+    position: absolute;
+    top: 50%;
+    right: 0;
+    /*線の形状*/
+    width: 250px;
+    height: 2px;
+    background: #eee;
+  }
+
+  .infinite-container {
+    scroll-behavior: smooth;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    position: relative;
+    left: 0;
+  }
+
+  .infinite-item {
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    width: 100%;
+  }
+
+  .infinite-item video {
+    aspect-ratio: 9/16;
+    height: 100%;
+  }
+
+  .infinite-item p {
+    position: absolute;
+  }
+
+  @keyframes slideIn {
+    from {
+      left: 100%;
+    }
+
+    to {
+      opacity: 50%;
+    }
+  }
+
+  .animateSlideIn {
+    animation: slideIn 0.3s ease 0s 1 normal forwards;
+  }
+
+  .rippless_btn {
+    padding: 0;
+    margin: auto;
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #1da1f2;
+    box-shadow: 0 0 20px #1da1f2;
+    cursor: pointer;
+  }
+
+  .rippless_btn img {
+    width: 60%;
+  }
+
+  .rippless_btn::before,
+  .rippless_btn::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #1da1f2;
+    border-radius: 50%;
+    box-sizing: border-box;
+    pointer-events: none;
+    animation: rippleEffect 2s linear infinite;
+  }
+
+  .rippless_btn::after {
+    animation-delay: 1s;
+  }
+
+  @keyframes rippleEffect {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  #leftMenu {
+    position: fixed;
+    height: 97%;
+    width: 20%;
+    right: 0;
+    left: 80%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: darkgray;
+    z-index: 9999;
+    border: 2px solid black;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5%;
+    box-sizing: border-box;
+  }
+
+
+  #menuContainer {
+    position: relative;
+    height: 96%;
+    width: 98%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  #relations {
+    height: 80%;
+    border: 2px solid black;
+    margin-bottom: 0.3%;
+  }
+
+  #tags {
+    height: 10%;
+    border: 2px solid black;
+  }
+
+  #buttons {
+    height: 10%;
+    border: 2px solid black;
+    margin-top: 0.3%;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .serch {
+    position: relative;
+    z-index: 1;
+  }
+
+  .serch img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .edit {
+    position: relative;
+    z-index: 1;
+  }
+
+  .edit img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .delete {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 @media screen and (min-width: 500px) {
-    
-    #leftMenu {
-        width: 40%;
-        left: 100%;
-        top: 50%;
-        /* transform: translateY(-50%); */
-    }
 
-    #menuContainer {
-        height: 96%;
-        width: 98%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%)
-    }
+  #leftMenu {
+    width: 40%;
+    left: 100%;
+    top: 50%;
+    /* transform: translateY(-50%); */
+  }
+
+  #menuContainer {
+    height: 96%;
+    width: 98%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%)
+  }
 
 
 }

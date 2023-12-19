@@ -1,14 +1,13 @@
 const { createApp, ref, reactive, watch, watchEffect, computed, onMounted, nextTick } = Vue;
 const { useDebounceFn, onClickOutside, useToggle, useEventListener, computedAsync, useShare } = VueUse;
 import { useModal } from "./modalComponent.js";
-import { fetchVideos, sharing } from './utils.js'
+import { fetchVideos, restrictAddVideoElement, restrictContextMenu, restrictDownload, restrictAddAttribute } from './utils.js'
 import { checkUserId } from "./assign-user-id.js"
 import { aes_gcm_encrypt, aes_gcm_decrypt } from "./aescrypt.js"
 
 const account = createApp({
     setup() {
-        const canshare = ref("teststs")
-        const { share, isSupported }
+        const { share, isSupported } = useShare()
         const shareLink = async (event) => {
             event.preventDefault()
             const data = {
@@ -16,56 +15,13 @@ const account = createApp({
                 text: "test url",
                 title: "test title",
             }
+            share(data)
         }
-        useEventListener(document, 'contextmenu', event => {
-            event.preventDefault()
-        })
-        useEventListener(document, 'click', function (event) {
-            console.log("click", event.target)
-            const videos = Array.from(document.querySelectorAll("video"))
-            if (videos.length !== videoElements.length) {
-                const result = videos.filter(ele => !videoElements.includes(ele));
-                result.forEach(ele => {
-                    ele.remove()
-                })
-            }
-            var target = event.target;
-            if (target.tagName.toLowerCase() === 'a' && target.getAttribute("download") !== null) {
-                event.preventDefault();
-                console.log(target.getAttribute("download"))
-                alert('ダウンロードは禁止されています。');
-            }
-        })
-        const
-            videoElements = reactive([]),
-            observerOptions = { childList: false, attributes: true },
-            videoAttributeObserver = new MutationObserver((mutationList, observer) => {
-                mutationList.forEach(mutation => {
-                    console.log(mutation)
-                    const attrName = mutation.attributeName
-                    if (mutation.type === "attributes" && !["class", "id", "src"].includes(attrName)) {
-                        mutation.target.removeAttribute(attrName)
-                    }
-                })
-            })
-<<<<<<< HEAD
-                .then(async response => {
-                    print(response)
-                }).catch(error => console.log(error))
-        }
-        const loadName = ref()
-        const loadAddress = ref()
-        const saveNameOrAdress = () => {
-            const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]').value
-            console.log(csrf)
-            const data = new FormData();
-            console.log(address.value, loadAddress.value !== address.value)
-            data.append('csrfmiddlewaretoken', csrf)
-            if (name.value && loadName.value !== name.value) data.append('name', name.value)
-            if (address.value && loadAddress.value !== address.value) data.append('address', address.value)
-            navigator.sendBeacon("/videopost/savenameoraddress/", data)
-        }
-=======
+        const videoElements = ref([])
+        restrictContextMenu()
+        restrictDownload()
+        restrictAddVideoElement(videoElements)
+        restrictAddAttribute(videoElements)
 
         const
             csrf = ref(),
@@ -128,7 +84,6 @@ const account = createApp({
             }),
             blobNfts = reactive([])
 
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
         const debouncedSave = useDebounceFn(saveNameOrAdress, 1000)
         onMounted(async () => {
             axios.defaults.xsrfCookieName = 'csrftoken'
@@ -141,10 +96,6 @@ const account = createApp({
             console.log(JSON.parse(load.getAttribute("data-test")))
             blobVideos.push(...(await fetchVideos(dataList.value)).map(value => { return value.value }))
             blobNfts.push(...((await fetchVideos(nftList.value)).map(value => { return value.value })))
-            videoElements.map(ele => {
-                console.log(ele)
-                videoAttributeObserver.observe(ele, observerOptions)
-            })
             window.ethereum.on('accountsChanged', request)
         })
 
@@ -380,7 +331,6 @@ const account = createApp({
 
 
         return {
-            canshare,
             shareLink,
             videoElements,
             loadElement,
