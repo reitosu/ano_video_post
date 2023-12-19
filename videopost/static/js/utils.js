@@ -1,4 +1,5 @@
 const { ref, computed, toRef, toValue, watch } = Vue;
+const { useEventListener } = VueUse;
 export const
     validateCloudinaryUrl = (video) => {
         if (!video.endsWith(".mp4")) {
@@ -10,6 +11,13 @@ export const
         else {
             return 'https://res.cloudinary.com/dhlsaygev/' + video
         }
+    },
+
+    fetchVideo = async video => {
+        const response = await fetch(validateCloudinaryUrl(video))
+        const blob = await new Response(response.body).blob()
+        const blobUrl = URL.createObjectURL(blob)
+        return blobUrl
     },
 
     fetchVideos = async (videoList) => {
@@ -26,11 +34,59 @@ export const
         return result
     },
 
-    sharing = async (data) => {
-        if (!navigator.share) {
-            throw new Error('sharing is not supported.')
-        }
-        else {
-            await navigator.share(data)
-        }
+    restrictContextMenu = () => {
+        return useEventListener(document, 'contextmenu', event => {
+            event.preventDefault()
+        })
+    },
+    restrictDownload = () => {
+        return useEventListener(document, 'click', (event) => {
+            var target = event.target;
+            if (target.tagName.toLowerCase() === 'a' && target.getAttribute("download") !== null) {
+                event.preventDefault();
+                console.log(target.getAttribute("download"))
+                alert('ダウンロードは禁止されています。');
+            }
+        })
+    },
+    restrictAddVideoElement = (videoList) => {
+        const approveVideoList = toRef(videoList)
+        const res = ref()
+        useEventListener(document, 'click', () => {
+            console.log("click")
+            const videos = Array.from(document.querySelectorAll("video"))
+            if (videos.length !== approveVideoList.value.length) {
+                const result = videos.filter(ele => !approveVideoList.value.includes(ele));
+                result.forEach(ele => {
+                    console.log("remove", ele)
+                    ele.remove()
+                })
+                res.value = result
+            }
+        })
+        return res
+    },
+    restrictAddAttribute = (target) => {
+        const
+            observerOptions = { childList: false, attributes: true },
+            videoAttributeObserver = new MutationObserver((mutationList, observer) => {
+                mutationList.forEach(mutation => {
+                    console.log(mutation)
+                    const attrName = mutation.attributeName
+                    if (mutation.type === "attributes" && !["class", "id", "src"].includes(attrName)) {
+                        mutation.target.removeAttribute(attrName)
+                    }
+                })
+            })
+        const targetList = Array.isArray(toRef(target).value) ? toRef(target) : toRef([target.value]);
+        watch(() => ({ ...targetList.value }), (next, pre) => {
+            const nextList = Object.values(next)
+            const preList = Object.values(pre)
+            const differentList = nextList.filter(ele => !preList.includes(ele))
+            if (differentList) {
+                differentList.forEach(ele => {
+                    videoAttributeObserver.observe(ele, observerOptions)
+                })
+            }
+        }, { deep: true })
     }

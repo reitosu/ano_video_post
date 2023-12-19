@@ -16,11 +16,11 @@
     <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
-    {% comment %} <script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@2.13.0/cld-video-player.min.js"></script> {% endcomment %}
     <title>トップページ</title>
   </head>
   <body>
 
+<<<<<<< HEAD
     <div id="scroll">
 
 
@@ -44,11 +44,22 @@
 
       <div>
         <div ref="loadElement" data-video="{{ videos }}"></div>
+=======
+    <div id="scroll">    
+      <div class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
+        <div class="scrolldown2">
+          {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
+        </div>
+          <div class="rippless_btn">
+            <div></div>
+          </div>
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
       </div>
 
       <div id="fixed">
         <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
           <div id="menuContainer">
+<<<<<<< HEAD
             
             <div id="header">
 
@@ -70,6 +81,10 @@
                 </div>
               </div>
             </div>
+=======
+            <div id="header"></div>
+            <div id="tags"></div>
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
             <div id="buttons">
               <div class="serch">
                 <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
@@ -81,13 +96,19 @@
             </div>
           </div>
         </div>
+<<<<<<< HEAD
 
 
       {% comment %} <button class="next-video" @click="nextVideo">次の動画</button>
       <button class="prev-video" @click="prevVideo">前の動画</button> {% endcomment %}
       <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
+=======
+      </div>
+      
+      <div class="infinite-container" id="container" ref="container">
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
         <!--動画要素の表示-->
-        <div v-for="(video,index) in dataList" class="infinite-item" :ref="videosRef">
+        <div v-for="(video,index) in dataList" class="infinite-item">
           <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
         </div>
         {% comment %} {% comment %} {% for video in object_list %}
@@ -98,8 +119,12 @@
             <div class="overlay"></div>
         </section>
         {% endfor %} {% endcomment %}
+<<<<<<< HEAD
       </div>
+=======
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
       </div>
+
     </div>
   </body>
 </html>

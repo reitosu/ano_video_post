@@ -1,13 +1,17 @@
 const { createApp, ref, reactive, watch, watchEffect, computed, onMounted, nextTick } = Vue;
 const { useDebounceFn, onClickOutside, useToggle, useEventListener, computedAsync, useShare } = VueUse;
 import { useModal } from "./modalComponent.js";
-import { fetchVideos, sharing } from './utils.js'
+import { fetchVideos, restrictAddVideoElement, restrictContextMenu, restrictDownload, restrictAddAttribute } from './utils.js'
 import { checkUserId } from "./assign-user-id.js"
 import { aes_gcm_encrypt, aes_gcm_decrypt } from "./aescrypt.js"
 
 const account = createApp({
     setup() {
+<<<<<<< HEAD
         const canshare = ref("teststs")
+=======
+        const { share, isSupported } = useShare()
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
         const shareLink = async (event) => {
             event.preventDefault()
             const data = {
@@ -15,7 +19,9 @@ const account = createApp({
                 text: "test url",
                 title: "test title",
             }
+            share(data)
         }
+<<<<<<< HEAD
         useEventListener(document, 'contextmenu', event => {
             event.preventDefault()
         })
@@ -47,6 +53,13 @@ const account = createApp({
                     }
                 })
             })
+=======
+        const videoElements = ref([])
+        restrictContextMenu()
+        restrictDownload()
+        restrictAddVideoElement(videoElements)
+        restrictAddAttribute(videoElements)
+>>>>>>> d924df4938e1247215462628e9745f3656fbcda8
 
         const
             csrf = ref(),
@@ -121,10 +134,6 @@ const account = createApp({
             console.log(JSON.parse(load.getAttribute("data-test")))
             blobVideos.push(...(await fetchVideos(dataList.value)).map(value => { return value.value }))
             blobNfts.push(...((await fetchVideos(nftList.value)).map(value => { return value.value })))
-            videoElements.map(ele => {
-                console.log(ele)
-                videoAttributeObserver.observe(ele, observerOptions)
-            })
             window.ethereum.on('accountsChanged', request)
         })
 
@@ -360,7 +369,6 @@ const account = createApp({
 
 
         return {
-            canshare,
             shareLink,
             videoElements,
             loadElement,

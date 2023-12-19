@@ -64,13 +64,12 @@ def get_account_list_from_wallet_address_of_user_id(user_id):
 class IndexView(ListView):
     model = Video
     template_name = 'index.html'
-    paginate_by = 3
 
     def get_context_data(self, **kwargs):
         print(self.request.session.get("user_id"))
         context = super().get_context_data(**kwargs)
         context["title"] = "インデックス"
-        context["videos"] = serialize("json", self.model.objects.all().exclude(
+        context["video_list"] = serialize("json", self.model.objects.all().exclude(
             ispublic=False).order_by('-uploaded'))
 
         return context
@@ -90,7 +89,7 @@ class IndexView(ListView):
 
 def pagenate_video_query(request):
     objects = Video.objects.all().exclude(ispublic=False).order_by('-uploaded')
-    paginator = Paginator(objects, 3)
+    paginator = Paginator(objects, 5)
 
     page_number = request.GET.get('page')
     if int(page_number) in paginator.page_range:
@@ -208,6 +207,7 @@ class AccountView(ListView):
         # metadata_list = [nft.get_nft_metadata(token_id[0]) for token_id in video_list.values_list("tokenid")]
         # print(metadata_list)
         print(nft_list)
+        print(self.request.session["user_id"])
         context['nft_list'] = serialize("json", nft_list)
         account = Account.objects.get(accountid=user_id)
         context['address'] = account.walletaddress if account.walletaddress else ""
@@ -239,8 +239,20 @@ def saveNameOrAddress(request):
     # before_address_list = get_account_list_from_wallet_address_of_user_id(user_id)
     if address:
         before_address_list.update(walletaddress=address)
-        video_queryset = Video.objects.filter(uploader=account)
-        [obj.uploader.add(*before_address_list) for obj in video_queryset]
+        after_account_list = Account.objects.filter(walletaddress=address)
+        # print(set([video_object for acc in after_account_list if (
+        #     video_object := Video.objects.filter(uploader=acc))]))
+        user_video_queryset = Video.objects.filter(uploader=account)
+        user_video_queryset = Video.objects.filter(
+            uploader=after_account_list[0])
+        all_video_list = [video_object for acc in after_account_list if (
+            video_object := Video.objects.filter(uploader=acc))]
+        print(240, user_video_queryset)
+        print(241, all_video_list)
+        print(242, [user_video_queryset |
+              video_object for video_object in all_video_list])
+        print(243, all_video_list)
+        [obj.uploader.add(*after_account_list) for obj in user_video_queryset]
 
     if name:
         before_address_list.update(name=name)
