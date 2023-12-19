@@ -77,7 +77,16 @@ class IndexView(ListView):
 
     def get_queryset(self):
         return self.model.objects.all().exclude(ispublic=False).order_by('-uploaded')
+    
+    
 
+# class StartView(TemplateView):
+#     template_name = 'start.html'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["title"] = "スタート"
+#         return context
 
 def pagenate_video_query(request):
     objects = Video.objects.all().exclude(ispublic=False).order_by('-uploaded')

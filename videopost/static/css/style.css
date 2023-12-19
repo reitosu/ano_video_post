@@ -3,6 +3,23 @@ body {
     /* background: white url("../images/background.png") no-repeat; */
     overflow: hidden;
 }
+
+
+.start {
+    position: absolute;
+    background-color: ivory;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    z-index: 999999999;
+}
+
+
+
+
+
 .tutorial {
   position:absolute; 
   background-color:gray; 
@@ -140,23 +157,22 @@ letter-spacing: 0.05em; */
 
 #leftMenu {
     position: fixed;
+    display: flex;
     height: 97%;
-    width: 48%;
-    left: 100%;
+    width: 75%;
+    left: 25%;
     top: 50%;
     transform: translateY(-50%);
     background-color: darkgray;
     z-index: 9999;
     border: 2px solid black;
     border-radius: 10px;
-    /* display: flex; */
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
     padding: 0.5%;
     box-sizing: border-box;
     overflow: hidden;
-    transition: 0.5s;
 }
 .menuInTutorial {
   animation: leftMenuOpen 1.5s ease-in-out infinite;
@@ -172,6 +188,24 @@ letter-spacing: 0.05em; */
         left: 100%;
     }
 
+}
+
+#good {
+  position: relative;
+  float: left;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  align-items: center;
+}
+
+#share {
+  position: relative;
+  float: right;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  align-items: center;
 }
 
 
@@ -196,6 +230,13 @@ letter-spacing: 0.05em; */
 }
 
 #buttons {
+    height: 10%;
+    border: 2px solid black;
+    margin-top: 0.3%;
+    display: flex;
+    justify-content: space-around;
+}
+buttton {
     height: 10%;
     border: 2px solid black;
     margin-top: 0.3%;

@@ -3,10 +3,7 @@
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width">
     {% load static %}
-<<<<<<< HEAD
     <link rel="icon" href="{% static 'images/main-logo.svg' %}">
-=======
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/modal.css' %}">
@@ -25,25 +22,54 @@
   <body>
 
     <div id="scroll">
-<<<<<<< HEAD
-      <div class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
+
+
+      <div class="loading">
+        
+      </div>
+
+
+
+
+
+      <div class="tutorial" v-if="tutorialFlag" @click.stop="onTutorialClick">
         <div class="scrolldown2">
           {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
         </div>
-          <div class="rippless_btn">
-            <div></div>
-          </div>
-=======
+        <div class="rippless_btn">
+          <div></div>
+        </div>
+      </div>
+
+
       <div>
         <div ref="loadElement" data-video="{{ videos }}"></div>
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
       </div>
-      
+
       <div id="fixed">
         <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
           <div id="menuContainer">
-            <div id="relations"></div>
-            <div id="tags"></div>
+            
+            <div id="header">
+
+              <div class="logo">
+                <img src="{% static 'images/header.svg'%}" alt="ロゴ">
+              </div>
+              </div>
+              <div id="trade">
+                <img src="{% static 'images/NFTgraph.png'%}" alt="tests">
+              </div>
+              <div id="info">info</div>
+
+              <div id="buttton">
+                <div id="good">
+                  <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
+                </div>
+                <div id="share">
+                  <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" alt="share"></a>
+                </div>
+              </div>
+            </div>
             <div id="buttons">
               <div class="serch">
                 <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
@@ -55,44 +81,25 @@
             </div>
           </div>
         </div>
-      </div>
-<<<<<<< HEAD
+
+
       {% comment %} <button class="next-video" @click="nextVideo">次の動画</button>
       <button class="prev-video" @click="prevVideo">前の動画</button> {% endcomment %}
       <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
-=======
-      
-      <div class="infinite-container" id="container" ref="container" @scrollend="ifLoad">
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
         <!--動画要素の表示-->
         <div v-for="(video,index) in dataList" class="infinite-item" :ref="videosRef">
           <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
         </div>
-        {% comment %} {% for video in object_list %}
+        {% comment %} {% comment %} {% for video in object_list %}
         <section class="infinite-item">
             <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
             <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" height="100%" autoplay></video>
             <!--動画の上に画像の表示-->
             <div class="overlay"></div>
         </section>
-<<<<<<< HEAD
-        {% endfor %}
-        
-        <div class="pickupblock">
-          <input type="button" class="bt" value="対象のボタン">
-          <div id="setsumeitext">
-          </div>
-      </div>
-    
-        
-=======
         {% endfor %} {% endcomment %}
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
+      </div>
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/js/modaal.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
-    <script src="{% static 'js/modal.js' %}"></script>
   </body>
 </html>

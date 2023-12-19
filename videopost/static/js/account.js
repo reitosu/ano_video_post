@@ -8,7 +8,6 @@ import { aes_gcm_encrypt, aes_gcm_decrypt } from "./aescrypt.js"
 const account = createApp({
     setup() {
         const canshare = ref("teststs")
-        const { share, isSupported }
         const shareLink = async (event) => {
             event.preventDefault()
             const data = {
@@ -48,24 +47,6 @@ const account = createApp({
                     }
                 })
             })
-<<<<<<< HEAD
-                .then(async response => {
-                    print(response)
-                }).catch(error => console.log(error))
-        }
-        const loadName = ref()
-        const loadAddress = ref()
-        const saveNameOrAdress = () => {
-            const csrf = document.querySelector('input[name="csrfmiddlewaretoken"]').value
-            console.log(csrf)
-            const data = new FormData();
-            console.log(address.value, loadAddress.value !== address.value)
-            data.append('csrfmiddlewaretoken', csrf)
-            if (name.value && loadName.value !== name.value) data.append('name', name.value)
-            if (address.value && loadAddress.value !== address.value) data.append('address', address.value)
-            navigator.sendBeacon("/videopost/savenameoraddress/", data)
-        }
-=======
 
         const
             csrf = ref(),
@@ -128,7 +109,6 @@ const account = createApp({
             }),
             blobNfts = reactive([])
 
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
         const debouncedSave = useDebounceFn(saveNameOrAdress, 1000)
         onMounted(async () => {
             axios.defaults.xsrfCookieName = 'csrftoken'

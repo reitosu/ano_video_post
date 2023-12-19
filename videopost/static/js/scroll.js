@@ -49,6 +49,10 @@ const infiniteScroll = createApp({
       console.log(dataList.value)
     });
 
+
+    const start_Window = ref(0)
+
+
     const tutorialFlag = ref(true)
     const onTutorialClick = () => {
 
@@ -166,11 +170,7 @@ const infiniteScroll = createApp({
     const menu = ref()
     const movementRatio = ref(100)
     const menuMoveFrag = ref("close")
-<<<<<<< HEAD
-    const MenuOpenlimit = 50
-=======
-    const limit = 50
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
+    const MenuOpenlimit = 0
 
     const onSwipe = () => {
       const onTouchStart = (event) => {
@@ -189,11 +189,7 @@ const infiniteScroll = createApp({
           console.log(menu.value.offsetLeft, screenSize)
           console.log(100 - (-movement / screenSize * 100))
           console.log(openDistance, menu.value.style.left)
-<<<<<<< HEAD
           movementRatio.value = Math.max(100 - (-movement / screenSize * 100), MenuOpenlimit)
-=======
-          movementRatio.value = Math.max(100 - (-movement / screenSize * 100), limit)
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
           console.log(Math.abs(movement), moveDistance)
           if (Math.abs(movement) >= moveDistance && ScreenHeight / 4 >= moveY - startY) {
             if (movement < 0 && parseFloat(menu.value.style.left) <= openDistance) {
@@ -201,10 +197,10 @@ const infiniteScroll = createApp({
               menuMoveFrag.value = "open"
               menu.value.animate([
                 { left: movementRatio.value + "%" },
-                { left: 50 + "%" }
+                { left: 25 + "%" }
               ], 100)
               setTimeout(() => {
-                menu.value.style.left = 50 + "%"
+                menu.value.style.left = 25 + "%"
               }, 100)
             }
             else if (movement > 0 && parseFloat(menu.value.style.left) >= openDistance) {
@@ -257,15 +253,13 @@ const infiniteScroll = createApp({
     }
 
     return {
-<<<<<<< HEAD
+      start_Window,
       tutorialFlag,
       onTutorialClick,
-=======
       fetchVideos,
       loadElement,
       dataList,
       blobVideos,
->>>>>>> f5e107a146713b6cd485fcb72c37062ded20c13b
       toggle,
       container,
       videosRef,
