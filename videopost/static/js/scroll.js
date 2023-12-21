@@ -1,11 +1,18 @@
 const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
 const { useDebounceFn, useElementVisibility, useEventListener } = VueUse;
-import { fetchVideo } from './utils.js'
+import { fetchVideo, isSmartPhone } from './utils.js'
 
 const pagenationNumber = 5
 
 const infiniteScroll = createApp({
   setup() {
+    const
+      tutorialFlag = ref(true),
+      onTutorialClick = () => {
+        tutorialFlag.value = false;
+        currentVideoElement.value.play()
+      }
+
     const
       dataList = ref([]),
       blobVideos = reactive([]),
@@ -52,32 +59,34 @@ const infiniteScroll = createApp({
     onMounted(async () => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-      onSwipe()
       await addVideos()
+      // onSwipe()
+      currentVideoElement.value = document.querySelector(".infinite-item > video")
+      console.log(currentVideoElement.value)
       console.log(videoElementVisibilities)
       console.log(dataList.value)
     });
 
-    const tutorialFlag = ref(true)
-    const onTutorialClick = () => {
-      tutorialFlag.value = false;
-    }
+    const
+      container = ref(),
+      videoElementVisibilities = reactive([]),
+      currentVideoElement = ref(undefined)
 
-    const container = ref()
-    const currentVideoElement = ref(undefined)
-    const videoElementVisibilities = reactive([])
-
-    useEventListener(container, "scrollend", () => {
+    useEventListener(container, "scrollend", (event) => {
+      console.log(event)
       console.log(videoElementVisibilities)
-      videoElementVisibilities.some(ele => {
+      videoElementVisibilities.some((ele, index) => {
         if (ele.visibility) {
-          console.log(ele.element)
-          console.log(blobVideos.at(-2), ele.element.src)
-          if (ele.element.src === blobVideos.at(-2)) {
+          const element = ele.element
+          console.log(blobVideos.at(-2), element.src)
+          if (element.src === blobVideos.at(-2)) {
             console.log("load")
             addVideos()
           }
-          currentVideoElement.value = ele.element
+          if (index + 1 in videoElementVisibilities) videoElementVisibilities[index + 1].element.pause()
+          if (index - 1 in videoElementVisibilities) videoElementVisibilities[index - 1].element.pause()
+          element.play()
+          currentVideoElement.value = element
           return true;
         }
       })
@@ -85,81 +94,144 @@ const infiniteScroll = createApp({
       console.log(videoElementVisibilities)
     })
 
-    const menu = ref()
-    const movementRatio = ref(100)
-    const menuMoveFrag = ref("close")
-    const MenuOpenlimit = 50
-
-    const onSwipe = () => {
-      const onTouchStart = (event) => {
-        const screenSize = screen.availWidth
-        const ScreenHeight = screen.availHeight
-        const moveDistance = screenSize / 8
-        const openDistance = 100 - (screenSize / 4 / screenSize * 100)
-        const startX = event.touches[0].pageX
-        const startY = event.touches[0].pageY
-
-        const onTouchMove = (event) => {
-          const moveX = event.touches[0].pageX
-          const moveY = event.touches[0].pageY
-          const movement = moveX - startX
-          console.log(startX, moveX, movement)
-          console.log(menu.value.offsetLeft, screenSize)
-          console.log(100 - (-movement / screenSize * 100))
-          console.log(openDistance, menu.value.style.left)
-          movementRatio.value = Math.max(100 - (-movement / screenSize * 100), MenuOpenlimit)
-          console.log(Math.abs(movement), moveDistance)
-          if (Math.abs(movement) >= moveDistance && ScreenHeight / 4 >= moveY - startY) {
-            if (movement < 0 && parseFloat(menu.value.style.left) <= openDistance) {
-              console.log("open")
-              menuMoveFrag.value = "open"
-              menu.value.animate([
-                { left: movementRatio.value + "%" },
-                { left: 50 + "%" }
-              ], 100)
-              setTimeout(() => {
-                menu.value.style.left = 50 + "%"
-              }, 100)
-            }
-            else if (movement > 0 && parseFloat(menu.value.style.left) >= openDistance) {
-              console.log("close")
-              console.log(movementRatio.value - 50)
-              menuMoveFrag.value = "close"
-              menu.value.animate([
-                { left: movementRatio.value - 50 + "%" },
-                { left: 110 + "%" }
-              ], 100)
-              setTimeout(() => {
-                menu.value.style.left = 100 + "%"
-              }, 100)
-            }
-            else {
-              menuMoveFrag.value = "else"
-              menu.value.style.left = movementRatio.value <= 50 ? '50%' : movementRatio.value + "%";
-            }
-          }
+    const
+      clickTimer = ref(undefined),
+      togglePlayAndGood = event => {
+        if (!clickTimer.value) {
+          clickTimer.value = setTimeout(() => {
+            clickTimer.value = clearTimeout(clickTimer.value)
+            console.log(clickTimer.value)
+            const videoElement = event.target
+            videoElement.paused ? videoElement.play() : videoElement.pause()
+          }, 250)
         }
-
-        const onTouchEnd = () => {
-          if (parseFloat(menu.value.style.left) != 100 && parseFloat(menu.value.style.left) != 50 && menuMoveFrag.value == "else") {
-            console.log("end")
-            menuMoveFrag.value = "close"
-            menu.value.animate([
-              { left: movementRatio.value + "%" },
-              { left: 110 + "%" }
-            ], 100)
-            setTimeout(() => {
-              menu.value.style.left = 100 + "%";
-            }, 100)
-          }
-          window.removeEventListener("touchmove", onTouchMove)
-          window.removeEventListener("touchend", onTouchEnd)
+        else {
+          clickTimer.value = clearTimeout(clickTimer.value)
+          console.log(clickTimer.value)
+          const videoElement = event.target
+          console.log(event)
+          // TODO: データバースのいいねの数を増やすこと
         }
-
-        window.addEventListener("touchmove", onTouchMove)
-        window.addEventListener("touchend", onTouchEnd)
       }
-      window.addEventListener("touchstart", onTouchStart)
+
+    const
+      menu = ref(),
+      menuRight = ref(0),
+      swipeDirection = ref(true),
+      menuOpacity = ref(0),
+      movementRatio = ref(100),
+      menuOpenFrag = ref(true),
+      menuOpenlimit = 75,
+      transitionFlag = ref(true),
+      menuTimer = ref(undefined),
+
+      menuOpen = () => {
+        menuOpacity.value = 1
+        menuOpenFrag.value = false
+        menuRight.value = 75
+      },
+
+      menuClose = () => {
+        menuOpacity.value = 0
+        menuOpenFrag.value = true
+        menuRight.value = 0
+      },
+
+      setMenuTimer = () => {
+        if (!menuTimer.value) {
+          menuTimer.value = setTimeout(() => {
+            transitionFlag.value = false
+          }, 400)
+        }
+      },
+
+      clearMenuTimer = () => {
+        menuTimer.value = clearTimeout(menuTimer.value)
+      }
+
+    if (isSmartPhone()) {
+      useEventListener(window, "touchstart", event => {
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        const moveDistance = windowWidth / 8
+        const startX = event.touches[0].clientX
+        const startY = event.touches[0].clientY
+        console.log(event)
+        console.log(startX, windowWidth / 4)
+        console.log(!menuOpenFrag.value, startX > windowWidth / 4)
+        if ((!menuOpenFrag.value || startX > windowWidth / 4) && !tutorialFlag.value) {
+          const removeTouchMove = useEventListener(window, "touchmove", event => {
+            const moveAmountY = Math.abs(startY - event.touches[0].clientY)
+            if (moveAmountY > 50) {
+              swipeDirection.value = false
+            }
+            console.log(swipeDirection.value)
+            if (swipeDirection.value) {
+              const moveX = event.touches[0].clientX
+              const movementRatio = Math.min(100 - (moveX / windowWidth * 100), menuOpenlimit)
+              const movementX = startX - moveX
+              console.log(moveX)
+              console.log(movementRatio)
+              console.log(movementX, moveDistance)
+              if (menuOpenFrag.value) {
+                if (movementX >= moveDistance) {
+                  setMenuTimer()
+                  menuOpacity.value = 1
+                  menuRight.value = movementRatio
+                }
+              } else {
+                if (movementX < -moveDistance) {
+                  setMenuTimer()
+                  menuOpacity.value = 1
+                  menuRight.value = movementRatio
+                }
+              }
+            }
+            else { transitionFlag.value = true, menuClose() }
+          })
+          const removeTouchUp = useEventListener(window, "touchend", event => {
+            if (swipeDirection.value) {
+              const endX = event.changedTouches[0].clientX
+              const movedX = startX - event.changedTouches[0].clientX
+              clearMenuTimer()
+              transitionFlag.value = true
+              if (endX < windowWidth / 4 && Math.abs(movedX) < 5) {
+                console.log("tap close")
+                menuClose()
+              } else {
+                if (menuOpenFrag.value) {
+                  if (movedX >= moveDistance) {
+                    console.log("open")
+                    menuOpen()
+                  } else {
+                    console.log("closed")
+                    menuClose()
+                  }
+                } else {
+                  if (movedX > -moveDistance) {
+                    console.log("opened")
+                    menuOpen()
+                  } else {
+                    console.log("close")
+                    menuClose()
+                  }
+                }
+              }
+            } else {
+              swipeDirection.value = true
+              console.log(swipeDirection.value)
+            }
+            console.log(event, "up")
+            removeTouchMove()
+            removeTouchUp()
+            removeTouchCansel()
+
+          })
+          const removeTouchCansel = useEventListener(window, "touchcansel", event => {
+            console.log("cansel", event)
+          })
+        }
+      })
     }
 
     const toggle = () => {
@@ -177,8 +249,11 @@ const infiniteScroll = createApp({
       blobVideos,
       toggle,
       container,
-      ifLoad,
+      togglePlayAndGood,
       menu,
+      menuRight,
+      menuOpacity,
+      transitionFlag,
     }
   }
 });

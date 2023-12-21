@@ -21,17 +21,16 @@
   <body>
 
     <div id="scroll">    
-      <div class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
+      <section class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
         <div class="scrolldown2">
-          {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
         </div>
           <div class="rippless_btn">
             <div></div>
           </div>
-      </div>
+      </section>
       
-      <div id="fixed">
-        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
+      <section id="fixed">
+        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag, 'menuTransition': transitionFlag }" ref="menu" :style="{right: menuRight+'%', opacity: menuOpacity}">
           <div id="menuContainer">
             <div id="header"></div>
             <div id="tags"></div>
@@ -46,22 +45,13 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
       
-      <div class="infinite-container" id="container" ref="container">
-        <!--動画要素の表示-->
+      <section class="infinite-container" id="container" ref="container">
         <div v-for="(video,index) in dataList" class="infinite-item">
-          <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
+          <video playsinline :src="blobVideos[index]" height="100%" autoplay loop @click.prevent="togglePlayAndGood"></video>
         </div>
-        {% comment %} {% for video in object_list %}
-        <section class="infinite-item">
-            <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
-            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" height="100%" autoplay></video>
-            <!--動画の上に画像の表示-->
-            <div class="overlay"></div>
-        </section>
-        {% endfor %} {% endcomment %}
-      </div>
+      </section>
 
     </div>
   </body>

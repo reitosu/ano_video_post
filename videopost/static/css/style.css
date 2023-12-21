@@ -104,7 +104,7 @@ body {
   scroll-behavior: smooth;
   width: 100%;
   height: 100%;
-  overflow-y: hidden;
+  overflow-y: scroll;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
   position: relative;
@@ -151,10 +151,10 @@ body {
 #leftMenu {
   position: fixed;
   height: 97%;
-  width: 48%;
-  left: 100%;
+  width: 73%;
+  right: 0%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(100%, -50%);
   background-color: darkgray;
   z-index: 9999;
   border: 2px solid black;
@@ -166,7 +166,10 @@ body {
   padding: 0.5%;
   box-sizing: border-box;
   overflow: hidden;
-  transition: 0.5s;
+}
+
+.menuTransition {
+  transition: right .4s ease-out, opacity .3s ease-in-out;
 }
 
 .menuInTutorial {
@@ -175,15 +178,18 @@ body {
 
 @keyframes leftMenuOpen {
   0% {
-    left: 100%;
+    right: 0%;
+    opacity: 0;
   }
 
   85% {
-    left: 70%;
+    right: 40%;
+    opacity: 1;
   }
 
   100% {
-    left: 100%;
+    right: 0%;
+    opacity: 0;
   }
 
 }
@@ -451,7 +457,6 @@ body {
     height: 97%;
     width: 20%;
     right: 0;
-    left: 80%;
     top: 50%;
     transform: translateY(-50%);
     background-color: darkgray;
@@ -525,7 +530,6 @@ body {
 
   #leftMenu {
     width: 40%;
-    left: 100%;
     top: 50%;
     /* transform: translateY(-50%); */
   }

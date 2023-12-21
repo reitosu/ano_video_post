@@ -1,6 +1,14 @@
 const { ref, computed, toRef, toValue, watch } = Vue;
 const { useEventListener } = VueUse;
 export const
+    isSmartPhone = () => {
+        if (window.matchMedia && window.matchMedia('(max-device-width: 640px)').matches) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     validateCloudinaryUrl = (video) => {
         if (!video.endsWith(".mp4")) {
             video += ".mp4"
@@ -73,7 +81,7 @@ export const
                 mutationList.forEach(mutation => {
                     console.log(mutation)
                     const attrName = mutation.attributeName
-                    if (mutation.type === "attributes" && !["class", "id", "src"].includes(attrName)) {
+                    if (mutation.type === "attributes" && !["class", "id", "src", "loop", "autoplay"].includes(attrName)) {
                         mutation.target.removeAttribute(attrName)
                     }
                 })
@@ -89,4 +97,10 @@ export const
                 })
             }
         }, { deep: true })
+    },
+    restrictAll = (videoList) => {
+        restrictAddAttribute(videoList)
+        restrictAddVideoElement(videoList)
+        restrictContextMenu()
+        restrictDownload()
     }
