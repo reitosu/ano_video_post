@@ -1,6 +1,6 @@
 const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
 const { useDebounceFn, useElementVisibility, useEventListener } = VueUse;
-import { fetchVideo, isSmartPhone } from './utils.js'
+import { fetchVideo, isSmartPhone, retryable, validateCloudinaryUrl } from './utils.js'
 
 const pagenationNumber = 5
 
@@ -14,33 +14,52 @@ const infiniteScroll = createApp({
       }
 
     const
+      loadElement = ref(undefined),
+      searchTags = computed(() => {
+        if (loadElement.value) {
+          return loadElement.value.getAttribute("data-tags")
+        }
+        return undefined
+      }),
+      shareVideo = computed(() => {
+        if (loadElement.value) {
+          return loadElement.value.getAttribute("data-video")
+        }
+        return undefined
+      }),
       dataList = ref([]),
       blobVideos = reactive([]),
 
       addVideos = async () => {
         const page = (dataList.value.length / pagenationNumber) + 1
         console.log(page)
-        const videoList = await getPagenation(page)
+        const videoList = await getPagenation(page, searchTags.value, shareVideo.value)
         dataList.value.push(...videoList)
         videoList.forEach(async video => {
-
-          const url = await fetchVideo(video.video)
-            .catch(error => console.log(error))
-          blobVideos.push(url)
+          if (isSmartPhone()) {
+            blobVideos.push(validateCloudinaryUrl(video.video))
+          }
+          else {
+            const url = await retryable(3, fetchVideo, video.video)
+            blobVideos.push(url)
+          }
         })
         setTimeout(() => {
           const videoElementList = Array.from(document.querySelectorAll(".infinite-item > video"))
           videoElementList.forEach(ele => {
             if (!(videoElementVisibilities.map(ele => { return ele.element }).includes(ele))) {
+              ele.load()
+              ele.addEventListener("loadeddata", event => console.log(event))
               videoElementVisibilities.push({ element: ele, visibility: useElementVisibility(ele) })
+              watch(videoElementVisibilities.slice(-1)[0], scrollPlay)
             }
           })
           console.log(videoElementVisibilities)
         }, 1000)
       },
 
-      getPagenation = (page) => {
-        return axios.get('/videopost/pagenatevideo/', { params: { "page": page } })
+      getPagenation = (page, tags = [], videoName = "") => {
+        return axios.get('/videopost/pagenatevideo/', { params: { "page": page, "tags": tags, "videoName": videoName } })
           .then(data => {
             if (data.data.results) {
               console.log(data)
@@ -60,7 +79,6 @@ const infiniteScroll = createApp({
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       await addVideos()
-      // onSwipe()
       currentVideoElement.value = document.querySelector(".infinite-item > video")
       console.log(currentVideoElement.value)
       console.log(videoElementVisibilities)
@@ -70,29 +88,20 @@ const infiniteScroll = createApp({
     const
       container = ref(),
       videoElementVisibilities = reactive([]),
-      currentVideoElement = ref(undefined)
-
-    useEventListener(container, "scrollend", (event) => {
-      console.log(event)
-      console.log(videoElementVisibilities)
-      videoElementVisibilities.some((ele, index) => {
-        if (ele.visibility) {
-          const element = ele.element
-          console.log(blobVideos.at(-2), element.src)
+      currentVideoElement = ref(undefined),
+      scrollPlay = (value) => {
+        console.log(value.element)
+        const element = value.element
+        if (value.visibility) {
+          element.play()
+          currentVideoElement.value = element
           if (element.src === blobVideos.at(-2)) {
             console.log("load")
             addVideos()
           }
-          if (index + 1 in videoElementVisibilities) videoElementVisibilities[index + 1].element.pause()
-          if (index - 1 in videoElementVisibilities) videoElementVisibilities[index - 1].element.pause()
-          element.play()
-          currentVideoElement.value = element
-          return true;
         }
-      })
-      console.log(currentVideoElement.value)
-      console.log(videoElementVisibilities)
-    })
+        else element.pause()
+      }
 
     const
       clickTimer = ref(undefined),
@@ -110,7 +119,8 @@ const infiniteScroll = createApp({
           console.log(clickTimer.value)
           const videoElement = event.target
           console.log(event)
-          // TODO: データバースのいいねの数を増やすこと
+          // TODO: データーべースのいいねの数を増やすこと
+
         }
       }
 
@@ -245,6 +255,7 @@ const infiniteScroll = createApp({
     return {
       tutorialFlag,
       onTutorialClick,
+      loadElement,
       dataList,
       blobVideos,
       toggle,

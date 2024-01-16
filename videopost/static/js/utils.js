@@ -9,6 +9,14 @@ export const
         }
     },
 
+    retryable = (retryCount, func, ...augs) => {
+        let promise = Promise.reject().catch(() => func(...augs));
+        for (let i = 0; i < retryCount; i++) {
+            promise = promise.catch(err => func());
+        }
+        return promise;
+    },
+
     validateCloudinaryUrl = (video) => {
         if (!video.endsWith(".mp4")) {
             video += ".mp4"
@@ -81,8 +89,13 @@ export const
                 mutationList.forEach(mutation => {
                     console.log(mutation)
                     const attrName = mutation.attributeName
-                    if (mutation.type === "attributes" && !["class", "id", "src", "loop", "autoplay"].includes(attrName)) {
-                        mutation.target.removeAttribute(attrName)
+                    if (mutation.type === "attributes") {
+                        if (attrName === "controlslist" && mutation.target.getAttribute("controlslist") !== "nodownload") {
+                            mutation.target.setAttribute("controlslist", "nodownload")
+                        }
+                        else if (!["class", "id", "src", "loop", "autoplay", "controlslist"].includes(attrName)) {
+                            mutation.target.removeAttribute(attrName)
+                        }
                     }
                 })
             })

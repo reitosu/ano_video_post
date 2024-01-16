@@ -6,7 +6,7 @@
     <link rel="icon" href="{% static 'images/main-logo.svg' %}">
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
@@ -20,7 +20,11 @@
   </head>
   <body>
 
-    <div id="scroll">    
+    <div id="scroll">
+      <div>
+        <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement"></div>
+      </div>
+
       <section class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
         <div class="scrolldown2">
         </div>
@@ -36,7 +40,7 @@
             <div id="tags"></div>
             <div id="buttons">
               <div class="serch">
-                <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
+                <a href="{% url 'videopost:search' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
               </div>
               <div class="edit">
                 <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->

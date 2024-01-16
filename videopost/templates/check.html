@@ -16,13 +16,14 @@
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="module" src="{% static 'js/check.js' %}" defer></script>
-    <div id="sessions">
-      <div id="draft" data-draft="{{ request.session.draft }}"></div>
-    </div>
   </head>
 
   <body>
     <div id="check">
+      <div id="sessions">
+        <div id="draft" ref="draftElement" data-draft="{{ request.session.draft }}"></div>
+      </div>
+
       <div id="header">
         <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
         <a href="{% url 'videopost:index' %}">×</a>

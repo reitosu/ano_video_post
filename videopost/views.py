@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, CreateView, ListView
 from django.http import JsonResponse
 from django.urls import reverse
-from django.db.models import Count
+from django.db.models import Case, When, Value, IntegerField, Count
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from .storage import UpdateFileSystemStorage
@@ -68,9 +68,19 @@ class IndexView(ListView):
     def get_context_data(self, **kwargs):
         print(self.request.session.get("user_id"))
         context = super().get_context_data(**kwargs)
-        context["title"] = "インデックス"
-        context["video_list"] = serialize("json", self.model.objects.all().exclude(
-            ispublic=False).order_by('-uploaded'))
+        obj = self.model.objects.all().exclude(ispublic=False)
+        if tags := self.request.GET.getlist("tag"):
+            print(tags)
+            for tag in tags:
+                obj = obj.filter(tags=tag)
+                print(obj)
+            context["tags"] = json.dumps(tags)
+        elif video_name := self.request.GET.get('videoname'):
+            print(video_name)
+            cs = get_cloudinary_source(video_name)
+            obj = self.model.objects.filter(video=cs) | obj
+            context["video_name"] = video_name
+        context["video_list"] = serialize("json", obj.order_by('-uploaded'))
 
         return context
 
@@ -80,6 +90,18 @@ class IndexView(ListView):
 
 def pagenate_video_query(request):
     objects = Video.objects.all().exclude(ispublic=False).order_by('-uploaded')
+    print(request.GET)
+    if tags := request.GET.get("tags"):
+        tags = json.loads(tags)
+        for tag in tags:
+            objects = objects.filter(tags=tag)
+    if video_name := request.GET.get("videoName"):
+        if not objects.filter(video=video_name):
+            video_name = get_cloudinary_source(video_name)
+        print(objects.filter(video=video_name))
+        objects = objects.annotate(share=Case(
+            When(video=video_name, then=Value(1)), default=Value(0), output_field=IntegerField())).order_by('-share')
+    print(objects.values())
     paginator = Paginator(objects, 5)
 
     page_number = request.GET.get('page')
@@ -90,13 +112,18 @@ def pagenate_video_query(request):
         return JsonResponse({'results': False})
 
 
-class SerchView(TemplateView):
+class SerchView(ListView):
+    model = Tag
     template_name = 'serch.html'
+    context_object_name = 'tags'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "サーチ"
         return context
+
+    def get_queryset(self):
+        return serialize("json", self.model.objects.all())
 
 
 class EditView(CreateView):

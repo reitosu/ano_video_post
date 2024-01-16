@@ -1,78 +1,99 @@
-var tags = [
-    "hou",
-    "ren",
-    "sou",
-    "houchi",
-    "renkyu",
-    "soutai",
-    "h",
-    "r",
-    "s"
-  ];
+const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
+const { useDebounceFn, useElementVisibility, useEventListener, onClickOutside } = VueUse;
+import { fetchVideo, isSmartPhone } from './utils.js'
+import { useFuse } from './fuseComponent.js'
 
-  var dropdownMenu = document.getElementById("dropdown-menu");
-  var tagList = document.getElementById("tag-list");
+const search = createApp({
+  setup() {
+    const
+      loadElement = ref(undefined),
+      dataList = computed(() => {
+        if (loadElement.value) {
+          const fieldsList = JSON.parse(loadElement.value.getAttribute("data-tags"))
+            .map(model => {
+              const fields = { name: model.pk, ...model.fields }
+              return fields
+            })
+          return fieldsList
+        }
+        else {
+          return undefined
+        }
+      }),
+      tagNames = computed(() => {
+        if (dataList.value) {
+          return dataList.value.map(record => {
+            console.log(record)
+            return record.name
+          })
+        }
+        else { return [] }
+      })
 
-  function populateDropdownMenu(tags) {
-    dropdownMenu.innerHTML = "";
+    onMounted(() => {
+      console.log(dataList.value)
+      console.log(tagNames.value)
+    })
 
-    if (tags.length > 0) {
-      tags.forEach(function(tag) {
-        var listItem = document.createElement("li");
-        listItem.textContent = tag;
-        dropdownMenu.appendChild(listItem);
-      });
+    const tagInputElement = ref()
+    const
+      inputTag = ref(""),
+      historys = reactive([]),
+      searchTags = reactive([])
 
-      dropdownMenu.style.display = "block";
-    } else {
-      dropdownMenu.style.display = "none";
+    const
+      predict = event => {
+        console.log(event.target.innerText)
+        inputTag.value = event.target.innerText
+      },
+
+      addSearchTag = () => {
+        if (inputTag.value) {
+          historys.unshift(inputTag.value)
+          searchTags.push({ name: inputTag.value, flag: false })
+          inputTag.value = ""
+        }
+      },
+
+      toggleTagBefore = (tag) => {
+        console.log(tag)
+        tag.flag = !tag.flag
+      },
+
+      deleteTag = (tag) => {
+        if (tag.flag) {
+          if (searchTags.indexOf(tag) >= 0) searchTags.splice(searchTags.indexOf(tag), 1)
+        }
+      }
+
+    const { results } = useFuse(inputTag, tagNames)
+
+    const
+      form = ref(),
+      search = () => {
+        if (searchTags.length) {
+          form.value.submit()
+        }
+        else {
+          alert("1つ以上")
+        }
+      }
+
+    return {
+      loadElement,
+      tagInputElement,
+      inputTag,
+      historys,
+      searchTags,
+      predict,
+      addSearchTag,
+      toggleTagBefore,
+      deleteTag,
+      results,
+      form,
+      search,
     }
   }
-
-  function populateTagList(tags) {
-    tagList.innerHTML = "";
-
-    if (tags.length > 0) {
-      tags.forEach(function(tag) {
-        var listItem = document.createElement("li");
-        listItem.textContent = tag;
-        tagList.appendChild(listItem);
-      });
-
-      tagList.style.display = "block";
-    } else {
-      tagList.style.display = "none";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function() {
-    var searchInput = document.getElementById("search-input");
-    var searchButton = document.getElementById("search-button");
-
-    searchButton.addEventListener("click", function() {
-      var searchText = searchInput.value.trim();
-
-      if (searchText !== "") {
-        var matchingTags = tags.filter(function(tag) {
-          return tag.includes(searchText);
-        });
-
-        populateTagList(matchingTags);
-      }
-    });
-
-    searchInput.addEventListener("input", function() {
-      var searchText = searchInput.value.trim();
-
-      if (searchText === "") {
-        dropdownMenu.style.display = "none";
-        dropdownMenu.innerHTML = "";
-      } else {
-        var matchingTags = tags.filter(function(tag) {
-          return tag.includes(searchText);
-        });
-
-        populateDropdownMenu(matchingTags);
-      }
-    });
-  });
+});
+search.config.compilerOptions.delimiters = ['[[', ']]'];
+search.mount('#app')
