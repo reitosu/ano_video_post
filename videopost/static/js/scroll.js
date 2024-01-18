@@ -6,6 +6,29 @@ const pagenationNumber = 5
 
 const infiniteScroll = createApp({
   setup() {
+    const 
+    timer = ref(null),
+    fadeUpFlag = ref(false),
+    fadeDownFlag = ref(false),
+    fadeUp = () => {
+      document.querySelector('video').addEventListener('loadeddata', fadeDown)
+      setTimeout(() => {
+        fadeUpFlag.value = true
+        timer.value = setTimeout(() => {
+          fadeDownFlag.value = false
+          timer.value = undefined
+          if (fadeDownFlag.value) {
+            fadeDown()
+          }
+        }, 2000)
+      },1000)
+    },
+    fadeDown = () => {
+      if (!timer.value && fadeUpFlag.value) {
+        fadeDownFlag.value = true
+      }
+    }
+
     const
       dataList = ref([]),
       blobVideos = reactive([]),
@@ -54,13 +77,13 @@ const infiniteScroll = createApp({
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       onSwipe()
       await addVideos()
+      fadeUp()
       console.log(videoElementVisibilities)
       console.log(dataList.value)
     });
 
 
-    const start_Window = ref(0)
-
+    const loadingFlag = ref(true)
 
     const tutorialFlag = ref(true)
     const onTutorialClick = () => {
@@ -92,11 +115,7 @@ const infiniteScroll = createApp({
     const menu = ref()
     const movementRatio = ref(100)
     const menuMoveFrag = ref("close")
-<<<<<<< HEAD
-    const MenuOpenlimit = 0
-=======
     const MenuOpenlimit = 50
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
 
     const onSwipe = () => {
       const onTouchStart = (event) => {
@@ -179,18 +198,15 @@ const infiniteScroll = createApp({
     }
 
     return {
-      start_Window,
-      tutorialFlag,
-      onTutorialClick,
-      fetchVideos,
-      loadElement,
+      fadeUpFlag,
+      fadeDownFlag,
+      loadingFlag,
       tutorialFlag,
       onTutorialClick,
       dataList,
       blobVideos,
       toggle,
       container,
-      ifLoad,
       menu,
     }
   }

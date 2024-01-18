@@ -7,11 +7,7 @@ import { aes_gcm_encrypt, aes_gcm_decrypt } from "./aescrypt.js"
 
 const account = createApp({
     setup() {
-<<<<<<< HEAD
-        const canshare = ref("teststs")
-=======
         const { share, isSupported } = useShare()
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
         const shareLink = async (event) => {
             event.preventDefault()
             const data = {
@@ -21,45 +17,11 @@ const account = createApp({
             }
             share(data)
         }
-<<<<<<< HEAD
-        useEventListener(document, 'contextmenu', event => {
-            event.preventDefault()
-        })
-        useEventListener(document, 'click', function (event) {
-            console.log("click", event.target)
-            const videos = Array.from(document.querySelectorAll("video"))
-            if (videos.length !== videoElements.length) {
-                const result = videos.filter(ele => !videoElements.includes(ele));
-                result.forEach(ele => {
-                    ele.remove()
-                })
-            }
-            var target = event.target;
-            if (target.tagName.toLowerCase() === 'a' && target.getAttribute("download") !== null) {
-                event.preventDefault();
-                console.log(target.getAttribute("download"))
-                alert('ダウンロードは禁止されています。');
-            }
-        })
-        const
-            videoElements = reactive([]),
-            observerOptions = { childList: false, attributes: true },
-            videoAttributeObserver = new MutationObserver((mutationList, observer) => {
-                mutationList.forEach(mutation => {
-                    console.log(mutation)
-                    const attrName = mutation.attributeName
-                    if (mutation.type === "attributes" && !["class", "id", "src"].includes(attrName)) {
-                        mutation.target.removeAttribute(attrName)
-                    }
-                })
-            })
-=======
         const videoElements = ref([])
         restrictContextMenu()
         restrictDownload()
         restrictAddVideoElement(videoElements)
         restrictAddAttribute(videoElements)
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
 
         const
             csrf = ref(),

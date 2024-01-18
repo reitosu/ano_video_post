@@ -2,25 +2,18 @@ body {
   overflow: hidden;
 }
 
-<<<<<<< HEAD
 
-.start {
+/* .loading {
     position: absolute;
-    background-color: ivory;
-    top: 0;
-    left: 0;
+    background-color: gray;
+    top: auto;
+    left: auto;
     width: 100%;
     height: 100%;
     background-size: cover;
     z-index: 999999999;
-}
-
-
-
-
-
-=======
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
+} */
+@media screen and (max-width: 768px) {
 .tutorial {
   position: absolute;
   background-color: gray;
@@ -118,12 +111,13 @@ body {
   height: 2px;
   background: #eee;
 }
+}
 
 .infinite-container {
   scroll-behavior: smooth;
   width: 100%;
   height: 100%;
-  overflow-y: hidden;
+  overflow-y: scroll;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
   position: relative;
@@ -168,12 +162,11 @@ body {
 }
 
 #leftMenu {
-<<<<<<< HEAD
     position: fixed;
     display: flex;
     height: 97%;
     width: 75%;
-    left: 25%;
+    left: 100%;
     top: 50%;
     transform: translateY(-50%);
     background-color: darkgray;
@@ -186,28 +179,94 @@ body {
     padding: 0.5%;
     box-sizing: border-box;
     overflow: hidden;
-=======
-  position: fixed;
-  height: 97%;
-  width: 48%;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: darkgray;
-  z-index: 9999;
-  border: 2px solid black;
-  border-radius: 10px;
-  /* display: flex; */
-  flex-direction: column;
-  justify-content: space-between;
+}
+#good {
+  position: relative;
+  float: left;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   align-items: center;
-  padding: 0.5%;
-  box-sizing: border-box;
-  overflow: hidden;
-  transition: 0.5s;
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
 }
 
+#share {
+  position: relative;
+  float: right;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  align-items: center;
+}
+
+
+#menuContainer {
+  position: relative;
+  height: 96%;
+  width: 98%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%)
+}
+
+#relations {
+  height: 80%;
+  border: 2px solid black;
+  margin-bottom: 0.3%;
+}
+
+#tags {
+  height: 10%;
+  border: 2px solid black;
+}
+#description {
+  height: 10%;
+  border: 2px solid black;
+  margin-top: auto;
+  border: #1da1f2;
+}
+
+#buttons {
+  height: 10%;
+  border: 2px solid black;
+  margin-top: 0.3%;
+  display: flex;
+  justify-content: space-around;
+}
+#buttton {
+    height: 10%;
+    border: 2px solid black;
+    margin-top: 0.3%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.serch {
+  position: relative;
+  z-index: 1;
+}
+
+.serch img {
+  width: 100%;
+  height: 100%;
+}
+
+.edit {
+  position: relative;
+  z-index: 1;
+}
+
+.edit img {
+  width: 100%;
+  height: 100%;
+}
+
+.delete {
+  position: relative;
+  z-index: 1;
+}
+
+@media screen and (max-width: 768px) {
 .menuInTutorial {
   animation: leftMenuOpen 1.5s ease-in-out infinite;
 }
@@ -265,6 +324,12 @@ body {
   height: 10%;
   border: 2px solid black;
 }
+#description {
+  height: 10%;
+  border: 2px solid black;
+  margin-top: auto;
+  border: #1da1f2;
+}
 
 #buttons {
   height: 10%;
@@ -273,11 +338,12 @@ body {
   display: flex;
   justify-content: space-around;
 }
-buttton {
+#buttton {
     height: 10%;
     border: 2px solid black;
     margin-top: 0.3%;
     display: flex;
+    align-items: center;
     justify-content: space-around;
 }
 
@@ -305,19 +371,6 @@ buttton {
   position: relative;
   z-index: 1;
 }
-
-/* body {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100vh;
-  background-color: #16161d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-} */
-
 .rippless_btn {
   padding: 0;
   margin: auto;
@@ -373,6 +426,21 @@ buttton {
     opacity: 0;
   }
 }
+}
+
+/* body {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  background-color: #16161d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+
 
 /*パソコン画面の設定*/
 @media screen and (min-width: 768px) {
@@ -454,7 +522,7 @@ buttton {
     animation: slideIn 0.3s ease 0s 1 normal forwards;
   }
 
-  .rippless_btn {
+  /* .rippless_btn {
     padding: 0;
     margin: auto;
     box-sizing: border-box;
@@ -485,7 +553,7 @@ buttton {
     left: 0;
     right: 0;
     margin: auto;
-    width: 100%;
+    width: 80%;
     height: 100%;
     border: 1px solid #1da1f2;
     border-radius: 50%;
@@ -508,7 +576,7 @@ buttton {
       transform: scale(2);
       opacity: 0;
     }
-  }
+  } */
 
   #leftMenu {
     position: fixed;
@@ -585,22 +653,102 @@ buttton {
   }
 }
 
-@media screen and (min-width: 500px) {
-
-  #leftMenu {
-    width: 40%;
-    left: 100%;
-    top: 50%;
-    /* transform: translateY(-50%); */
-  }
-
-  #menuContainer {
-    height: 96%;
-    width: 98%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%)
-  }
-
-
+/* ローディング画面 */
+/* .loading {
+  width: 100vw;
+  height: 100vh;
+  transition: all 1s;
+  background-color: #0bd;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999999;
 }
+.spinner {
+  width: 100px;
+  height: 100px;
+  margin: 200px auto;
+  background-color: #fff;
+  border-radius: 100%;
+  animation: sk-scaleout 1.0s infinite ease-in-out;
+} */
+/* ローディングアニメーション */
+/* @keyframes sk-scaleout {
+  0% {
+    transform: scale(0);
+  } 100% {
+    transform: scale(1.0);
+    opacity: 0;
+  }
+}
+.loaded {
+  opacity: 0;
+  visibility: hidden;
+}
+.loading_pic {
+
+  width: auto;
+  height: 30%;
+} */
+
+
+/* Loading背景画面設定　*/
+#splash {
+  /*fixedで全面に固定*/
+    flex-direction: column;
+    justify-content: space-evenly;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 999999999;
+    background:#c0c0c0;
+    text-align:center;
+    color:#fff;
+  }
+  
+  /* Loading画像中央配置　*/
+  #splash_logo {
+    width: 100%;
+  }
+  /* #splash_icon {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  } */
+  
+  /* Loading アイコンの大きさ設定　*/
+  #splash {
+    transition: 1s ease-in-out;
+    display: flex;
+  }
+  #splash_logo img {
+    transform: translateY(100%);
+    top: 30%;
+    width:100%;
+    opacity: 0;
+    transition: 1s ease-in-out;
+  }
+
+  .fadeUp{
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  .fadeDown {
+    opacity: 0 !important;
+    transform: scale(0);
+    border-radius: 50%;
+  }
+  #loader {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .loaded {
+    opacity: 0;
+    visibility: hidden;
+  }

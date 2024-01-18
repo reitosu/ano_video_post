@@ -20,18 +20,24 @@
   </head>
   <body>
 
-<<<<<<< HEAD
+
     <div id="scroll">
-
-
-      <div class="loading">
-        
+      <div id="splash" :class="{'fadeDown': fadeDownFlag}">
+        <div id="splash_logo">
+          <img src="{% static 'images/header.svg'%}" alt="" :class="{'fadeUp' : fadeUpFlag}">
+        </div>
+        <div id="loader" :class="{'fadeUp' : fadeUpFlag}">
+          {% include "loader.html" %}
+        </div>
       </div>
 
+      <div id="wrapper">
 
-
-
-
+      {% comment %} <div class="loading">
+        <img src="{% static 'images/header.svg'%}" alt="loading_pic">
+        <div class="spinner"></div>
+        
+      </div> {% endcomment %}
       <div class="tutorial" v-if="tutorialFlag" @click.stop="onTutorialClick">
         <div class="scrolldown2">
           {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
@@ -42,71 +48,57 @@
       </div>
 
 
-      <div>
-        <div ref="loadElement" data-video="{{ videos }}"></div>
-=======
-    <div id="scroll">    
-      <div class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
-        <div class="scrolldown2">
-          {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
-        </div>
-          <div class="rippless_btn">
-            <div></div>
-          </div>
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
-      </div>
+        <div id="fixed">
+          <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
+            <div id="menuContainer">
+              
+              <div id="header">
 
-      <div id="fixed">
-        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
-          <div id="menuContainer">
-<<<<<<< HEAD
-            
-            <div id="header">
-
-              <div class="logo">
-                <img src="{% static 'images/header.svg'%}" alt="ロゴ">
-              </div>
-              </div>
-              <div id="trade">
-                <img src="{% static 'images/NFTgraph.png'%}" alt="tests">
-              </div>
-              <div id="info">info</div>
-
-              <div id="buttton">
-                <div id="good">
-                  <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
+                <div class="logo">
+                  <img src="{% static 'images/main_text.svg'%}" alt="ロゴ">
                 </div>
-                <div id="share">
-                  <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" alt="share"></a>
+
+                <div class="description">
+                  <p>description</p>
                 </div>
+
+                </div>
+                {% comment %} <div id="trade">
+                  <img src="{% static 'images/NFTgraph.png'%}" alt="tests">
+                </div> {% endcomment %}
+
+                <div id="info">info</div>
+
+                <div id="buttton">
+                  <div id="good">
+                    <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
+                  </div>
+
+                  <div id="share">
+                    <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" alt="share"></a>
+                  </div>
+
+                </div>
+
               </div>
+
+              <div id="buttons">
+
+                <div class="serch">
+                  <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
+                </div>
+
+                <div class="edit">
+                  <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
+                  <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
+                </div>
+                
+              </div>
+
             </div>
-=======
-            <div id="header"></div>
-            <div id="tags"></div>
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
-            <div id="buttons">
-              <div class="serch">
-                <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
-              </div>
-              <div class="edit">
-                <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
-                <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
-              </div>
-            </div>
-          </div>
         </div>
-<<<<<<< HEAD
-
-
-      {% comment %} <button class="next-video" @click="nextVideo">次の動画</button>
-      <button class="prev-video" @click="prevVideo">前の動画</button> {% endcomment %}
-      <div class="infinite-container" id="container" ref="container" @wheel="onWheel" @scrollend="ifLoad">
-=======
-      </div>
       
       <div class="infinite-container" id="container" ref="container">
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
         <!--動画要素の表示-->
         <div v-for="(video,index) in dataList" class="infinite-item">
           <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
@@ -119,12 +111,9 @@
             <div class="overlay"></div>
         </section>
         {% endfor %} {% endcomment %}
-<<<<<<< HEAD
-      </div>
-=======
->>>>>>> d924df4938e1247215462628e9745f3656fbcda8
       </div>
 
     </div>
-  </body>
+    </div>
+ </body>
 </html>
