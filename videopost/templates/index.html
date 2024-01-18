@@ -6,7 +6,7 @@
     <link rel="icon" href="{% static 'images/main-logo.svg' %}">
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
@@ -20,6 +20,7 @@
   </head>
   <body>
 
+<<<<<<< HEAD
 
     <div id="scroll">
       <div id="splash" :class="{'fadeDown': fadeDownFlag}">
@@ -100,9 +101,44 @@
       
       <div class="infinite-container" id="container" ref="container">
         <!--動画要素の表示-->
-        <div v-for="(video,index) in dataList" class="infinite-item">
-          <video playsinline :src="blobVideos[index]" height="100%" autoplay></video>
+=======
+    <div id="scroll">
+      <div>
+        <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement"></div>
+      </div>
+
+      <section class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
+        <div class="scrolldown2">
         </div>
+          <div class="rippless_btn">
+            <div></div>
+          </div>
+      </section>
+      
+      <section id="fixed">
+        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag, 'menuTransition': transitionFlag }" ref="menu" :style="{right: menuRight+'%', opacity: menuOpacity}">
+          <div id="menuContainer">
+            <div id="header"></div>
+            <div id="tags"></div>
+            <div id="buttons">
+              <div class="serch">
+                <a href="{% url 'videopost:search' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
+              </div>
+              <div class="edit">
+                <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
+                <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section class="infinite-container" id="container" ref="container">
+>>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
+        <div v-for="(video,index) in dataList" class="infinite-item">
+          <video playsinline :src="blobVideos[index]" height="100%" autoplay loop @click.prevent="togglePlayAndGood"></video>
+        </div>
+<<<<<<< HEAD
         {% comment %} {% comment %} {% for video in object_list %}
         <section class="infinite-item">
             <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
@@ -112,6 +148,9 @@
         </section>
         {% endfor %} {% endcomment %}
       </div>
+=======
+      </section>
+>>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
 
     </div>
     </div>

@@ -1,5 +1,5 @@
 const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
-const { useIntervalFn } = VueUse;
+const { useIntervalFn, useMediaControls } = VueUse;
 import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
@@ -26,19 +26,31 @@ const check = createApp({
         const loadDraft = (event) => {
             console.log(event)
             if (event.detail.result.select === "復元") {
-                console.log(draft.value)
-                const beforeWidth = draft.value.position.timelineWidth
-                tags.value = draft.value.tags
-                videoSrc.value = draft.value.video
+                console.log(draftData.value)
+                const beforeWidth = draftData.value.position.timelineWidth
+                tags.value = draftData.value.tags
+                videoSrc.value = draftData.value.video
+                let ratio = 1
                 if (timelineWidth.value != beforeWidth) {
-                    const ratio = timelineWidth.value / beforeWidth
-                    materialLeft.value = draft.value.position.materialLeft * ratio
-                    materialWidth.value = draft.value.position.materialWidth * ratio
+                    ratio = timelineWidth.value / beforeWidth
+                }
+                materialLeft.value = draftData.value.position.materialLeft * ratio
+                materialWidth.value = draftData.value.position.materialWidth * ratio
+                if (materialLeft.value > 5) {
+                    currentTimePosition.value = ((materialLeft.value - 5) / timelineWidth.value) * 100
                 }
             }
         }
 
-        const draft = ref()
+        const
+            draftElement = ref(undefined),
+            draftData = computed(() => {
+                if (draftElement.value) {
+                    console.log(JSON.parse(draftElement.value.getAttribute("data-draft")))
+                    return JSON.parse(draftElement.value.getAttribute("data-draft"))
+                }
+                else return undefined
+            })
         const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["復元", "閉じる"] })
 
         onMounted(() => {
@@ -48,15 +60,18 @@ const check = createApp({
             axios.defaults.xsrfCookieName = 'csrftoken'
             axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
             console.log(document.querySelector("#draft").getAttribute("data-draft"))
-            draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
-            console.log(draft.value)
             const width = timelineElement.value.clientWidth
             timelineWidth.value = width
-            materialWidth.value = width
-            if (draft.value.video) {
+            if (draftData.value.video) {
                 openModal()
                 document.addEventListener("result", loadDraft)
             }
+            // draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
+            // console.log(draft.value)
+            // if (draft.value.video) {
+            //     openModal()
+            //     document.addEventListener("result", loadDraft)
+            // }
             pause()
         });
 
@@ -70,17 +85,19 @@ const check = createApp({
             tags.value.splice(index, 1)
         }
 
-        const videoPreview = ref()
-        const videoSrc = ref()
-        const displayCurrentTime = reactive({ "current": "0.0", "duration": "0.0" })
-        const roundBase = ref(10)
+        const
+            videoPreview = ref(),
+            videoSrc = ref(),
+            videoControls = ref({ ...useMediaControls(videoPreview, { src: videoSrc }) }),
+            duration = computed(() => { return videoControls.value.duration }),
+            displayCurrentTime = reactive({ "current": "0.0", "duration": "0.0" }),
+            roundBase = ref(10)
 
         const selectVideo = (event) => {
             console.log(event.target.files[0])
             const selected = event.target.files[0]
             const formData = new FormData();
             formData.append('videoData', selected, 'video.mp4');
-            formData.append('userId', localStorage.getItem("userId"))
             axios({
                 method: 'POST',
                 url: '/videopost/vpost/',
@@ -91,6 +108,8 @@ const check = createApp({
                     console.log('sucsess')
                     const path = response.data.path
                     videoSrc.value = path + '?t=' + Date.now()
+                    materialWidth.value = timelineWidth.value
+                    console.log(videoControls.value)
                 }).catch(error => console.log('動画ファイルの読み込みに失敗しました。: ', error))
         }
 
@@ -179,7 +198,6 @@ const check = createApp({
                 console.log(currentTime.value)
                 videoPreview.value.currentTime = currentTime.value
                 displayCurrentTime.current = currentTime.value
-                videoPreview.value.currentTime = currentTime.value
             }
             const onMouseUp = () => {
                 window.removeEventListener("mousemove", onMouseMove)
@@ -193,7 +211,7 @@ const check = createApp({
         }
 
         const material = ref()
-        const materialWidth = ref()
+        const materialWidth = ref(0)
         const materialLeft = ref(5)
         const leftHandle = ref()
         const rightHandle = ref()
@@ -211,11 +229,14 @@ const check = createApp({
                 console.log(currentTimePosition.value, materialLeftRatio, materialRightRatio)
                 if (currentTimePosition.value <= materialLeftRatio) {
                     currentTimePosition.value = materialLeftRatio
+                    console.log(currentTime.value)
                     videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
                 else if (currentTimePosition.value >= materialRightRatio) {
                     currentTimePosition.value = materialRightRatio
                     videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
             }
             const onMouseUp = () => {
@@ -258,6 +279,7 @@ const check = createApp({
                 if (current <= materialLeft.value || current >= materialLeft.value + materialWidth.value) {
                     currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
                     videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
             }
             else if (next.direction == "r" && timelineRight >= materialLeft.value + materialWidth.value + amountX) {
@@ -265,6 +287,7 @@ const check = createApp({
                 if (current >= materialLeft.value + materialWidth.value) {
                     currentTimePosition.value = ((materialLeft.value - timelineLeft.value + materialWidth.value) / timelineWidth.value) * 100
                     videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
             }
         }
@@ -376,6 +399,7 @@ const check = createApp({
             togglelastcheck,
             results,
             loadDraft,
+            draftElement,
             tags,
             tagsWidth,
             tagDelete,

@@ -2,6 +2,10 @@
     display: none;
 }
 
+body {
+    user-select: none;
+}
+
 body::-webkit-scrollbar {
     display: none;
 }
