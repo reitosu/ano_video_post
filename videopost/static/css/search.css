@@ -35,50 +35,6 @@
     margin-right: 6px;
 }
 
-.search-tag {
-    display: flex;
-    margin: 0 .1em .6em 0;
-    padding: .6em;
-    line-height: 1;
-    color: #fff;
-    text-decoration: none;
-    background-color: #222;
-    border-radius: 2em 0 0 2em;
-}
-
-#tag-before {
-    color: white;
-    width: 1em;
-    height: 1em;
-    position: relative;
-    margin-right: 0.3em;
-    transition: .3s;
-}
-
-.icon-circle {
-    background-color: white;
-    border-radius: 50%;
-}
-
-.icon-close:before,
-.icon-close:after {
-    content: "";
-    position: absolute;
-    top: 0.45em;
-    width: 1em;
-    height: 3px;
-    background-color: currentColor;
-}
-
-.icon-close:before {
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-}
-
-.icon-close:after {
-    -webkit-transform: rotate(45deg);
-    transform: rotate(45deg);
-}
 
 .searchButton {
     display: flex;

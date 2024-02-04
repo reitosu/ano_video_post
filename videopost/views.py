@@ -114,7 +114,7 @@ def pagenate_video_query(request):
 
 class SerchView(ListView):
     model = Tag
-    template_name = 'serch.html'
+    template_name = 'search.html'
     context_object_name = 'tags'
 
     def get_context_data(self, **kwargs):

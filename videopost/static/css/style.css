@@ -4,7 +4,6 @@ body {
   background-color: black;
 }
 
-<<<<<<< HEAD
 
 /* .loading {
     position: absolute;
@@ -17,8 +16,6 @@ body {
     z-index: 999999999;
 } */
 @media screen and (max-width: 768px) {
-=======
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
 .tutorial {
   position: absolute;
   background-color: gray;
@@ -169,14 +166,12 @@ body {
 }
 
 #leftMenu {
-<<<<<<< HEAD
     position: fixed;
     display: flex;
     height: 97%;
-    width: 75%;
-    left: 100%;
+    width: 73%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(100%, -50%);
     background-color: darkgray;
     z-index: 9999;
     border: 2px solid black;
@@ -188,14 +183,17 @@ body {
     box-sizing: border-box;
     overflow: hidden;
 }
+/* div#header {
+  font: small-caps bold 20px cursive;
+} */
 #good {
-  position: relative;
-  float: left;
+  /* position: relative; */
+  /* float: left; */
   width: 50px;
-  height: 50px;
+  margin: 10px;
+  /* height: 50px;
   border-radius: 50%;
   align-items: center;
-=======
   position: fixed;
   height: 97%;
   width: 73%;
@@ -207,9 +205,9 @@ body {
   border: 2px solid black;
   border-radius: 10px;
   /* display: flex; */
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+  /* flex-direction: column; */
+  /* justify-content: space-between;
+  align-items: center; */
   padding: 0.5%;
   box-sizing: border-box;
   overflow: hidden;
@@ -217,16 +215,21 @@ body {
 
 .menuTransition {
   transition: right .4s ease-out, opacity .3s ease-in-out;
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
 }
 
 #share {
+  bottom: 65px;
   position: relative;
   float: right;
+  right: 3em;
   width: 50px;
   height: 50px;
+  margin: 10px;
   border-radius: 50%;
-  align-items: center;
+  /* align-items: center; */
+}
+div#header {
+  background-color: blanchedalmond;
 }
 
 
@@ -249,27 +252,99 @@ body {
   height: 10%;
   border: 2px solid black;
 }
-#description {
-  height: 10%;
+.description {
+  position: relative;
+  bottom: 60px;
   border: 2px solid black;
-  margin-top: auto;
-  border: #1da1f2;
+  border-radius: 10px;
+  height: 100px;
+}
+p.des {
+  text-align: center;
 }
 
-#buttons {
-  height: 10%;
-  border: 2px solid black;
-  margin-top: 0.3%;
-  display: flex;
-  justify-content: space-around;
+.logo {
+  margin: 0 auto;
+  position: relative;
+  bottom: 50px;
 }
-#buttton {
+
+#pbutton {
+  display: flex;
+}
+.transaction {
+  position: relative;
+  height: 10%;
+  /* border: 2px solid black; */
+  /* margin-top: auto; */
+  /* margin: 30px; */
+  bottom: 70px;
+  border-radius: 10px;
+}
+
+.price {
+  position: relative;
+  top: 10px;
+  left: 5px;
+  /* height: 10%;
+  border: 2px solid black;
+  margin-top: auto;
+  border: #1da1f2; */
+}
+p.by_txt {
+  float: left;
+  /* text-align: end; */
+}
+.buy {
+  position: relative;
+  /* left: 180px; */
+  bottom: 20px;
+  float: right;
+
+}
+/* .description {
+  position: relative;
+  bottom: 60px;
+  border: 2px solid black;
+  border-radius: 10px;
+  height: 200px;
+} */
+
+
+.title_message {
+  font-size: larger;
+  /* text-align: center; */
+}
+.description_message {
+  font-size: medium;
+}
+.uploaded_date {
+  font-size: medium;
+  text-align: center;
+}
+
+.info {
+  position: relative;
+  /* border: 2px solid black;
+  border-radius: 10px; */
+  /* height: 100px; */
+  bottom: 7em;
+  margin: 10%;
+}
+p#info_name {
+  text-align: center;
+}
+/* #buttton {
     height: 10%;
     border: 2px solid black;
     margin-top: 0.3%;
     display: flex;
     align-items: center;
     justify-content: space-around;
+} */
+h3 {
+  /* text-align: center; */
+  font-size: 30px;
 }
 
 .serch {
@@ -340,31 +415,45 @@ body {
   height: 10%;
   border: 2px solid black;
 }
+img.buy_icon {
+  width: 30px;
+}
 #description {
   height: 10%;
   border: 2px solid black;
   margin-top: auto;
-  border: #1da1f2;
 }
 
 #buttons {
+  position: fixed;
+  /* top: 200px; */
+  bottom: 1px;
   height: 10%;
+  width: 100%;
   border: 2px solid black;
   margin-top: 0.3%;
+  align-items: center;
   display: flex;
   justify-content: space-around;
 }
-<<<<<<< HEAD
 #buttton {
-    height: 10%;
-    border: 2px solid black;
-    margin-top: 0.3%;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+  position: relative;
+  /* display: flex; */
+  bottom: 8em;
+  width: 100%;
+  /* border: 2px solid black; */
+  border-radius: 30px;
+  margin: 10%;
+  /* margin-top: 0.3%; */
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: space-around; */
 }
-=======
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
+#ug {
+  display: flex;
+  flex-flow: column;
+  position: relative;
+}
 
 .serch {
   position: relative;
@@ -617,6 +706,7 @@ body {
   }
 
 
+
   #menuContainer {
     position: relative;
     height: 96%;
@@ -637,13 +727,13 @@ body {
     border: 2px solid black;
   }
 
-  #buttons {
+  /* #buttons {
     height: 10%;
     border: 2px solid black;
     margin-top: 0.3%;
     display: flex;
     justify-content: space-around;
-  }
+  } */
 
   .serch {
     position: relative;
@@ -671,7 +761,6 @@ body {
   }
 }
 
-<<<<<<< HEAD
 /* ローディング画面 */
 /* .loading {
   width: 100vw;
@@ -698,14 +787,6 @@ body {
   } 100% {
     transform: scale(1.0);
     opacity: 0;
-=======
-@media screen and (min-width: 500px) {
-
-  #leftMenu {
-    width: 40%;
-    top: 50%;
-    /* transform: translateY(-50%); */
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
   }
 }
 .loaded {
@@ -722,15 +803,15 @@ body {
 /* Loading背景画面設定　*/
 #splash {
   /*fixedで全面に固定*/
-    flex-direction: column;
-    justify-content: space-evenly;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 999999999;
-    background:#c0c0c0;
-    text-align:center;
-    color:#fff;
+  flex-direction: column;
+  justify-content: space-evenly;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 999999999;
+  background:#c0c0c0;
+  text-align:center;
+  color:#fff;
   }
   
   /* Loading画像中央配置　*/

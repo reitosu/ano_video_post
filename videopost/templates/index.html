@@ -6,7 +6,8 @@
     <link rel="icon" href="{% static 'images/main-logo.svg' %}">
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tag.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'css/loader.css' %}"> {% endcomment %}
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
@@ -20,9 +21,11 @@
   </head>
   <body>
 
-<<<<<<< HEAD
 
     <div id="scroll">
+      <div>
+        <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement"></div>
+      </div>
       <div id="splash" :class="{'fadeDown': fadeDownFlag}">
         <div id="splash_logo">
           <img src="{% static 'images/header.svg'%}" alt="" :class="{'fadeUp' : fadeUpFlag}">
@@ -50,95 +53,112 @@
 
 
         <div id="fixed">
-          <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag }" ref="menu">
+          <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag, 'menuTransition': transitionFlag }" ref="menu" :style="{right: menuRight+'%', opacity: menuOpacity}">
             <div id="menuContainer">
+              <div class="logo">
+                <img src="{% static 'images/main_text.svg'%}" alt="ロゴ">
+              </div>
               
               <div id="header">
 
-                <div class="logo">
-                  <img src="{% static 'images/main_text.svg'%}" alt="ロゴ">
-                </div>
 
-                <div class="description">
-                  <p>description</p>
-                </div>
 
-                </div>
+
+                  <div class="transaction">
+                    <div class="price">
+                      <h3>price</h3>
+
+                    </div>
+                      <div class="buy">
+                        <p v-if="dataList[currentVideoIndex].price" class="by_txt">[[ dataList[currentVideoIndex].price ]]</p>
+                        <p v-else class="by_txt">無し</p>
+                        <img src="{% static 'images/buy_icon.png'%}" class="buy_icon" alt="buy">
+                      </div>
+                    </div>
+
+                    <div class="info">
+                      {% comment %} <p id="info_name">info</p> {% endcomment %}
+                      <h3>title</h3>
+                      <div class="title_message">
+                        <p v-if="dataList[currentVideoIndex].title">[[ dataList[currentVideoIndex].title ]]</p>
+                        <p v-else>無し</p>
+                      </div>
+                      <h3>description</h3>
+                      <div class="description_message">
+                        <p v-if="dataList[currentVideoIndex].description">[[ dataList[currentVideoIndex].description ]]</p>
+                        <p v-else>無し</p>
+                      </div>
+                      {% comment %} <p>[[ dataList[currentVideoIndex].video]]</p> {% endcomment %}
+
+                      
+                    </div>
+
+
+
+
                 {% comment %} <div id="trade">
                   <img src="{% static 'images/NFTgraph.png'%}" alt="tests">
                 </div> {% endcomment %}
+                <div class="trade" >
+                    <div id="buttton">
+                        <div id="good">
+                          <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
+                        </div>
 
-                <div id="info">info</div>
+                        <div id="share">
+                          <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" @Click="shareLink" alt="share"></a>
+                        </div>
 
-                <div id="buttton">
-                  <div id="good">
-                    <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
-                  </div>
+                    
+                    <div id="ug">
+                      <h3>upload</h3>
+                      <div class="uploaded_date">
+                        <p v-if="dataList[currentVideoIndex].uploaded">
+                          [[
+                            new Date(dataList[currentVideoIndex].uploaded).toLocaleString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo'})
+                          ]]
+                        </p>
+                        <p v-else>無し</p>
+                      </div>
+      
+                      <h3>tags</h3>
+                      <div class="tags_message">
+                        <div v-if="dataList[currentVideoIndex].tags.length">
+                          <p class="search-tag" v-for="tag in dataList[currentVideoIndex].tags">
+                            <div id="tag-before" @click="deleteTag(tag)" class="icon-circle"></div>
+                            [[ tag ]]
+                          </p>
+                        </div>
+                        <p v-else>無し</p>
+                      </div>
 
-                  <div id="share">
-                    <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" alt="share"></a>
-                  </div>
-
+                    </div>
+                    
+                    </div>
                 </div>
-
               </div>
+                <div id="buttons">
 
-              <div id="buttons">
+                  <div class="serch">
+                    <a href="{% url 'videopost:search' %}"><img src="{% static 'images/search_icon.png'%}" alt="検索"></a>
+                  </div>
 
-                <div class="serch">
-                  <a href="{% url 'videopost:serch' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
+                  <div class="edit">
+                    <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
+                    <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
+                  </div>
                 </div>
-
-                <div class="edit">
-                  <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
-                  <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
-                </div>
+              
                 
-              </div>
 
             </div>
         </div>
       
       <div class="infinite-container" id="container" ref="container">
         <!--動画要素の表示-->
-=======
-    <div id="scroll">
-      <div>
-        <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement"></div>
-      </div>
-
-      <section class="tutorial" v-if="tutorialFlag" @click="onTutorialClick">
-        <div class="scrolldown2">
-        </div>
-          <div class="rippless_btn">
-            <div></div>
-          </div>
-      </section>
-      
-      <section id="fixed">
-        <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag, 'menuTransition': transitionFlag }" ref="menu" :style="{right: menuRight+'%', opacity: menuOpacity}">
-          <div id="menuContainer">
-            <div id="header"></div>
-            <div id="tags"></div>
-            <div id="buttons">
-              <div class="serch">
-                <a href="{% url 'videopost:search' %}"><img src="{% static 'images/serch.png'%}" alt="検索"></a>
-              </div>
-              <div class="edit">
-                <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
-                <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      <section class="infinite-container" id="container" ref="container">
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
         <div v-for="(video,index) in dataList" class="infinite-item">
           <video playsinline :src="blobVideos[index]" height="100%" autoplay loop @click.prevent="togglePlayAndGood"></video>
         </div>
-<<<<<<< HEAD
         {% comment %} {% comment %} {% for video in object_list %}
         <section class="infinite-item">
             <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
@@ -148,10 +168,6 @@
         </section>
         {% endfor %} {% endcomment %}
       </div>
-=======
-      </section>
->>>>>>> e88fedae44b531c592f70d3b2e0947e9b7ab370a
-
     </div>
     </div>
  </body>

@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <title>サンプルページ</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
+    <link rel="stylesheet" href="{% static 'css/tag.css' %}">
+    <link rel="stylesheet" href="{% static 'css/search.css' %}">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@vueuse/shared"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="{% static 'js/search.js' %}" defer></script>
+  </head>
+
+  <body>
+    <div id="app" v-cloak>
+      <div>
+        <div data-tags="{{ tags }}" ref="loadElement"></div>
+      </div>
+
+      <section id="searchContainer">
+        <div id="fuzzySearch">
+          <div style="display:flex;">
+            <div class="tag-input-wrapper" style="overflow: hidden;">
+              <input type="search" v-model="inputTag" id="tagInput" ref="tagInputElement">
+            </div>
+            <button @click="addSearchTag">add</button>
+          </div>
+          <ul id="searchPrediction" @click.stop="predict">
+            <li v-for="history in historys" v-show="inputTag"><div id="historyMark"></div>[[ history ]]</li>
+            <li v-for="tag in results">[[ tag.item ]]</li>
+          </ul>
+        </div>
+      </section>
+
+      <section style="display: flex;">
+        <div class="search-tag" v-for="tag in searchTags" @click="toggleTagBefore(tag)">
+          <div id="tag-before" @click="deleteTag(tag)" :class="{'icon-close': tag.flag, 'icon-circle': !tag.flag}"></div>
+          [[ tag.name ]]
+        </div>
+      </section>
+
+      <section class="searchButton">
+        <form action="{% url 'videopost:index' %}" method="get" ref="form">
+          <input type="hidden" v-for="tag in searchTags" :value="tag.name" name="tag"></input>
+        </form>
+        <button @click.prevent="search">検索</button>
+      </section>
+
+    </div>
+  </body>
+</html>
