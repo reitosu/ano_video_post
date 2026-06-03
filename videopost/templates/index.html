@@ -63,11 +63,12 @@
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Lucide Icons CDN: defer + scroll.js より前に置き、実行順を明示
+         defer 同士は DOM 順に実行されるため Lucide → scroll.js の順が保証される -->
+    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
     <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
-    <!-- Lucide Icons CDN（UMDビルドを明示指定して window.lucide を生成） -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <title>トップページ</title>
   </head>
   <body class="bg-ano-bg font-inter overflow-hidden">

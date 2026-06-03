@@ -93,7 +93,7 @@ const infiniteScroll = createApp({
             }
           })
           // v-for で追加された <i data-lucide> タグをアイコンに変換
-          if (typeof lucide !== 'undefined') lucide.createIcons()
+          if (window.lucide) window.lucide.createIcons()
           console.log(videoElementVisibilities)
         }, 1000)
       },
@@ -121,7 +121,7 @@ const infiniteScroll = createApp({
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       await addVideos()
       await nextTick()  // v-for による <video> 要素の DOM 反映を待つ
-      lucide.createIcons()  // サイドバー・ボトムナビ・初回 v-for アイテムのアイコンを描画
+      if (window.lucide) window.lucide.createIcons()  // サイドバー・ボトムナビ・初回 v-for アイテムのアイコンを描画
       fadeUp()
       currentVideoElement.value = document.querySelector(".infinite-item video")
       console.log(currentVideoElement.value)
