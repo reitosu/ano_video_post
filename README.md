@@ -296,7 +296,7 @@ py -3.11 -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-> **注意:** PowerShell では相対パスのスクリプト実行に先頭の `.\` が必須です。`.\` がないと `The module 'venv' could not be loaded` エラーが発生します。
+> **注意:** PowerShell では相対パスのスクリプト実行に先頭の `.`\` が必須です。`.`\` がないと `The term 'venv\\Scripts\\Activate.ps1' is not recognized as the name of a cmdlet, function, script file, or operable program` のようなエラーが発生します。
 
 **Windows (コマンドプロンプト):**
 ```cmd
