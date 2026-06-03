@@ -83,7 +83,7 @@ const infiniteScroll = createApp({
           }
         })
         setTimeout(() => {
-          const videoElementList = Array.from(document.querySelectorAll(".infinite-item > video"))
+          const videoElementList = Array.from(document.querySelectorAll(".infinite-item video"))
           videoElementList.forEach(ele => {
             if (!(videoElementVisibilities.map(ele => { return ele.element }).includes(ele))) {
               ele.load()
@@ -120,7 +120,7 @@ const infiniteScroll = createApp({
       await addVideos()
       await nextTick()  // v-for による <video> 要素の DOM 反映を待つ
       fadeUp()
-      currentVideoElement.value = document.querySelector(".infinite-item > video")
+      currentVideoElement.value = document.querySelector(".infinite-item video")
       console.log(currentVideoElement.value)
       console.log(videoElementVisibilities)
       console.log(dataList.value)
