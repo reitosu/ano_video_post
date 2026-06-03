@@ -23,7 +23,13 @@ const infiniteScroll = createApp({
     fadeDownFlag = ref(false),
     loadedFlag = ref(false),
     fadeUp = () => {
-      document.querySelector('video').addEventListener('loadeddata', fadeDown)
+      const firstVideo = document.querySelector('video')
+      if (firstVideo) {
+        firstVideo.addEventListener('loadeddata', fadeDown)
+      } else {
+        // 動画要素が存在しない場合はロード済みとして扱い、タイムアウトで確実にフェードアウト
+        loadedFlag.value = true
+      }
       setTimeout(() => {
         fadeUpFlag.value = true
         timer.value = setTimeout(() => {
@@ -112,6 +118,7 @@ const infiniteScroll = createApp({
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       await addVideos()
+      await nextTick()  // v-for による <video> 要素の DOM 反映を待つ
       fadeUp()
       currentVideoElement.value = document.querySelector(".infinite-item > video")
       console.log(currentVideoElement.value)
