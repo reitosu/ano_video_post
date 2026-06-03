@@ -1,0 +1,247 @@
+name: PR Security Check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write  # SARIF を Security タブへアップロードするために必要
+  pull-requests: read
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ── 1. Backend Security (Django / Python) ──────────────────────
+  backend-security:
+    name: Backend Security (Django / Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: セキュリティツールのインストール
+        run: pip install bandit semgrep
+
+      # Bandit – Python SAST（結果を SARIF で Security タブへ）
+      - name: Bandit SAST スキャン
+        run: |
+          bandit -r videopost/ env1/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --format sarif \
+            --output bandit.sarif \
+            --exit-zero
+
+      - name: Bandit SARIF をアップロード
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: bandit.sarif
+          category: bandit-python
+
+      # Semgrep – Django / Python / OWASP Top 10
+      - name: Semgrep (Django / Python / OWASP Top10)
+        run: |
+          semgrep \
+            --config p/django \
+            --config p/python \
+            --config p/owasp-top-ten \
+            --sarif \
+            --output semgrep-backend.sarif \
+            --exit-zero \
+            videopost/ env1/
+
+      - name: Semgrep Backend SARIF をアップロード
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-backend.sarif
+          category: semgrep-backend
+
+      # Django の設定セキュリティチェック
+      - name: Django 設定セキュリティチェック
+        run: |
+          pip install \
+            "Django==4.2.1" \
+            "django-environ==0.11.2" \
+            "django-cloudinary-storage==0.3.0" \
+            "cloudinary==1.33.0" \
+            "ua-parser==0.18.0" \
+            "sqlparse==0.4.4"
+          cat > .env << 'EOF'
+          DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production
+          CLOUDINARY_NAME=ci-dummy
+          CLOUDINARY_API_KEY=000000000000000
+          CLOUDINARY_API_SECRET=ci-dummy-secret
+          EOF
+          python manage.py check
+
+  # ── 2. Frontend Security (JavaScript / Vue.js) ─────────────────
+  frontend-security:
+    name: Frontend Security (JavaScript / Vue.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Semgrep のインストール
+        run: pip install semgrep
+
+      # Semgrep – JavaScript / XSS / Secrets
+      - name: Semgrep (JavaScript / XSS)
+        run: |
+          semgrep \
+            --config p/javascript \
+            --config p/xss \
+            --config p/secrets \
+            --sarif \
+            --output semgrep-frontend.sarif \
+            --exit-zero \
+            videopost/static/js/ videopost/templates/
+
+      - name: Semgrep Frontend SARIF をアップロード
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-frontend.sarif
+          category: semgrep-frontend
+
+      # 危険な JS パターンのチェック（eval / innerHTML / document.write）
+      - name: 危険な JavaScript パターン検査
+        run: |
+          FOUND=0
+
+          echo "=== eval() の検査 ==="
+          if grep -rn "eval(" videopost/static/js/ videopost/templates/; then
+            echo "WARNING: eval() が検出されました"
+            FOUND=1
+          fi
+
+          echo "=== innerHTML の検査 ==="
+          if grep -rn "\.innerHTML\s*=" videopost/static/js/ videopost/templates/; then
+            echo "WARNING: innerHTML への代入が検出されました (XSS リスク)"
+            FOUND=1
+          fi
+
+          echo "=== document.write() の検査 ==="
+          if grep -rn "document\.write(" videopost/static/js/; then
+            echo "WARNING: document.write() が検出されました"
+            FOUND=1
+          fi
+
+          echo "=== 平文の秘密鍵・API キー パターン検査 ==="
+          if grep -rniE "(api_key|apikey|secret|private.?key)\s*[:=]\s*['\"][^'\"]{8,}" \
+               videopost/static/js/; then
+            echo "ERROR: JS ファイルにハードコードされた鍵が検出されました"
+            FOUND=1
+          fi
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo "セキュリティ警告が検出されました。上記の出力を確認してください。"
+            exit 1
+          fi
+
+  # ── 3. NFT / Blockchain Security ───────────────────────────────
+  nft-blockchain-security:
+    name: NFT / Blockchain Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Semgrep のインストール
+        run: pip install semgrep
+
+      # Semgrep – Secrets / Fintech (NFT ファイルを対象)
+      - name: Semgrep (Secrets / Fintech)
+        run: |
+          semgrep \
+            --config p/secrets \
+            --config p/fintech-security \
+            --sarif \
+            --output semgrep-nft.sarif \
+            --exit-zero \
+            videopost/nft.py videopost/aescrypt.py videopost/rsacrypto.py \
+            videopost/static/js/aescrypt.js videopost/static/js/rsacrypto.js
+
+      - name: Semgrep NFT SARIF をアップロード
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-nft.sarif
+          category: semgrep-nft
+
+      # カスタム NFT セキュリティルール（Semgrep）
+      - name: カスタム NFT Semgrep ルール
+        run: |
+          semgrep \
+            --config .github/semgrep/nft-rules.yml \
+            --sarif \
+            --output semgrep-nft-custom.sarif \
+            --exit-zero \
+            videopost/
+
+      - name: カスタム NFT SARIF をアップロード
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-nft-custom.sarif
+          category: semgrep-nft-custom
+
+      # ブロックチェーン固有のパターンチェック（grep ベース）
+      - name: Ethereum 秘密鍵ハードコードの検査
+        run: |
+          FOUND=0
+
+          echo "=== 64桁16進数（秘密鍵）のハードコード検査 ==="
+          if grep -rnE "0x[0-9a-fA-F]{64}" videopost/; then
+            echo "ERROR: ハードコードされた Ethereum 秘密鍵の可能性があります"
+            FOUND=1
+          fi
+
+          echo "=== crypto 用途での random モジュール使用検査 ==="
+          if grep -n "import random" \
+               videopost/nft.py videopost/aescrypt.py videopost/rsacrypto.py 2>/dev/null; then
+            echo "WARNING: 暗号処理に random モジュールを使用しています。os.urandom() または secrets モジュールを使用してください"
+            FOUND=1
+          fi
+
+          echo "=== print / pprint による秘密情報漏洩の検査 ==="
+          if grep -niE "(pprint|print)\s*\(.*?(private|priv|secret|wallet|key)" \
+               videopost/nft.py videopost/aescrypt.py videopost/rsacrypto.py 2>/dev/null; then
+            echo "WARNING: 秘密情報を含む可能性のある print/pprint が検出されました"
+            FOUND=1
+          fi
+
+          echo "=== eval() の使用検査 ==="
+          if grep -n "eval(" \
+               videopost/nft.py videopost/aescrypt.py videopost/rsacrypto.py 2>/dev/null; then
+            echo "ERROR: ブロックチェーン処理で eval() が使用されています"
+            FOUND=1
+          fi
+
+          echo "=== NFT_STORAGE_API_KEY / WALLET_PRIVATE_KEY のハードコード検査 ==="
+          if grep -rnE '(NFT_STORAGE_API_KEY|WALLET_PRIVATE_KEY)\s*=\s*["\x27][^"\x27]+["\x27]' \
+               videopost/ env1/ 2>/dev/null | grep -v ".env"; then
+            echo "ERROR: API キーまたはウォレット秘密鍵がハードコードされています"
+            FOUND=1
+          fi
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "ブロックチェーン/NFT セキュリティ警告が検出されました。上記を確認してください。"
+            exit 1
+          fi
+
+          echo "ブロックチェーン固有のセキュリティチェック: すべてクリア"
