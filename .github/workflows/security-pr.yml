@@ -30,7 +30,7 @@ jobs:
       # Bandit – Python SAST（結果を SARIF で Security タブへ）
       - name: Bandit SAST スキャン
         run: |
-          bandit -r videopost/ env1/ \
+          bandit -r videopost/ config/ \
             --severity-level medium \
             --confidence-level medium \
             --format sarif \
@@ -55,7 +55,7 @@ jobs:
             --config p/owasp-top-ten \
             --sarif \
             --output semgrep-backend.sarif \
-            videopost/ env1/ || true
+            videopost/ config/ || true
 
       - name: Semgrep Backend SARIF をアップロード
         uses: github/codeql-action/upload-sarif@v3
@@ -68,20 +68,7 @@ jobs:
       # Django の設定セキュリティチェック
       - name: Django 設定セキュリティチェック
         run: |
-          python - <<'PYEOF'
-          content = open('requirements.txt', 'rb').read()
-          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
-              text = content.decode('utf-16')
-          else:
-              text = content.decode('utf-8', errors='replace')
-          lines = [
-              l.strip() for l in text.splitlines()
-              if l.strip()
-              and not l.strip().startswith('#')
-              and 'pywin32' not in l.lower()
-          ]
-          open('requirements-ci.txt', 'w').write('\n'.join(lines))
-          PYEOF
+          grep -iv pywin32 requirements.txt > requirements-ci.txt
           pip install -r requirements-ci.txt
           cat > .env << 'EOF'
           DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production
@@ -244,7 +231,7 @@ jobs:
 
           echo "=== NFT_STORAGE_API_KEY / WALLET_PRIVATE_KEY のハードコード検査 ==="
           if grep -rnE '(NFT_STORAGE_API_KEY|WALLET_PRIVATE_KEY)\s*=\s*["\x27][^"\x27]+["\x27]' \
-               videopost/ env1/ 2>/dev/null | grep -v ".env"; then
+               videopost/ config/ 2>/dev/null | grep -v ".env"; then
             echo "ERROR: API キーまたはウォレット秘密鍵がハードコードされています"
             FOUND=1
           fi
