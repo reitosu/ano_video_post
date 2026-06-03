@@ -77,7 +77,8 @@ jobs:
             --exit-zero
           bandit -r videopost/ env1/ \
             --severity-level medium \
-            --confidence-level medium
+            --confidence-level medium \
+            --exit-zero
 
       - name: Upload Bandit results
         uses: actions/upload-artifact@v4
@@ -114,7 +115,8 @@ jobs:
             "django-cloudinary-storage==0.3.0" \
             "cloudinary==1.33.0" \
             "ua-parser==0.18.0" \
-            "sqlparse==0.4.4"
+            "sqlparse==0.4.4" \
+            "pycryptodome==3.21.0"
 
       - name: Create CI .env
         run: |

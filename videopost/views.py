@@ -8,7 +8,6 @@ from django.core.serializers import serialize
 from .storage import UpdateFileSystemStorage
 from .models import Video, Tag, Account
 from .forms import VideoForm
-from .rsacrypto import generate_key
 import os
 import base64
 import moviepy.editor
@@ -31,6 +30,7 @@ def get_cloudinary_source(video_name):
 
 
 def assign_unique_id(request):
+    from .rsacrypto import generate_key
     if request.method == "GET":
         public_key, private_key = generate_key()
         public_key = public_key.decode()

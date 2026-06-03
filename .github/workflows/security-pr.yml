@@ -75,7 +75,8 @@ jobs:
             "django-cloudinary-storage==0.3.0" \
             "cloudinary==1.33.0" \
             "ua-parser==0.18.0" \
-            "sqlparse==0.4.4"
+            "sqlparse==0.4.4" \
+            "pycryptodome==3.21.0"
           cat > .env << 'EOF'
           DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production
           CLOUDINARY_NAME=ci-dummy
