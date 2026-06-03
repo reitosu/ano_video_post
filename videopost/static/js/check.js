@@ -380,7 +380,7 @@ const check = createApp({
 
         const lastCheckVideo = ref()
         const togglelastcheck = () => {
-            const element = document.querySelector("#lastcheck")
+            const element = document.querySelector("#lastCheck")
             console.log(element.style.left)
             if (element.style.left == '0px') {
                 console.log("close")

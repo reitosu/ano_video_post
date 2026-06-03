@@ -21,7 +21,7 @@
   <body>
     <div id="check">
       <div id="sessions">
-        <div id="draft" ref="draftElement" data-draft="{{ request.session.draft }}"></div>
+        <div id="draft" ref="draftElement" data-draft="{{ request.session.draft|default:'{}' }}"></div>
       </div>
 
       <div id="header">
