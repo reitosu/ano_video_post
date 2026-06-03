@@ -1,6 +1,6 @@
 const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
 const { useDebounceFn, useElementVisibility, useEventListener, useShare } = VueUse;
-import { fetchVideo, isSmartPhone, retryable, validateCloudinaryUrl } from './utils.js'
+import { isSmartPhone, validateCloudinaryUrl } from './utils.js'
 
 const pagenationNumber = 5
 
@@ -23,14 +23,19 @@ const infiniteScroll = createApp({
     fadeDownFlag = ref(false),
     loadedFlag = ref(false),
     fadeUp = () => {
-      document.querySelector('video').addEventListener('loadeddata', fadeDown)
+      const videoEl = document.querySelector('video')
+      if (videoEl) {
+        videoEl.addEventListener('loadeddata', fadeDown)
+      } else {
+        loadedFlag.value = true
+      }
       setTimeout(() => {
         fadeUpFlag.value = true
         timer.value = setTimeout(() => {
           timer.value = clearTimeout(timer.value)
           if (loadedFlag.value) fadeDown()
         }, 2000)
-      },1000)
+      }, 1000)
     },
     fadeDown = () => {
       if (!timer.value && fadeUpFlag.value) fadeDownFlag.value = true
@@ -67,14 +72,8 @@ const infiniteScroll = createApp({
         console.log(page)
         const videoList = await getPagenation(page, searchTags.value, shareVideo.value)
         dataList.value.push(...videoList)
-        videoList.forEach(async video => {
-          if (isSmartPhone()) {
-            blobVideos.push(validateCloudinaryUrl(video.video))
-          }
-          else {
-            const url = await retryable(3, fetchVideo, video.video)
-            blobVideos.push(url)
-          }
+        videoList.forEach(video => {
+          blobVideos.push(validateCloudinaryUrl(video.video))
         })
         setTimeout(() => {
           const videoElementList = Array.from(document.querySelectorAll(".infinite-item > video"))
@@ -112,6 +111,7 @@ const infiniteScroll = createApp({
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       await addVideos()
+      await nextTick()
       fadeUp()
       currentVideoElement.value = document.querySelector(".infinite-item > video")
       console.log(currentVideoElement.value)

@@ -311,7 +311,8 @@ def video_post(request):
                 video = moviepy.editor.VideoFileClip(path)
                 clipped_video = video.subclip(start_time, end_time)
                 clipped_video.write_videofile(path)
-            path = "\\"+os.path.join(*path.split('\\')[3:])
+            rel = os.path.relpath(path, settings.STATIC_ROOT).replace('\\', '/')
+            path = '/' + settings.STATIC_URL.strip('/') + '/' + rel
         return JsonResponse({'path': path})
 
 
