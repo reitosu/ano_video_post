@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% load static %}
     <link rel="icon" href="{% static 'images/main-logo.svg' %}">
 
@@ -15,7 +15,7 @@
     <script>
       tailwind.config = {
         corePlugins: {
-          preflight: false  // 既存CSSを維持（Step2でのHTML全面書き換え後に有効化）
+          preflight: false  // 既存CSSを維持（スプラッシュ・スクロール動作）
         },
         theme: {
           extend: {
@@ -33,11 +33,9 @@
               'danger':    '#FF5A5F',
             },
             fontFamily: {
-              // Figma: TYPE · Inter
               inter: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             },
             fontSize: {
-              // Figma: TYPE スケール
               'label':   ['11px', { fontWeight: '500', letterSpacing: '0.04em' }],
               'caption': ['12px', { lineHeight: '1.5' }],
               'meta':    ['13px', { lineHeight: '1.4' }],
@@ -46,7 +44,6 @@
               'display': ['28px', { fontWeight: '700', lineHeight: '1.2' }],
             },
             borderRadius: {
-              // Figma: RADIUS 8 · 12 · 16 · 20 · pill（8/12はTailwind標準のrounded-lg/xlと対応）
               '13':   '13px',
               '20':   '20px',
               '24':   '24px',
@@ -57,13 +54,12 @@
       }
     </script>
 
+    <!-- CSSリセット（preflight: false のためブラウザデフォルトを打ち消す） -->
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
+    <!-- 既存スタイル（スプラッシュ・スクロールスナップ動作を維持） -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/tag.css' %}">
-    {% comment %} <link rel="stylesheet" href="{% static 'css/loader.css' %}"> {% endcomment %}
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css">
+
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -72,156 +68,339 @@
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
     <title>トップページ</title>
   </head>
-  <body>
+  <body class="bg-ano-bg font-inter overflow-hidden">
 
+    <div id="scroll" class="h-screen overflow-hidden">
 
-    <div id="scroll">
-      <div>
-        <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement"></div>
-      </div>
+      <!-- Vueデータロード用（Django テンプレートからタグ・動画名を受け取る） -->
+      <div data-tags="{{ tags }}" data-video="{{ video_name }}" ref="loadElement" class="hidden"></div>
+
+      <!-- スプラッシュ画面（既存ロジック・アニメーションを維持） -->
       <div id="splash" :class="{'fadeDown': fadeDownFlag}">
         <div id="splash_logo">
-          <img src="{% static 'images/header.svg'%}" alt="" :class="{'fadeUp' : fadeUpFlag}">
+          <img src="{% static 'images/header.svg' %}" alt="" :class="{'fadeUp': fadeUpFlag}">
         </div>
-        <div id="loader" :class="{'fadeUp' : fadeUpFlag}">
+        <div id="loader" :class="{'fadeUp': fadeUpFlag}">
           {% include "loader.html" %}
         </div>
       </div>
 
-      <div id="wrapper">
-
-      {% comment %} <div class="loading">
-        <img src="{% static 'images/header.svg'%}" alt="loading_pic">
-        <div class="spinner"></div>
-        
-      </div> {% endcomment %}
+      <!-- チュートリアルオーバーレイ -->
       <div class="tutorial" v-if="tutorialFlag" @click.stop="onTutorialClick">
-        <div class="scrolldown2">
-          {% comment %} <span>メニュー画面の表示は左にスワイプ</span> {% endcomment %}
-        </div>
-        <div class="rippless_btn">
-          <div></div>
-        </div>
+        <div class="rippless_btn"><div></div></div>
       </div>
 
+      <!-- ===== メインレイアウト ===== -->
+      <div id="wrapper" class="h-full flex">
 
-        <div id="fixed">
-          <div id="leftMenu" :class="{ 'menuInTutorial': tutorialFlag, 'menuTransition': transitionFlag }" ref="menu" :style="{right: menuRight+'%', opacity: menuOpacity}">
-            <div id="menuContainer">
-              <div class="logo">
-                <img src="{% static 'images/main_text.svg'%}" alt="ロゴ">
+        <!-- ── デスクトップ: 左サイドバー (md以上で表示) ── -->
+        <aside class="hidden md:flex flex-col flex-shrink-0 w-60 h-full bg-surface-1 border-r border-hairline">
+
+          <!-- ロゴ -->
+          <div class="flex items-center gap-1.5 px-7 pt-8 pb-3">
+            <span class="text-text-1 text-2xl font-bold">ano</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-accent inline-block mt-1"></span>
+          </div>
+
+          <!-- 投稿ボタン -->
+          <div class="px-4 pb-3">
+            <a href="{% url 'videopost:check' %}"
+               class="flex items-center justify-center gap-2 h-12 w-full
+                      bg-accent rounded-xl font-semibold text-[15px] text-ano-bg">
+              <!-- Plus icon -->
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              投稿する
+            </a>
+          </div>
+
+          <!-- ナビゲーション -->
+          <nav class="flex-1 px-3 space-y-0.5">
+            <!-- ホーム（アクティブ） -->
+            <a href="{% url 'videopost:index' %}"
+               class="flex items-center gap-4 h-12 px-4 bg-surface-2 rounded-xl border-l-[3px] border-accent">
+              <svg class="w-[22px] h-[22px] text-accent flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+              </svg>
+              <span class="text-accent font-semibold text-[15px]">ホーム</span>
+            </a>
+            <!-- 検索 -->
+            <a href="{% url 'videopost:search' %}"
+               class="flex items-center gap-4 h-12 px-4 rounded-xl">
+              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+              </svg>
+              <span class="text-text-2 font-medium text-[15px]">検索</span>
+            </a>
+            <!-- NFT -->
+            <a href="#"
+               class="flex items-center gap-4 h-12 px-4 rounded-xl">
+              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
+              </svg>
+              <span class="text-text-2 font-medium text-[15px]">NFT</span>
+            </a>
+            <!-- マイ -->
+            <a href="{% url 'videopost:account' %}"
+               class="flex items-center gap-4 h-12 px-4 rounded-xl">
+              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+              </svg>
+              <span class="text-text-2 font-medium text-[15px]">マイ</span>
+            </a>
+          </nav>
+
+          <!-- ウォレット情報 -->
+          <div class="mx-4 mb-4">
+            <div class="flex items-center gap-3 px-4 py-3.5 bg-surface-2 rounded-xl">
+              <div class="w-5 h-5 rounded-full bg-surface-3 flex-shrink-0"></div>
+              <div class="min-w-0">
+                <p class="text-text-1 text-[13px] font-medium truncate">0x4a3f…e9c2</p>
+                <p class="text-text-3 text-caption">12.4 MATIC</p>
               </div>
-              
-              <div id="header">
-
-
-
-
-                  <div class="transaction">
-                    <div class="price">
-                      <h3>price</h3>
-
-                    </div>
-                      <div class="buy">
-                        <p v-if="dataList[currentVideoIndex].price" class="by_txt">[[ dataList[currentVideoIndex].price ]]</p>
-                        <p v-else class="by_txt">無し</p>
-                        <img src="{% static 'images/buy_icon.png'%}" class="buy_icon" alt="buy">
-                      </div>
-                    </div>
-
-                    <div class="info">
-                      {% comment %} <p id="info_name">info</p> {% endcomment %}
-                      <h3>title</h3>
-                      <div class="title_message">
-                        <p v-if="dataList[currentVideoIndex].title">[[ dataList[currentVideoIndex].title ]]</p>
-                        <p v-else>無し</p>
-                      </div>
-                      <h3>description</h3>
-                      <div class="description_message">
-                        <p v-if="dataList[currentVideoIndex].description">[[ dataList[currentVideoIndex].description ]]</p>
-                        <p v-else>無し</p>
-                      </div>
-                      {% comment %} <p>[[ dataList[currentVideoIndex].video]]</p> {% endcomment %}
-
-                      
-                    </div>
-
-
-
-
-                {% comment %} <div id="trade">
-                  <img src="{% static 'images/NFTgraph.png'%}" alt="tests">
-                </div> {% endcomment %}
-                <div class="trade" >
-                    <div id="buttton">
-                        <div id="good">
-                          <a href="{% url 'videopost:index' %}"><img src="{% static 'images/good_icon.svg'%}" alt="good"></a>
-                        </div>
-
-                        <div id="share">
-                          <a href="{% url 'videopost:index' %}"><img src="{% static 'images/share_icon.svg'%}" @Click="shareLink" alt="share"></a>
-                        </div>
-
-                    
-                    <div id="ug">
-                      <h3>upload</h3>
-                      <div class="uploaded_date">
-                        <p v-if="dataList[currentVideoIndex].uploaded">
-                          [[
-                            new Date(dataList[currentVideoIndex].uploaded).toLocaleString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo'})
-                          ]]
-                        </p>
-                        <p v-else>無し</p>
-                      </div>
-      
-                      <h3>tags</h3>
-                      <div class="tags_message">
-                        <div v-if="dataList[currentVideoIndex].tags.length">
-                          <p class="search-tag" v-for="tag in dataList[currentVideoIndex].tags">
-                            <div id="tag-before" @click="deleteTag(tag)" class="icon-circle"></div>
-                            [[ tag ]]
-                          </p>
-                        </div>
-                        <p v-else>無し</p>
-                      </div>
-
-                    </div>
-                    
-                    </div>
-                </div>
-              </div>
-                <div id="buttons">
-
-                  <div class="serch">
-                    <a href="{% url 'videopost:search' %}"><img src="{% static 'images/search_icon.png'%}" alt="検索"></a>
-                  </div>
-
-                  <div class="edit">
-                    <!--<a href="{% url 'videopost:edit' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>-->
-                    <a href="{% url 'videopost:check' %}"><img src="{% static 'images/edit.png'%}" alt="投稿"></a>
-                  </div>
-                </div>
-              
-                
-
             </div>
-        </div>
-      
-      <div class="infinite-container" id="container" ref="container">
-        <!--動画要素の表示-->
-        <div v-for="(video,index) in dataList" class="infinite-item">
-          <video playsinline :src="blobVideos[index]" height="100%" autoplay loop @click.prevent="togglePlayAndGood"></video>
-        </div>
-        {% comment %} {% comment %} {% for video in object_list %}
-        <section class="infinite-item">
-            <p style="width:70%; word-wrap:break-word;">{{ video.title }}</p>
-            <video playsinline src="https://res.cloudinary.com/dhlsaygev/video/upload/{{ video.video }}.mp4" height="100%" autoplay></video>
-            <!--動画の上に画像の表示-->
-            <div class="overlay"></div>
-        </section>
-        {% endfor %} {% endcomment %}
-      </div>
-    </div>
-    </div>
- </body>
+          </div>
+        </aside>
+
+        <!-- ── 中央 + 右パネル ── -->
+        <div class="flex-1 flex overflow-hidden">
+
+          <!-- 動画フィードカラム -->
+          <div class="flex-1 relative overflow-hidden">
+
+            <!-- モバイル: 上部タブバー（動画に重なるオーバーレイ） -->
+            <div class="md:hidden absolute top-0 left-0 right-0 z-20 pointer-events-none">
+              <div class="flex items-center justify-between px-5 pt-12 pb-6
+                          bg-gradient-to-b from-black/60 via-black/20 to-transparent
+                          pointer-events-auto">
+                <div class="flex items-center gap-6">
+                  <button class="relative text-text-1 font-semibold text-base pb-1.5">
+                    おすすめ
+                    <span class="absolute bottom-0 left-0 w-full h-[3px] bg-accent rounded-sm"></span>
+                  </button>
+                  <button class="text-text-2 font-medium text-base pb-1.5">タグ</button>
+                </div>
+                <a href="{% url 'videopost:search' %}" class="text-text-1">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- 動画無限スクロール（JSの .infinite-item > video セレクタを維持） -->
+            <div class="infinite-container" id="container" ref="container">
+              <div v-for="(item, index) in dataList" class="infinite-item">
+                <video playsinline :src="blobVideos[index]" height="100%" autoplay loop
+                       @click.prevent="togglePlayAndGood"></video>
+
+                <!-- 右アクションバー -->
+                <div class="absolute right-3 bottom-28 z-10 flex flex-col items-center gap-5">
+                  <!-- いいね -->
+                  <div class="flex flex-col items-center gap-1">
+                    <button class="w-12 h-12 rounded-full bg-black/40 border border-hairline
+                                   flex items-center justify-center text-text-1">
+                      <svg class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/>
+                      </svg>
+                    </button>
+                    <span class="text-text-1 text-label text-center w-16">12.4k</span>
+                  </div>
+                  <!-- コメント -->
+                  <div class="flex flex-col items-center gap-1">
+                    <button class="w-12 h-12 rounded-full bg-black/40 border border-hairline
+                                   flex items-center justify-center text-text-1">
+                      <svg class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+                      </svg>
+                    </button>
+                    <span class="text-text-1 text-label text-center w-16">318</span>
+                  </div>
+                  <!-- 共有 -->
+                  <div class="flex flex-col items-center gap-1">
+                    <button @click.stop="shareLink"
+                            class="w-12 h-12 rounded-full bg-black/40 border border-hairline
+                                   flex items-center justify-center text-text-1">
+                      <svg class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/>
+                      </svg>
+                    </button>
+                    <span class="text-text-1 text-label text-center w-16">共有</span>
+                  </div>
+                  <!-- 所有 -->
+                  <div class="flex flex-col items-center gap-1">
+                    <button class="w-12 h-12 rounded-full bg-surface-2/80
+                                   flex items-center justify-center text-accent">
+                      <svg class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
+                      </svg>
+                    </button>
+                    <span class="text-accent text-label text-center w-16">所有</span>
+                  </div>
+                </div>
+
+                <!-- 下部情報オーバーレイ（モバイル） -->
+                <div class="absolute bottom-0 left-0 right-0 z-10 md:hidden">
+                  <div class="px-5 pt-20 pb-4
+                              bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                    <!-- 24時間バッジ -->
+                    <div class="inline-flex items-center gap-1.5 h-7 px-3 mb-3
+                                bg-black/45 border border-hairline rounded-pill">
+                      <svg class="w-3.5 h-3.5 text-text-1 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                      </svg>
+                      <span class="text-text-1 text-caption">24時間で消去</span>
+                    </div>
+                    <!-- ユーザー情報 -->
+                    <div class="flex items-center gap-2 mb-1.5">
+                      <svg class="w-4 h-4 text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                      </svg>
+                      <span class="text-text-1 text-meta font-semibold">@anon</span>
+                      <span class="text-text-2 text-meta">· 匿名投稿</span>
+                    </div>
+                    <!-- タイトル -->
+                    <p class="text-text-1 text-title mb-1.5" v-if="item.title">[[ item.title ]]</p>
+                    <!-- 説明文 -->
+                    <p class="text-text-2 text-body mb-3 line-clamp-2" v-if="item.description">[[ item.description ]]</p>
+                    <!-- タグ -->
+                    <div class="flex flex-wrap gap-2" v-if="item.tags && item.tags.length">
+                      <span v-for="tag in item.tags"
+                            class="inline-flex items-center h-[30px] px-3
+                                   bg-surface-2/85 text-text-1 text-meta rounded-pill">
+                        #[[ tag ]]
+                      </span>
+                    </div>
+                  </div>
+                  <!-- プログレスバー -->
+                  <div class="relative h-[3px] bg-white/15">
+                    <div class="absolute left-0 top-0 h-[3px] bg-accent" style="width:38%">
+                      <span class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2
+                                   w-2.5 h-2.5 rounded-full bg-accent block"></span>
+                    </div>
+                  </div>
+                  <!-- ボトムナビバー分のスペーサー -->
+                  <div class="h-20"></div>
+                </div>
+
+              </div><!-- /infinite-item -->
+            </div><!-- /infinite-container -->
+
+            <!-- モバイル: ボトムナビゲーションバー（fixed） -->
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30
+                        h-20 bg-surface-1 border-t border-hairline">
+              <div class="flex items-center justify-around h-full px-4">
+                <!-- ホーム -->
+                <a href="{% url 'videopost:index' %}" class="flex flex-col items-center gap-1 w-14">
+                  <svg class="w-[22px] h-[22px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+                  </svg>
+                  <span class="text-accent font-medium text-[10px]">ホーム</span>
+                </a>
+                <!-- 検索 -->
+                <a href="{% url 'videopost:search' %}" class="flex flex-col items-center gap-1 w-14">
+                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                  </svg>
+                  <span class="text-text-2 font-medium text-[10px]">検索</span>
+                </a>
+                <!-- 投稿ボタン（アクセントボタン） -->
+                <a href="{% url 'videopost:check' %}"
+                   class="flex items-center justify-center w-14 h-[38px] bg-accent rounded-13">
+                  <svg class="w-6 h-6 text-ano-bg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                  </svg>
+                </a>
+                <!-- NFT -->
+                <a href="#" class="flex flex-col items-center gap-1 w-14">
+                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
+                  </svg>
+                  <span class="text-text-2 font-medium text-[10px]">NFT</span>
+                </a>
+                <!-- マイ -->
+                <a href="{% url 'videopost:account' %}" class="flex flex-col items-center gap-1 w-14">
+                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+                  </svg>
+                  <span class="text-text-2 font-medium text-[10px]">マイ</span>
+                </a>
+              </div>
+            </nav>
+
+          </div><!-- /動画フィードカラム -->
+
+          <!-- ── デスクトップ: 右情報パネル (md以上で表示) ── -->
+          <div class="hidden md:flex flex-col w-[408px] flex-shrink-0 m-6 ml-0 overflow-hidden"
+               v-if="dataList.length">
+            <div class="bg-surface-1 rounded-[20px] flex-1 overflow-y-auto">
+              <div class="p-6">
+
+                <!-- 投稿者情報 -->
+                <div class="flex items-center gap-2 mb-3">
+                  <svg class="w-4 h-4 text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+                  </svg>
+                  <span class="text-text-1 font-semibold text-[16px]">@anon</span>
+                  <span class="text-text-2 text-meta">· 匿名投稿</span>
+                </div>
+
+                <!-- タイトル -->
+                <h2 class="text-text-1 text-[22px] font-semibold leading-snug mb-2"
+                    v-if="dataList[currentVideoIndex]">
+                  [[ dataList[currentVideoIndex].title ]]
+                </h2>
+
+                <!-- 説明文 -->
+                <p class="text-text-2 text-body mb-4"
+                   v-if="dataList[currentVideoIndex] && dataList[currentVideoIndex].description">
+                  [[ dataList[currentVideoIndex].description ]]
+                </p>
+
+                <!-- タグ -->
+                <div class="flex flex-wrap gap-2 mb-4"
+                     v-if="dataList[currentVideoIndex] && dataList[currentVideoIndex].tags && dataList[currentVideoIndex].tags.length">
+                  <span v-for="tag in dataList[currentVideoIndex].tags"
+                        class="inline-flex items-center h-8 px-3
+                               bg-surface-2 text-text-1 text-meta rounded-pill">
+                    #[[ tag ]]
+                  </span>
+                </div>
+
+                <div class="border-t border-hairline my-4"></div>
+
+                <!-- NFT情報 -->
+                <p class="text-text-3 text-caption mb-2">この動画のNFT</p>
+                <div class="flex items-center gap-1.5 mb-1"
+                     v-if="dataList[currentVideoIndex] && dataList[currentVideoIndex].price">
+                  <span class="w-2.5 h-2.5 rounded-full bg-accent flex-shrink-0"></span>
+                  <span class="text-accent text-[26px] font-semibold leading-none">
+                    [[ dataList[currentVideoIndex].price ]] MATIC
+                  </span>
+                </div>
+                <p class="text-text-3 text-caption mb-5">現在出品中 · 所有 @anon</p>
+                <button class="w-full h-12 bg-accent rounded-xl text-ano-bg font-semibold text-[16px]">
+                  購入する
+                </button>
+
+                <div class="border-t border-hairline my-4"></div>
+
+                <!-- コメント -->
+                <p class="text-text-1 font-semibold text-[14px] mb-4">コメント</p>
+                <div class="flex items-center gap-3">
+                  <div class="flex-1 bg-surface-2 rounded-xl h-11 px-4 flex items-center">
+                    <span class="text-text-3 text-meta">コメントを追加…</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div><!-- /右情報パネル -->
+
+        </div><!-- /中央+右 -->
+      </div><!-- /wrapper -->
+    </div><!-- /scroll -->
+
+  </body>
 </html>
