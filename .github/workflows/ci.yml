@@ -26,7 +26,7 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 videopost/ env1/ manage.py \
+          flake8 videopost/ config/ manage.py \
             --max-line-length=127 \
             --exclude=migrations \
             --statistics \
@@ -69,13 +69,13 @@ jobs:
 
       - name: Run Bandit (SAST)
         run: |
-          bandit -r videopost/ env1/ \
+          bandit -r videopost/ config/ \
             --severity-level medium \
             --confidence-level medium \
             --format json \
             --output bandit-results.json \
             --exit-zero
-          bandit -r videopost/ env1/ \
+          bandit -r videopost/ config/ \
             --severity-level medium \
             --confidence-level medium \
             --exit-zero

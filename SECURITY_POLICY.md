@@ -129,7 +129,7 @@ push / PR to main
 
 **Job: Lint (flake8)**
 ```
-対象: videopost/ env1/ manage.py
+対象: videopost/ config/ manage.py
 設定: --max-line-length=127 --exclude=migrations
 失敗条件: flake8 がエラーを報告した場合
 ```
@@ -137,7 +137,7 @@ push / PR to main
 **Job: Security Scan**
 ```
 Bandit:
-  対象: videopost/ env1/
+  対象: videopost/ config/
   条件: severity >= medium, confidence >= medium
   出力: bandit-results.json（アーティファクト 30 日保持）
   ※ --exit-zero のため CI は失敗しないが結果を確認すること
@@ -205,7 +205,7 @@ pip-audit:
 | `import random` in 暗号ファイル | nft.py/aescrypt.py/rsacrypto.py | **CI 失敗** |
 | `print/pprint` + 秘密情報変数 | nft.py/aescrypt.py/rsacrypto.py | **CI 失敗** |
 | `eval()` in 暗号ファイル | nft.py/aescrypt.py/rsacrypto.py | **CI 失敗** |
-| `NFT_STORAGE_API_KEY` / `WALLET_PRIVATE_KEY` ハードコード | `videopost/`, `env1/` | **CI 失敗** |
+| `NFT_STORAGE_API_KEY` / `WALLET_PRIVATE_KEY` ハードコード | `videopost/`, `config/` | **CI 失敗** |
 
 ---
 

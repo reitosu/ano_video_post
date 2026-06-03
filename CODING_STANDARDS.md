@@ -211,7 +211,7 @@ videopost/
 ```
 
 - アプリロジックは `videopost/` 以下に集約する
-- `env1/` は設定のみ（ビジネスロジックを置かない）
+- `config/` は設定のみ（ビジネスロジックを置かない）
 - 一時ファイルは `videopost/static/materials/` に出力し、`.gitignore` に含める
 
 ---

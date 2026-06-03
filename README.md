@@ -66,7 +66,7 @@ graph TB
 
 ```
 ano_video_post/
-├── env1/                    # Django設定ディレクトリ
+├── config/                  # Django設定ディレクトリ
 │   ├── settings.py         # アプリケーション設定
 │   ├── urls.py            # ルートURL設定
 │   ├── wsgi.py            # WSGI設定
@@ -82,7 +82,7 @@ ano_video_post/
 │   ├── templates/         # HTMLテンプレート
 │   │   ├── index.html     # メイン画面
 │   │   ├── edit.html      # 編集画面
-│   │   ├── serch.html     # 検索画面
+│   │   ├── search.html    # 検索画面
 │   │   ├── account.html   # アカウント画面
 │   │   ├── check.html     # 確認画面
 │   │   └── video.html     # 動画視聴画面
@@ -90,11 +90,11 @@ ano_video_post/
 │       ├── css/           # スタイルシート
 │       ├── js/            # JavaScript
 │       ├── images/        # 画像素材
-│       ├── abi/          # スマートコントラクトABI
-│       └── materials/     # 一時ファイル保存
-├── 設計/                   # 設計ドキュメント
-│   ├── *.dio             # Draw.io図面ファイル
-│   └── *.svg             # フローチャート画像
+│       └── abi/           # スマートコントラクトABI
+├── docs/
+│   └── design/            # 設計ドキュメント (Draw.io, SVG)
+├── scripts/
+│   └── check_cloudinary.py # Cloudinaryリソース確認スクリプト
 ├── manage.py              # Django管理スクリプト
 ├── db.sqlite3            # SQLiteデータベース
 └── requirements.txt      # 依存関係
