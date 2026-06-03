@@ -316,7 +316,7 @@ pip install -r requirements.txt
 ```bash
 # テンプレートをコピーして値を埋める
 cp .env.example .env
-cp .env.test.example .env.test
+cp .env.test.example scripts/.env.test
 ```
 
 `.env` を開き、各項目を設定してください。
