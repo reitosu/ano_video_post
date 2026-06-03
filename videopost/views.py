@@ -44,15 +44,16 @@ def assign_unique_id(request):
     if request.method == "GET":
         public_key, private_key = generate_key()
         public_key = public_key.decode()
-        with open("./videopost/temp/private.pem", "wb") as f:
-            f.write(private_key)
+        # ユーザーごとのセッションに保存（共有ファイルへの平文保存を廃止）
+        request.session["temp_private_key"] = base64.b64encode(private_key).decode()
         return JsonResponse({"public_key": public_key})
     elif request.method == "POST":
         user_id = request.POST.get("userId")
-        with open("./videopost/temp/private.pem", "rb") as f:
-            private_key = f.read()
-            Account.objects.create(
-                accountid=user_id, privatekey=private_key.decode())
+        private_key_b64 = request.session.pop("temp_private_key", None)
+        if not private_key_b64:
+            return JsonResponse({"error": "session expired"}, status=400)
+        private_key = base64.b64decode(private_key_b64)
+        Account.objects.create(accountid=user_id, privatekey=private_key.decode())
         return JsonResponse({"response": "success"})
 
 
@@ -169,9 +170,10 @@ def trim_video(request):
         video_path = request.POST.get("videoPath")
         start_time = request.POST.get("startTime")
         end_time = request.POST.get("endTime")
-        path = os.path.join(settings.STATIC_ROOT, video_path[8:].split("?")[0])
-        print(start_time)
-        print(end_time)
+        relative_path = video_path.lstrip("/").removeprefix("static/").split("?")[0]
+        path = os.path.abspath(os.path.join(settings.STATIC_ROOT, relative_path))
+        if not path.startswith(os.path.abspath(str(settings.STATIC_ROOT)) + os.sep):
+            return JsonResponse({"error": "invalid path"}, status=400)
         clip = moviepy.editor.VideoFileClip(path)
         trimed = clip.subclip(float(start_time), float(end_time))
         trimed_path = os.path.join(os.path.dirname(path), "trimed.mp4")
@@ -413,9 +415,8 @@ def test_ipfs(request):
 
 
 def test(request):
+    if not settings.DEBUG:
+        return JsonResponse({"error": "not found"}, status=404)
     url = request.GET.get("url")
-    print(request.GET)
-    print(url)
     r = requests.get(url)
-    print(str(r.content)[2:])
     return JsonResponse({"response": str(r.content)[2:]})
