@@ -31,7 +31,10 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', '192.168.10.106', '10.228.179.236', '10.0.54.27', '192.168.2.208'])
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=['127.0.0.1', '192.168.10.106', '10.228.179.236', '10.0.54.27', '192.168.2.208']
+)
 
 
 # Application definition

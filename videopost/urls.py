@@ -26,7 +26,7 @@ urlpatterns = [
     path('test/', views.test, name='test')
 ]
 
-"""    
+"""
     path('ipost/', views.image_post, name='image_post'),
     path('delete/', views.delete_materials, name='delete'),
     path('saveBackup/', views.save_backup, name='save_backup'),"""

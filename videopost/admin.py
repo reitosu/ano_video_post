@@ -1,7 +1,9 @@
 from django.contrib import admin
-from .models import Video,Tag,TagMap,whenClick,Account,DeviceMap
+from .models import Video, Tag, TagMap, WhenClick, Account, DeviceMap
 
 # Register your models here.
+
+
 class VideoAdmin(admin.ModelAdmin):
     filter_horizontal = ('tags', 'uploader')
 
@@ -9,6 +11,6 @@ class VideoAdmin(admin.ModelAdmin):
 admin.site.register(Video, VideoAdmin)
 admin.site.register(Tag)
 admin.site.register(TagMap)
-admin.site.register(whenClick)
+admin.site.register(WhenClick)
 admin.site.register(Account)
 admin.site.register(DeviceMap)

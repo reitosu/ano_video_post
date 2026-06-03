@@ -28,7 +28,7 @@ class Nft:
         self.abi_path = path.join(
             settings.STATIC_ROOT, "abi", "ExampleNFT.json")
         self.contract = Contract(self.wa, self.contract_address, self.abi_path)
-    
+
     def get_nft_metadata(self, token_id):
         uri = self.contract.get_tokenURI(token_id)
         print(uri[7:])

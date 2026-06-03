@@ -10,6 +10,7 @@ def generate_key():
     private_key = key.export_key()
     return public_key, private_key
 
+
 def encrypt(text, public_key):
     plaintext = text.encode("utf-8")
     recipient_key = RSA.import_key(public_key)
@@ -18,6 +19,7 @@ def encrypt(text, public_key):
     print(encrypted_message)
     encrypted_message = base64.b64encode(encrypted_message).decode()
     return encrypted_message
+
 
 def decrypt(encrypted, private_key):
     encrypted = base64.b64decode(encrypted)

@@ -1,26 +1,19 @@
 from django.conf import settings
-from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, CreateView, ListView
 from django.http import JsonResponse
 from django.urls import reverse
-from django.db.models import Case, When, Value, IntegerField, Count
+from django.db.models import Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from .storage import UpdateFileSystemStorage
-from .models import Video, Tag, WhenClick, TagMap, Account
+from .models import Video, Tag, Account
 from .forms import VideoForm
 from .nft import Nft
-from .aescrypt import aes_gcm_decrypt, aes_gcm_encrypt
-from .rsacrypto import generate_key, encrypt, decrypt
-from .utils import Cloudinary
-from django.utils import timezone
+from .rsacrypto import generate_key
 import os
 import base64
 import moviepy.editor
-import uuid
-import shutil
 import json
-from itertools import chain
 from cloudinary.uploader import upload
 from cloudinary.api import resource
 from cloudinary import CloudinaryResource
@@ -42,7 +35,6 @@ def assign_unique_id(request):
     if request.method == "GET":
         public_key, private_key = generate_key()
         public_key = public_key.decode()
-        # ユーザーごとのセッションに保存（共有ファイルへの平文保存を廃止）
         request.session["temp_private_key"] = base64.b64encode(private_key).decode()
         return JsonResponse({"public_key": public_key})
     elif request.method == "POST":
@@ -320,47 +312,6 @@ def video_post(request):
                 clipped_video.write_videofile(path)
             path = "\\"+os.path.join(*path.split('\\')[3:])
         return JsonResponse({'path': path})
-
-
-"""def image_post(request):
-    if request.method == 'POST':
-        image_data = request.POST.get('photo')
-        format, imgstr = image_data.split(';base64,')
-        ext = format.split('/')[-1]
-        image_data = base64.b64decode(imgstr)
-        file = ContentFile(image_data)
-        name = request.POST.get('name')+'.'+ext
-        id = request.session.get('user_id')
-        path = os.path.join(settings.STATIC_ROOT, 'materials', id)
-        fs = FileSystemStorage(location=path)
-        fs.save(name, file)
-        path = fs.path(name)
-        path = "\\"+os.path.join(*path.split('\\')[3:])
-
-        return JsonResponse({'path': path})
-
-
-def delete_materials(request):
-    id = request.session.get('user_id')
-    path = os.path.join(settings.STATIC_ROOT, 'materials', id)
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    print("deleted")
-    return redirect('/videopost/edit')
-
-
-def save_backup(request):
-    print("r")
-    if request.method == "POST":
-        print(request.POST)
-        print(request.POST.get("backup_materials"))
-        print(request.POST.get("backup_previews"))
-        request.session["backup_materials"] = request.POST.get(
-            "backup_materials")
-        request.session["backup_previews"] = request.POST.get(
-            "backup_previews")
-        request.session["backup_width"] = request.POST.get("backup_width")
-        return JsonResponse({"backup": "success"})"""
 
 
 def test_ipfs(request):
