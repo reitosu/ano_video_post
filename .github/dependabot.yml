@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Python (pip) 依存パッケージの自動更新
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly       # 更新頻度: 毎週
+      day: monday            # 実行曜日: 月曜日
+      time: '09:00'
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 10
+    reviewers:
+      - Daisuke106
+    labels:
+      - 依存関係
+      - Python
+    groups:
+      # Django 関連パッケージをまとめて更新
+      Djangoグループ:
+        patterns:
+          - django*
+          - Django*
+      # Web3 / ブロックチェーン関連パッケージ
+      Web3グループ:
+        patterns:
+          - web3*
+          - eth-*
+      # メディア処理関連パッケージ
+      メディア処理グループ:
+        patterns:
+          - cloudinary*
+          - moviepy*
+          - opencv*
+          - Pillow*
+          - imageio*
+      # 暗号化関連パッケージ
+      暗号化グループ:
+        patterns:
+          - pycryptodome*
+          - cryptography*
+
+  # GitHub Actions の自動更新
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly       # 更新頻度: 毎週
+      day: monday            # 実行曜日: 月曜日
+      time: '09:00'
+      timezone: Asia/Tokyo
+    reviewers:
+      - Daisuke106
+    labels:
+      - 依存関係
+      - GitHub-Actions
