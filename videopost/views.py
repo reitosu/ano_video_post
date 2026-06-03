@@ -8,7 +8,6 @@ from django.core.serializers import serialize
 from .storage import UpdateFileSystemStorage
 from .models import Video, Tag, Account
 from .forms import VideoForm
-from .nft import Nft
 from .rsacrypto import generate_key
 import os
 import base64
@@ -243,6 +242,7 @@ def delete_video(request):
 
 
 def mint_video(request):
+    from .nft import Nft
     video_name = request.POST.get('videoName')
     name = request.POST.get('name')
     description = request.POST.get('description')
@@ -315,6 +315,7 @@ def video_post(request):
 
 
 def test_ipfs(request):
+    from .nft import Nft
     n = Nft()
     cid = n.mint_nft()
     return JsonResponse({"response": cid})

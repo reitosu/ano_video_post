@@ -1,0 +1,15 @@
+title = "gitleaks config"
+
+[allowlist]
+  description = "Known false positives and historical findings"
+
+  # node-rsa-js.js contains PEM boundary strings in regex patterns (library source code, not real keys)
+  paths = [
+    "videopost/static/js/rsa/node-rsa-js.js",
+  ]
+
+  # Historical commit af4cca74 (2023-11-14) contained a private.pem.
+  # Key is considered compromised and must NOT be reused.
+  commits = [
+    "af4cca740609e58acd833b1d3ae1f66c4de926f4",
+  ]
