@@ -255,8 +255,14 @@ erDiagram
 
 ### 前提条件
 
-- Python 3.11
+- Python **3.11**（[python.org - Python 3.11](https://www.python.org/downloads/release/python-3119/) からインストール）
 - pip
+
+> **Windows の注意:**
+> - Microsoft Store 経由の Python（`WindowsApps\python.exe`）はダミースタブのため使用不可。必ず [python.org](https://www.python.org/downloads/release/python-3119/) からインストールしてください。
+> - インストール時に **「Add Python to PATH」** にチェックを入れてください。
+> - **Python 3.12 以降（3.13、3.14 等）は非推奨**です。`requirements.txt` の各パッケージが Python 3.11 向けにビルドされており、新しいバージョンでは依存関係の解決に失敗します。
+> - インストール後に新しいターミナルで `py -3.11 --version` を実行し、`Python 3.11.x` と表示されることを確認してください。
 
 ### インストール手順
 
@@ -269,17 +275,39 @@ cd ano_video_post
 
 2. **仮想環境の作成・有効化**
 
+**Mac/Linux:**
 ```bash
-python -m venv venv
-# Mac/Linux
+python3.11 -m venv venv
 source venv/bin/activate
-# Windows
-venv\Scripts\activate
+```
+
+**Windows (PowerShell):**
+
+PowerShell はデフォルトでスクリプト実行がブロックされている場合があります。初回のみ以下を実行してください（ユーザー権限で変更されます）。
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+`py` ランチャーで Python 3.11 を明示して venv を作成します（先頭の `.\` が必須です）。
+
+```powershell
+py -3.11 -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+> **注意:** PowerShell では相対パスのスクリプト実行に先頭の `.\` が必須です。`.\` がないと `The module 'venv' could not be loaded` エラーが発生します。
+
+**Windows (コマンドプロンプト):**
+```cmd
+py -3.11 -m venv venv
+venv\Scripts\activate.bat
 ```
 
 3. **依存関係のインストール**
 
 ```bash
+pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
 
@@ -288,6 +316,7 @@ pip install -r requirements.txt
 ```bash
 # テンプレートをコピーして値を埋める
 cp .env.example .env
+cp .env.test.example .env.test
 ```
 
 `.env` を開き、各項目を設定してください。
