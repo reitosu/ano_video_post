@@ -1,61 +1,72 @@
-button {
-    width: auto;
-    padding:0;
-    margin:0;
-    background:none;
-    border:0;
-    font-size:0;
-    line-height:0;
-    overflow:visible;
-    cursor:pointer;
+[v-cloak] {
+    display: none;
 }
 
-#dropdown-menu{
-    display:none;
-    list-style:none;
-    padding:0;
-    margin:0
-    border 1px solid #ccc;
-    background-color:#fff;
-
+.tag-input-wrapper {
+    overflow: hidden;
 }
 
-#dropdown-menu li{
-    text-align:center;
+.tag-input-wrapper input {
+    width: 100%;
+}
+
+#searchPrediction {
+    position: absolute;
+    z-index: 10001;
+    background-color: white;
+}
+
+#searchPrediction li {
+    border: 1px solid;
+    margin-left: 0.5px;
+    margin-right: 0.5px;
     padding: 5px;
-    cursor:pointer;
-
+    cursor: pointer;
 }
 
-#dropdown-menu li:hover{
-    background-color:#f2f2f2;
+#historyMark {
+    display: inline-block;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: black;
+    border-radius: 50%;
+    width: 5px;
+    height: 5px;
+    margin-right: 6px;
 }
 
-#tag-list{
-    display:none;
-    list-style:none;
-    padding:0;
-    margin:0;
+
+.searchButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 3%
 }
 
-#tag-list li{
-    padding:5px;
-    cursor:pointer;
+.searchButton button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 100%;
+    color: #222;
+    background-color: #efefef;
+    border-radius: 5%;
+    box-shadow: -4px -4px 8px #fff, 4px 4px 8px rgb(0 0 0 / 24%);
 }
 
-#tag-list li:hover{
-    background-color:#f2f2f2;
-}
+@media (any-hover: hover) {
+    .searchButton button {
+        transition: box-shadow 0.2s;
+    }
 
-#tag_all li:hover{
-    background-color: #ccc;
-    
-}
+    .searchButton button:hover {
+        box-shadow: -2px -2px 4px #fff, 2px 2px 4px rgb(0 0 0 / 24%);
+    }
 
-#tag_hot li:hover{
-    background-color: #ccc;
-}
-
-#tag_new li:hover{
-    background-color: #ccc;
+    .searchButton button:active {
+        background-color: #ebebeb;
+        box-shadow: inset 4px 4px 8px rgb(0 0 0 / 16%);
+    }
 }

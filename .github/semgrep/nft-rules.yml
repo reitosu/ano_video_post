@@ -1,0 +1,136 @@
+rules:
+  # ── Ethereum 秘密鍵のハードコード検出 ──────────────────────────
+  - id: nft-hardcoded-eth-private-key
+    patterns:
+      - pattern: $VAR = "0x$HEX"
+    message: >
+      Ethereum 秘密鍵がハードコードされている可能性があります ($VAR)。
+      環境変数 (.env) から読み込んでください。
+    severity: ERROR
+    languages: [python, javascript]
+    metadata:
+      category: security
+      technology: [web3, ethereum, blockchain]
+      cwe: CWE-321
+
+  # ── 暗号用途での random モジュール使用検出 ──────────────────────
+  - id: nft-weak-random-in-crypto
+    patterns:
+      - pattern: import random
+      - pattern: random.$FUNC(...)
+    message: >
+      暗号処理に random モジュールを使用しています。
+      os.urandom() または secrets モジュールを使用してください。
+    severity: WARNING
+    languages: [python]
+    paths:
+      include:
+        - "**/nft.py"
+        - "**/aescrypt.py"
+        - "**/rsacrypto.py"
+    metadata:
+      category: security
+      technology: [cryptography]
+      cwe: CWE-338
+
+  # ── eval() の使用検出 ────────────────────────────────────────────
+  - id: nft-eval-usage
+    pattern: eval(...)
+    message: >
+      eval() の使用が検出されました。
+      ブロックチェーン / NFT のコードでは eval() を避けてください (コードインジェクションリスク)。
+    severity: ERROR
+    languages: [python, javascript]
+    metadata:
+      category: security
+      cwe: CWE-95
+
+  # ── 秘密情報を含む可能性の pprint / print 検出 ──────────────────
+  - id: nft-sensitive-data-in-print
+    patterns:
+      - pattern-either:
+          - pattern: print($X)
+          - pattern: pprint($X)
+      - metavariable-regex:
+          metavariable: $X
+          regex: (?i).*(private|priv|secret|wallet|key|token).*
+    message: >
+      秘密情報 ($X) が print/pprint で出力されている可能性があります。
+      本番環境では logging モジュールを使用し、DEBUG レベルで出力してください。
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: security
+      technology: [web3, blockchain]
+      cwe: CWE-532
+
+  # ── Web3 トランザクションのアドレス未検証 ────────────────────────
+  - id: nft-unvalidated-transaction-address
+    patterns:
+      - pattern: $W.eth.send_raw_transaction(...)
+      - pattern-not-inside: |
+          if Web3.is_address($ADDR):
+              ...
+    message: >
+      send_raw_transaction の前にアドレスを Web3.is_address() で検証していません。
+      不正なアドレスへの誤送金を防ぐために検証を追加してください。
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: security
+      technology: [web3, ethereum]
+      cwe: CWE-20
+
+  # ── JS 側での秘密鍵の直接扱い ────────────────────────────────────
+  - id: nft-js-private-key-in-variable
+    patterns:
+      - pattern: var $KEY = "...";
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*(private|priv|secret|wallet).*
+    message: >
+      JavaScript 側で秘密鍵を変数に格納しています ($KEY)。
+      秘密鍵はサーバーサイドのみで扱い、フロントエンドには渡さないでください。
+    severity: ERROR
+    languages: [javascript]
+    metadata:
+      category: security
+      technology: [web3, blockchain]
+      cwe: CWE-312
+
+  # ── AES 鍵のハードコード検出 ─────────────────────────────────────
+  - id: nft-hardcoded-aes-key
+    patterns:
+      - pattern: $KEY = b"$VALUE"
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*(key|secret|aes|pass).*
+    message: >
+      AES 鍵がハードコードされている可能性があります ($KEY)。
+      鍵は環境変数または鍵管理サービスから取得してください。
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: security
+      technology: [cryptography, aes]
+      cwe: CWE-321
+
+  # ── IPFS アップロードでの例外握りつぶし ──────────────────────────
+  - id: nft-broad-exception-in-ipfs
+    patterns:
+      - pattern: |
+          try:
+              ...
+          except Exception:
+              pass
+    message: >
+      IPFS / NFT 処理で Exception を握りつぶしています。
+      適切なエラーハンドリングとログ記録を行ってください。
+    severity: WARNING
+    languages: [python]
+    paths:
+      include:
+        - "**/nft.py"
+    metadata:
+      category: reliability
+      technology: [ipfs, blockchain]

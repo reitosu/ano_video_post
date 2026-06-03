@@ -1,151 +1,288 @@
-const { createApp, ref, onMounted } = Vue;
-const { useDebounceFn } = VueUse;
+const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
+const { useDebounceFn, useElementVisibility, useEventListener, useShare } = VueUse;
+import { fetchVideo, isSmartPhone, retryable, validateCloudinaryUrl } from './utils.js'
 
+const pagenationNumber = 5
 
 const infiniteScroll = createApp({
   setup() {
+    const { share, isSupported } = useShare()
+    const shareLink = async (event) => {
+        event.preventDefault()
+        const currentVideo = dataList.value[currentVideoIndex.value].video.split("/").slice(-1)[0]
+        const data = {
+            url: "http://127.0.0.1:8000/videopost/?videoname="+currentVideo,
+            text: "test url",
+            title: "test title",
+        }
+        share(data)
+    }
+    const 
+    timer = ref(null),
+    fadeUpFlag = ref(false),
+    fadeDownFlag = ref(false),
+    loadedFlag = ref(false),
+    fadeUp = () => {
+      document.querySelector('video').addEventListener('loadeddata', fadeDown)
+      setTimeout(() => {
+        fadeUpFlag.value = true
+        timer.value = setTimeout(() => {
+          timer.value = clearTimeout(timer.value)
+          if (loadedFlag.value) fadeDown()
+        }, 2000)
+      },1000)
+    },
+    fadeDown = () => {
+      if (!timer.value && fadeUpFlag.value) fadeDownFlag.value = true
+      else loadedFlag.value = true
+    }
+
+    const
+      tutorialFlag = ref(true),
+      onTutorialClick = () => {
+        tutorialFlag.value = false;
+        currentVideoElement.value.play()
+      }
+
+    const
+      loadElement = ref(undefined),
+      searchTags = computed(() => {
+        if (loadElement.value) {
+          return loadElement.value.getAttribute("data-tags")
+        }
+        return undefined
+      }),
+      shareVideo = computed(() => {
+        if (loadElement.value) {
+          console.log(loadElement.value)
+          return loadElement.value.getAttribute("data-video")
+        }
+        return undefined
+      }),
+      dataList = ref([]),
+      blobVideos = reactive([]),
+
+      addVideos = async () => {
+        const page = (dataList.value.length / pagenationNumber) + 1
+        console.log(page)
+        const videoList = await getPagenation(page, searchTags.value, shareVideo.value)
+        dataList.value.push(...videoList)
+        videoList.forEach(async video => {
+          if (isSmartPhone()) {
+            blobVideos.push(validateCloudinaryUrl(video.video))
+          }
+          else {
+            const url = await retryable(3, fetchVideo, video.video)
+            blobVideos.push(url)
+          }
+        })
+        setTimeout(() => {
+          const videoElementList = Array.from(document.querySelectorAll(".infinite-item > video"))
+          videoElementList.forEach(ele => {
+            if (!(videoElementVisibilities.map(ele => { return ele.element }).includes(ele))) {
+              ele.load()
+              ele.addEventListener("loadeddata", event => console.log(event))
+              videoElementVisibilities.push({ element: ele, visibility: useElementVisibility(ele) })
+              watch(videoElementVisibilities.slice(-1)[0], scrollPlay)
+            }
+          })
+          console.log(videoElementVisibilities)
+        }, 1000)
+      },
+
+      getPagenation = async (page, tags = [], videoName = "") => {
+        console.log(shareVideo.value,loadElement.value)
+        return axios.get('/videopost/pagenatevideo/', { params: { "page": page, "tags": tags, "videoName": videoName } })
+          .then(data => {
+            if (data.data.results) {
+              console.log(data)
+              console.log(JSON.parse(data.data.results))
+              return JSON.parse(data.data.results).map(model => {
+                return model.fields
+              })
+            }
+            else {
+              return []
+            }
+          })
+          .catch(error => console.log('ページの取得に失敗しました: ', error))
+      }
+
     onMounted(async () => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-      videos.value = document.querySelectorAll(".infinite-item")
-      onSwipe()
+      await addVideos()
+      fadeUp()
+      currentVideoElement.value = document.querySelector(".infinite-item > video")
+      console.log(currentVideoElement.value)
+      console.log(videoElementVisibilities)
+      console.log(dataList.value)
+      console.log(currentVideoIndex.value)
+      console.log(dataList.value[currentVideoIndex.value])
+      setTimeout(() => {console.log(shareVideo.value,loadElement.value)},1000)
     });
 
-    const container = ref()
-    const videos = ref()
-    const currentVideo = ref(0)
-    const wheelDebounce = useDebounceFn((event) => {
-      console.log("wheel")
-      const direction = event.deltaY
-      if (direction > 0 && currentVideo.value < videos.value.length - 1) {
-        currentVideo.value++;
+    const
+      container = ref(),
+      videoElementVisibilities = reactive([]),
+      currentVideoElement = ref(undefined),
+      currentVideoIndex = computed(() => {
+        if (videoElementVisibilities.length && currentVideoElement.value) return videoElementVisibilities.findIndex(ele => ele.element === currentVideoElement.value)
+        else return 0
+      }),
+      scrollPlay = (value) => {
+        console.log(value.element)
+        const element = value.element
+        if (value.visibility) {
+          element.play()
+          currentVideoElement.value = element
+          if (element.src === blobVideos.at(-2)) {
+            console.log("load")
+            addVideos()
+          }
+        }
+        else element.pause()
       }
-      else if (direction < 0 && currentVideo.value > 0) {
-        currentVideo.value--;
+
+    const
+      clickTimer = ref(undefined),
+      togglePlayAndGood = event => {
+        if (!clickTimer.value) {
+          clickTimer.value = setTimeout(() => {
+            clickTimer.value = clearTimeout(clickTimer.value)
+            console.log(clickTimer.value)
+            const videoElement = event.target
+            videoElement.paused ? videoElement.play() : videoElement.pause()
+          }, 250)
+        }
+        else {
+          clickTimer.value = clearTimeout(clickTimer.value)
+          console.log(clickTimer.value)
+          const videoElement = event.target
+          console.log(event)
+          // TODO: データーべースのいいねの数を増やすこと
+
+        }
       }
 
-      console.log(currentVideo.value)
-      console.log(videos.value[currentVideo.value])
-      console.log(videos.value[currentVideo.value].offsetTop)
-      console.log(container.value.scrollTop)
-      console.log(videos.value[currentVideo.value].offsetTop + container.value.scrollTop)
-      container.value.scrollTo({
-        top: videos.value[currentVideo.value].offsetTop,
-        behavior: "smooth",
-      });
-    }, 1)
+    const
+      menu = ref(),
+      menuRight = ref(0),
+      swipeDirection = ref(true),
+      menuOpacity = ref(0),
+      movementRatio = ref(100),
+      menuOpenFrag = ref(true),
+      menuOpenlimit = 75,
+      transitionFlag = ref(true),
+      menuTimer = ref(undefined),
 
-    const onWheel = (event) => {
-      wheelDebounce(event)
-    }
+      menuOpen = () => {
+        menuOpacity.value = 1
+        menuOpenFrag.value = false
+        menuRight.value = 75
+      },
 
-    const page = ref(2)
-    const ifLoad = () => {
-      console.log("scroll")
-      console.log(Math.abs(videos.value[currentVideo.value].offsetTop))
-      console.log(Math.abs(videos.value[videos.value.length - 1].offsetTop))
-      if (Math.abs(videos.value[currentVideo.value].offsetTop) == Math.abs(videos.value[videos.value.length - 1].offsetTop)) {
-        loadVideos(page.value)
-        page.value++
+      menuClose = () => {
+        menuOpacity.value = 0
+        menuOpenFrag.value = true
+        menuRight.value = 0
+      },
+
+      setMenuTimer = () => {
+        if (!menuTimer.value) {
+          menuTimer.value = setTimeout(() => {
+            transitionFlag.value = false
+          }, 400)
+        }
+      },
+
+      clearMenuTimer = () => {
+        menuTimer.value = clearTimeout(menuTimer.value)
       }
-    }
 
-    const loadVideos = () => {
-      console.log("load")
-      console.log(page.value)
-      axios({
-        method: 'GET',
-        url: '?page=' + page.value,
-        responseType: '',
-      })
-        .then(data => {
-          console.log("success")
-          console.log(data.request.response)
-          const fragment = document.createRange().createContextualFragment(data.request.response);
-          console.log(fragment.querySelectorAll('.infinite-item'))
-          fragment.querySelectorAll('.infinite-item').forEach(node => {
-            container.value.append(node)
+    if (isSmartPhone()) {
+      useEventListener(window, "touchstart", event => {
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        const moveDistance = windowWidth / 8
+        const startX = event.touches[0].clientX
+        const startY = event.touches[0].clientY
+        console.log(event)
+        console.log(startX, windowWidth / 4)
+        console.log(!menuOpenFrag.value, startX > windowWidth / 4)
+        if ((!menuOpenFrag.value || startX > windowWidth / 4) && !tutorialFlag.value) {
+          const removeTouchMove = useEventListener(window, "touchmove", event => {
+            const moveAmountY = Math.abs(startY - event.touches[0].clientY)
+            if (moveAmountY > 50) {
+              swipeDirection.value = false
+            }
+            console.log(swipeDirection.value)
+            if (swipeDirection.value) {
+              const moveX = event.touches[0].clientX
+              const movementRatio = Math.min(100 - (moveX / windowWidth * 100), menuOpenlimit)
+              const movementX = startX - moveX
+              console.log(moveX)
+              console.log(movementRatio)
+              console.log(movementX, moveDistance)
+              if (menuOpenFrag.value) {
+                if (movementX >= moveDistance) {
+                  setMenuTimer()
+                  menuOpacity.value = 1
+                  menuRight.value = movementRatio
+                }
+              } else {
+                if (movementX < -moveDistance) {
+                  setMenuTimer()
+                  menuOpacity.value = 1
+                  menuRight.value = movementRatio
+                }
+              }
+            }
+            else { transitionFlag.value = true, menuClose() }
           })
-          videos.value = document.querySelectorAll(".infinite-item")
-          console.log(videos.value)
-        })
-        .catch(error => console.log('ページの取得に失敗しました: ', error))
-    }
-
-    const menu = ref()
-    const movementRatio = ref(100)
-    const menuMoveFrag = ref("close")
-
-    const onSwipe = () => {
-      const onTouchStart = (event) => {
-        const screenSize = screen.availWidth
-        const ScreenHeight = screen.availHeight
-        const moveDistance = screenSize / 8
-        const openDistance = 100 - (screenSize / 4 / screenSize * 100)
-        const startX = event.touches[0].pageX
-        const startY = event.touches[0].pageY
-
-        const onTouchMove = (event) => {
-          const moveX = event.touches[0].pageX
-          const moveY = event.touches[0].pageY
-          const movement = moveX - startX
-          console.log(startX, moveX, movement)
-          console.log(menu.value.offsetLeft, screenSize)
-          console.log(100 - (-movement / screenSize * 100))
-          console.log(openDistance, menu.value.style.left)
-          movementRatio.value = 100 - (-movement / screenSize * 100)
-          console.log(Math.abs(movement), moveDistance)
-          if (Math.abs(movement) >= moveDistance && ScreenHeight / 4 >= moveY - startY) {
-            if (movement < 0 && parseFloat(menu.value.style.left) <= openDistance) {
-              console.log("open")
-              menuMoveFrag.value = "open"
-              menu.value.animate([
-                { left: movementRatio.value + "%" },
-                { left: 50 + "%" }
-              ], 100)
-              setTimeout(() => {
-                menu.value.style.left = 50 + "%"
-              }, 100)
+          const removeTouchUp = useEventListener(window, "touchend", event => {
+            if (swipeDirection.value) {
+              const endX = event.changedTouches[0].clientX
+              const movedX = startX - event.changedTouches[0].clientX
+              clearMenuTimer()
+              transitionFlag.value = true
+              if (endX < windowWidth / 4 && Math.abs(movedX) < 5) {
+                console.log("tap close")
+                menuClose()
+              } else {
+                if (menuOpenFrag.value) {
+                  if (movedX >= moveDistance) {
+                    console.log("open")
+                    menuOpen()
+                  } else {
+                    console.log("closed")
+                    menuClose()
+                  }
+                } else {
+                  if (movedX > -moveDistance) {
+                    console.log("opened")
+                    menuOpen()
+                  } else {
+                    console.log("close")
+                    menuClose()
+                  }
+                }
+              }
+            } else {
+              swipeDirection.value = true
+              console.log(swipeDirection.value)
             }
-            else if (movement > 0 && parseFloat(menu.value.style.left) >= openDistance) {
-              console.log("close")
-              console.log(movementRatio.value - 50)
-              menuMoveFrag.value = "close"
-              menu.value.animate([
-                { left: movementRatio.value - 50 + "%" },
-                { left: 110 + "%" }
-              ], 100)
-              setTimeout(() => {
-                menu.value.style.left = 100 + "%"
-              }, 100)
-            }
-            else {
-              menuMoveFrag.value = "else"
-              menu.value.style.left = movementRatio.value <= 50 ? '50%' : movementRatio.value + "%";
-            }
-          }
+            console.log(event, "up")
+            removeTouchMove()
+            removeTouchUp()
+            removeTouchCansel()
+
+          })
+          const removeTouchCansel = useEventListener(window, "touchcansel", event => {
+            console.log("cansel", event)
+          })
         }
-
-        const onTouchEnd = () => {
-          if (parseFloat(menu.value.style.left) != 100 && parseFloat(menu.value.style.left) != 50 && menuMoveFrag.value == "else") {
-            console.log("end")
-            menuMoveFrag.value = "close"
-            menu.value.animate([
-              { left: movementRatio.value + "%" },
-              { left: 110 + "%" }
-            ], 100)
-            setTimeout(() => {
-              menu.value.style.left = 100 + "%";
-            }, 100)
-          }
-          window.removeEventListener("touchmove", onTouchMove)
-          window.removeEventListener("touchend", onTouchEnd)
-        }
-
-        window.addEventListener("touchmove", onTouchMove)
-        window.addEventListener("touchend", onTouchEnd)
-      }
-      window.addEventListener("touchstart", onTouchStart)
+      })
     }
 
     const toggle = () => {
@@ -157,13 +294,24 @@ const infiniteScroll = createApp({
     }
 
     return {
-      test,
+      shareLink,
+      fadeUpFlag,
+      fadeDownFlag,
+      tutorialFlag,
+      onTutorialClick,
+      tutorialFlag,
+      onTutorialClick,
+      loadElement,
+      dataList,
+      blobVideos,
       toggle,
       container,
-      videos,
-      onWheel,
-      ifLoad,
+      currentVideoIndex,
+      togglePlayAndGood,
       menu,
+      menuRight,
+      menuOpacity,
+      transitionFlag,
     }
   }
 });

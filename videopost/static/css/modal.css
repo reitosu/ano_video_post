@@ -1,0 +1,22 @@
+#Info {
+    display: none;
+}
+
+/* Path: videopost/static/css/modal.css */
+/* モーダルの横幅を変更 */
+.modal-container {
+    max-width: 600px;
+}
+
+/* モーダルボタンの色を変更 */
+.modal-close:after,
+.modal-close:before {
+    background-color: #ccc;
+}
+
+.modal-close:focus:after,
+.modal-close:focus:before,
+.modal-clsose:hover:after,
+.modal-close:hover:before {
+    background-color: #666;
+}

@@ -12,6 +12,8 @@ from tempfile import TemporaryDirectory
 from eth_account import Account
 from web3 import Web3
 from web3.middleware.geth_poa import geth_poa_middleware
+import requests
+from pprint import pprint
 
 
 class Nft:
@@ -27,7 +29,16 @@ class Nft:
             settings.STATIC_ROOT, "abi", "ExampleNFT.json")
         self.contract = Contract(self.wa, self.contract_address, self.abi_path)
 
-    def mint_nft(self, video: str, nft_owner_address: str) -> int:
+    def get_nft_metadata(self, token_id):
+        uri = self.contract.get_tokenURI(token_id)
+        print(uri[7:])
+        uri = f"https://nftstorage.link/ipfs/{uri[7:]}"
+        print(uri)
+        response = requests.get(uri)
+        pprint(json.loads(response.content.decode()))
+        return json.loads(response.content.decode())
+
+    def mint_nft(self, video: str, name: str, description: str, nft_owner_address: str) -> int:
         """
         minting nft
 
@@ -37,15 +48,17 @@ class Nft:
 
         returns:
             int : tokenID
+            str : address
         """
         # video = "w35dpkpfqntumtv26dvq"
         with TemporaryDirectory() as td:
             json_path = path.join(td, "json.json")
-            self.create_matadata(video, "test", "This is test nft.", json_path)
+            self.create_matadata(video, name, description, json_path)
             cid = self.store_ipfs(json_path)
         reciept = self.contract.mint_nft(nft_owner_address, cid)
-        token_id = int(dict(dict(reciept)["logs"][1])["data"], 16)
-        return token_id
+        token_id = int.from_bytes(dict(dict(reciept)["logs"][1])["data"], 'big')
+        address = dict(dict(reciept)["logs"][1])["address"]
+        return token_id, address
 
     def trade(self, from_address: str, to_address: str, token_id: int, price: int):
         self.contract.send_matic(to_address, from_address, price)

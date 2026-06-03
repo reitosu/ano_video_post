@@ -1,17 +1,23 @@
 const { ref } = Vue;
-export function useModal({ title="modal", message="default message", button="OK", }) {
+export function useModal({ title = "modal", message = "default message", button = "OK", }) {
     const createButton = (inputButton) => {
         const button = Array.isArray(inputButton) ? inputButton : [inputButton]
         let strButton = ""
         button.forEach((b) => {
+            if (b instanceof Object) {
+                if (b.noClose === true) {
+                    strButton += `<button id="modal${b}" class="modal-default-button noClose">${b}</button>`
+                }
+            }
             strButton += `<button id="modal${b}" class="modal-default-button">${b}</button>`
         })
         return strButton
     }
     const option = {
         "title": title,
-        "message": message,
+        "message": message.replaceAll("\n", "<br>"),
         "button": createButton(button)
+
     }
     const modalLayout = `
     <div class="modal-mask">
@@ -21,7 +27,7 @@ export function useModal({ title="modal", message="default message", button="OK"
             </div>
 
             <div class="modal-body">
-                <div>${option.message}</div>
+                <p>${option.message}</p>
             </div>
 
             <div class="modal-footer">
@@ -32,7 +38,7 @@ export function useModal({ title="modal", message="default message", button="OK"
     <style>
     .modal-mask {
         position: fixed;
-        z-index: 9998; 
+        z-index: 19998; 
         top: 0;
         left: 0;
         width: 100%;
@@ -84,10 +90,18 @@ export function useModal({ title="modal", message="default message", button="OK"
     const div = ref()
     const buttonElements = ref()
     const onClickButton = (event) => {
-        result.value = event.target.id.replace("modal","")
-        const customEvent = new CustomEvent('result', { detail: { "result":result.value } });
+        const i = document.querySelector(".modal-body").children[0].children
+        const selectValue = event.target.id.replace("modal", "")
+        if (i) {
+            result.value = { select: event.target.id.replace("modal", ""), input: i }
+        }
+        else {
+            result.value = event.target.id.replace("modal", "")
+        }
+        const customEvent = new CustomEvent('result', { detail: { "result": result.value } });
         document.dispatchEvent(customEvent)
-        closeModal()
+        console.log(event.target.className.split(" ").length)
+        if (event.target.className.split(" ").length < 2 || event.target.className.split(" ")[1] != "noClose") closeModal()
     }
     const result = ref(undefined)
     const openModal = () => {
@@ -110,7 +124,9 @@ export function useModal({ title="modal", message="default message", button="OK"
     const toggle = () => {
         show.value ? closeModal() : openModal()
     }
+    const modal = { open: openModal, close: closeModal, toggle: toggle, result: result }
     return {
+        modal,
         openModal,
         closeModal,
         toggle,

@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ─── Job 1: Lint ────────────────────────────────────────────────
+  lint:
+    name: Lint (flake8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: |
+          flake8 videopost/ env1/ manage.py \
+            --max-line-length=127 \
+            --exclude=migrations \
+            --statistics \
+            --count
+
+  # ─── Job 2: Security scan (SAST + SCA) ─────────────────────────
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security tools
+        run: pip install bandit[toml] pip-audit
+
+      - name: Decode requirements to Linux format
+        run: |
+          python - <<'PYEOF'
+          content = open('requirements.txt', 'rb').read()
+          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
+              text = content.decode('utf-16')
+          else:
+              text = content.decode('utf-8', errors='replace')
+          lines = [
+              l.strip() for l in text.splitlines()
+              if l.strip()
+              and not l.strip().startswith('#')
+              and 'pywin32' not in l.lower()
+          ]
+          open('requirements-ci.txt', 'w').write('\n'.join(lines))
+          print(f"Wrote {len(lines)} requirements to requirements-ci.txt")
+          PYEOF
+
+      - name: Run Bandit (SAST)
+        run: |
+          bandit -r videopost/ env1/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --format json \
+            --output bandit-results.json \
+            --exit-zero
+          bandit -r videopost/ env1/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --exit-zero
+
+      - name: Upload Bandit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-results
+          path: bandit-results.json
+          retention-days: 30
+
+      - name: Dependency vulnerability check (pip-audit)
+        run: |
+          pip-audit -r requirements-ci.txt \
+            --skip-editable \
+            --desc on \
+            --format columns \
+            || true
+
+  # ─── Job 3: Django system check ─────────────────────────────────
+  django-check:
+    name: Django Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies from requirements.txt
+        run: |
+          python - <<'PYEOF'
+          content = open('requirements.txt', 'rb').read()
+          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
+              text = content.decode('utf-16')
+          else:
+              text = content.decode('utf-8', errors='replace')
+          lines = [
+              l.strip() for l in text.splitlines()
+              if l.strip()
+              and not l.strip().startswith('#')
+              and 'pywin32' not in l.lower()
+          ]
+          open('requirements-ci.txt', 'w').write('\n'.join(lines))
+          PYEOF
+          pip install -r requirements-ci.txt
+
+      - name: Create CI .env
+        run: |
+          cat > .env << 'EOF'
+          DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production
+          CLOUDINARY_NAME=ci-dummy
+          CLOUDINARY_API_KEY=000000000000000
+          CLOUDINARY_API_SECRET=ci-dummy-secret
+          EOF
+
+      - name: Django system check
+        run: python manage.py check

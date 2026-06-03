@@ -1,5 +1,5 @@
 const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
-const { useIntervalFn } = VueUse;
+const { useIntervalFn, useMediaControls } = VueUse;
 import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
@@ -25,20 +25,32 @@ const check = createApp({
 
         const loadDraft = (event) => {
             console.log(event)
-            if (event.detail.result === "復元") {
-                console.log(draft.value)
-                const beforeWidth = draft.value.position.timelineWidth
-                tags.value = draft.value.tags
-                videoSrc.value = draft.value.video
+            if (event.detail.result.select === "復元") {
+                console.log(draftData.value)
+                const beforeWidth = draftData.value.position.timelineWidth
+                tags.value = draftData.value.tags
+                videoSrc.value = draftData.value.video
+                let ratio = 1
                 if (timelineWidth.value != beforeWidth) {
-                    const ratio = timelineWidth.value / beforeWidth
-                    materialLeft.value = draft.value.position.materialLeft * ratio
-                    materialWidth.value = draft.value.position.materialWidth * ratio
+                    ratio = timelineWidth.value / beforeWidth
+                }
+                materialLeft.value = draftData.value.position.materialLeft * ratio
+                materialWidth.value = draftData.value.position.materialWidth * ratio
+                if (materialLeft.value > 5) {
+                    currentTimePosition.value = ((materialLeft.value - 5) / timelineWidth.value) * 100
                 }
             }
         }
 
-        const draft = ref()
+        const
+            draftElement = ref(undefined),
+            draftData = computed(() => {
+                if (draftElement.value) {
+                    console.log(JSON.parse(draftElement.value.getAttribute("data-draft")))
+                    return JSON.parse(draftElement.value.getAttribute("data-draft"))
+                }
+                else return undefined
+            })
         const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["復元", "閉じる"] })
 
         onMounted(() => {
@@ -47,15 +59,19 @@ const check = createApp({
             document.addEventListener('wheel', noscroll, { passive: false });
             axios.defaults.xsrfCookieName = 'csrftoken'
             axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-            draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
-            console.log(draft.value)
+            console.log(document.querySelector("#draft").getAttribute("data-draft"))
             const width = timelineElement.value.clientWidth
             timelineWidth.value = width
-            materialWidth.value = width
-            if (draft.value.video) {
+            if (draftData.value.video) {
                 openModal()
                 document.addEventListener("result", loadDraft)
             }
+            // draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
+            // console.log(draft.value)
+            // if (draft.value.video) {
+            //     openModal()
+            //     document.addEventListener("result", loadDraft)
+            // }
             pause()
         });
 
@@ -69,10 +85,13 @@ const check = createApp({
             tags.value.splice(index, 1)
         }
 
-        const videoPreview = ref()
-        const videoSrc = ref()
-        const displayCurrentTime = reactive({ "current": "0.0", "duration": "0.0" })
-        const roundBase = ref(10)
+        const
+            videoPreview = ref(),
+            videoSrc = ref(),
+            videoControls = ref({ ...useMediaControls(videoPreview, { src: videoSrc }) }),
+            duration = computed(() => { return videoControls.value.duration }),
+            displayCurrentTime = reactive({ "current": "0.0", "duration": "0.0" }),
+            roundBase = ref(10)
 
         const selectVideo = (event) => {
             console.log(event.target.files[0])
@@ -88,7 +107,9 @@ const check = createApp({
                 .then(async response => {
                     console.log('sucsess')
                     const path = response.data.path
-                    videoSrc.value = path
+                    videoSrc.value = path + '?t=' + Date.now()
+                    materialWidth.value = timelineWidth.value
+                    console.log(videoControls.value)
                 }).catch(error => console.log('動画ファイルの読み込みに失敗しました。: ', error))
         }
 
@@ -99,16 +120,33 @@ const check = createApp({
             intervalList.value = createInterval(duration)
         }
 
+        const maxTime = computed(() => {
+            return displayCurrentTime.duration * (materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value
+        })
+        const minTime = computed(() => {
+            return displayCurrentTime.duration * (materialLeft.value - timelineLeft.value) / timelineWidth.value
+        })
         const { pause, resume, isActive: playFlag } = useIntervalFn(() => {
-            const current = roundDecimalPlace(videoPreview.value.currentTime, roundBase.value)
-            displayCurrentTime.current = current
+            if ((materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value * 100 <= currentTimePosition.value) pauseVideo()
             currentTimePosition.value = videoPreview.value.currentTime / displayCurrentTime.duration * 100
+            displayCurrentTime.current = currentTime.value
         }, 1)
 
         const playVideo = () => {
             if (videoPreview.value.readyState >= 1) {
-                resume()
-                videoPreview.value.play()
+                console.log(videoPreview.value.currentTime + 0.1, maxTime.value, currentTime.value)
+                const result = new Promise(function (resolve) {
+                    if (videoPreview.value.currentTime + 0.1 >= maxTime.value) {
+                        videoPreview.value.currentTime = minTime.value
+                        currentTimePosition.value = minTime.value
+                    }
+                    resolve("success")
+                })
+                result.then(res => {
+                    console.log(res)
+                    resume()
+                    videoPreview.value.play()
+                })
             }
         }
         const pauseVideo = () => {
@@ -137,30 +175,43 @@ const check = createApp({
         const timelineWidth = ref(97 + '%')
         const timelineLeft = ref(5)
 
+        const maxWidth = computed(() => {
+            return (materialLeft.value - timelineLeft.value + materialWidth.value) / timelineWidth.value * 100
+        })
+        const minWidth = computed(() => {
+            return (materialLeft.value - timelineLeft.value) / timelineWidth.value * 100
+        })
+        const restrictCurrent = (position) => {
+            return position >= maxWidth.value ? maxWidth.value : position <= minWidth.value ? minWidth.value : position;
+        }
+
+        const currentTime = computed(() => {
+            return roundDecimalPlace((currentTimePosition.value / 100) * displayCurrentTime.duration, roundBase.value)
+        })
+
         const moveCurrent = (event) => {
             console.log("click")
             const onMouseMove = (event) => {
                 let clickPosition = ((event.pageX - timelineElement.value.offsetLeft) / timelineWidth.value) * 100;
-                const max = (materialLeft.value - timelineLeft.value + materialWidth.value) / timelineWidth.value * 100
-                const min = (materialLeft.value - timelineLeft.value) / timelineWidth.value * 100
-                clickPosition = clickPosition >= max ? max : clickPosition <= min ? min : clickPosition;
+                clickPosition = restrictCurrent(clickPosition);
                 currentTimePosition.value = clickPosition
-                const currentTime = (clickPosition / 100) * displayCurrentTime.duration
-                displayCurrentTime.current = roundDecimalPlace(currentTime, roundBase.value)
-                videoPreview.value.currentTime = currentTime
+                console.log(currentTime.value)
+                videoPreview.value.currentTime = currentTime.value
+                displayCurrentTime.current = currentTime.value
             }
             const onMouseUp = () => {
                 window.removeEventListener("mousemove", onMouseMove)
                 window.removeEventListener("mouseup", onMouseUp)
             }
             const clickPosition = ((event.pageX - timelineElement.value.offsetLeft) / timelineWidth.value) * 100;
-            currentTimePosition.value = clickPosition >= 100 ? 100 : clickPosition <= 0 ? 0 : clickPosition;
+            currentTimePosition.value = restrictCurrent(clickPosition);
+            videoPreview.value.currentTime = currentTime.value
             window.addEventListener("mousemove", onMouseMove)
             window.addEventListener("mouseup", onMouseUp)
         }
 
         const material = ref()
-        const materialWidth = ref()
+        const materialWidth = ref(0)
         const materialLeft = ref(5)
         const leftHandle = ref()
         const rightHandle = ref()
@@ -173,13 +224,26 @@ const check = createApp({
                 const moveX = event.pageX + startX
                 const timelineRight = timelineLeft.value + timelineWidth.value
                 materialLeft.value = moveX <= timelineLeft.value ? timelineLeft.value : moveX + materialWidth.value >= timelineRight ? timelineRight - materialWidth.value : moveX;
+                const materialLeftRatio = ((materialLeft.value - 5) / timelineWidth.value) * 100
+                const materialRightRatio = ((materialLeft.value + materialWidth.value - 5) / timelineWidth.value) * 100
+                console.log(currentTimePosition.value, materialLeftRatio, materialRightRatio)
+                if (currentTimePosition.value <= materialLeftRatio) {
+                    currentTimePosition.value = materialLeftRatio
+                    console.log(currentTime.value)
+                    videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
+                }
+                else if (currentTimePosition.value >= materialRightRatio) {
+                    currentTimePosition.value = materialRightRatio
+                    videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
+                }
             }
             const onMouseUp = () => {
                 window.removeEventListener("mousemove", onMouseMove)
                 window.removeEventListener("mousedown", onMouseUp)
             }
             const startX = materialLeft.value - event.pageX
-
             window.addEventListener("mousemove", onMouseMove)
             window.addEventListener("mouseup", onMouseUp)
         }
@@ -208,16 +272,22 @@ const check = createApp({
             const timelineRight = timelineLeft.value + timelineWidth.value
             const current = (currentTimePosition.value / 100) * timelineWidth.value
             if (next.direction == "l" && timelineLeft.value <= materialLeft.value + amountX && materialWidth.value - amountX >= 0) {
-                materialWidth.value -= amountX
-                materialLeft.value += amountX
-                if (current <= materialLeft.value) {
+                if (materialWidth.value - amountX >= timelineWidth.value / parseFloat(displayCurrentTime.duration)) {
+                    materialWidth.value -= amountX
+                    materialLeft.value += amountX
+                }
+                if (current <= materialLeft.value || current >= materialLeft.value + materialWidth.value) {
                     currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
+                    videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
             }
             else if (next.direction == "r" && timelineRight >= materialLeft.value + materialWidth.value + amountX) {
-                materialWidth.value += amountX
+                materialWidth.value += materialWidth.value + amountX >= timelineWidth.value / parseFloat(displayCurrentTime.duration) ? amountX : 0;
                 if (current >= materialLeft.value + materialWidth.value) {
                     currentTimePosition.value = ((materialLeft.value - timelineLeft.value + materialWidth.value) / timelineWidth.value) * 100
+                    videoPreview.value.currentTime = currentTime.value
+                    displayCurrentTime.current = currentTime.value
                 }
             }
         }
@@ -239,16 +309,6 @@ const check = createApp({
                 }).catch(error => console.log('タグデータの取得に失敗しました。: ', error))
         }
 
-        const slideUp = (element) => {
-            if (tagDatas.length === 0) getTagDatas();
-            tagInputElement.value.focus({ preventScroll: true })
-            element.style.transform = "translateY(0%)"
-        }
-
-        const slideDown = (element) => {
-            element.style.transform = "translateY(100%)"
-        }
-
         const predict = (event) => {
             tagInputElement.value.focus({ preventScroll: true })
             inputTag.value = event.target.textContent
@@ -262,9 +322,84 @@ const check = createApp({
 
         const { results } = useFuse(inputTag, tagDatas)
 
+        const { openModal: trimModal } = useModal({ title: "注意", message: "12秒以内にしてください。", button: "OK" })
+        const { openModal: loadModal, closeModal } = useModal({ title: "ロード", message: "動画の準備中です。", button: "" })
+
+        const trim = () => {
+            const startTime = (materialLeft.value - timelineLeft.value) / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            const trimTime = materialWidth.value / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            console.log(trimTime)
+            if (trimTime <= 12) {
+                console.log("in the 12sec.")
+                loadModal()
+                const endTime = startTime + trimTime
+                const formData = new FormData()
+                formData.append('videoPath', videoSrc.value)
+                formData.append('startTime', roundDecimalPlace(startTime, roundBase.value));
+                formData.append('endTime', roundDecimalPlace(endTime, roundBase.value));
+                formData.append('trimTime', roundDecimalPlace(trimTime, roundBase.value))
+                axios({
+                    method: 'POST',
+                    url: '/videopost/trim/',
+                    responseType: 'json',
+                    data: formData,
+                })
+                    .then(async response => {
+                        console.log('sucsess')
+                        console.log(response.data.path)
+                        const path = response.data.path
+                        lastCheckVideo.value.src = path
+                        closeModal()
+                        if (tagDatas.length === 0) getTagDatas();
+                    }).catch(error => console.log('動画のアップロードに失敗しました。: ', error))
+                togglelastcheck()
+            }
+            else {
+                trimModal()
+            }
+            console.log(roundDecimalPlace(startTime, roundBase.value), roundDecimalPlace(startTime + trimTime, roundBase.value))
+        }
+
+        const post = () => {
+            const formData = new FormData()
+            formData.append("path", lastCheckVideo.value.src)
+            formData.append("isDeleteOneDay", isDeleteOneDay.value)
+            formData.append("userId", localStorage.getItem("userId"))
+            formData.append("tags", tags.value)
+            axios({
+                method: 'POST',
+                url: '/videopost/posting/',
+                responseType: 'json',
+                data: formData,
+            })
+                .then(async response => {
+                    console.log('sucsess')
+                    console.log(response)
+                }).catch(error => console.log('動画のアップロードに失敗しました。: ', error))
+        }
+
+        const lastCheckVideo = ref()
+        const togglelastcheck = () => {
+            const element = document.querySelector("#lastcheck")
+            console.log(element.style.left)
+            if (element.style.left == '0px') {
+                console.log("close")
+                element.style.left = "100%"
+            }
+            else {
+                console.log("open")
+                element.style.left = 0
+            }
+        }
+
+        const isDeleteOneDay = ref(false)
+
+
         return {
+            togglelastcheck,
             results,
             loadDraft,
+            draftElement,
             tags,
             tagsWidth,
             tagDelete,
@@ -296,10 +431,12 @@ const check = createApp({
             tagInputElement,
             inputTag,
             historys,
-            slideUp,
-            slideDown,
             predict,
             addTag,
+            trim,
+            post,
+            lastCheckVideo,
+            isDeleteOneDay,
         }
     }
 });

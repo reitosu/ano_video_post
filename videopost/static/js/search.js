@@ -1,147 +1,99 @@
-<<<<<<< HEAD
-const { createApp, ref, reactive, watch, computed, onMounted } = Vue;
-const { useFuse } = VueUse;
+const { createApp, ref, reactive, computed, onMounted, watch, watchEffect, nextTick } = Vue;
+const { useDebounceFn, useElementVisibility, useEventListener, onClickOutside } = VueUse;
+import { fetchVideo, isSmartPhone } from './utils.js'
+import { useFuse } from './fuseComponent.js'
 
 const search = createApp({
-  setup() {        
-    const getTagDatas = () => {
-      axios({
-          method: 'POST',
-          url: '/videopost/getTags/',
-          responseType: 'json',
+  setup() {
+    const
+      loadElement = ref(undefined),
+      dataList = computed(() => {
+        if (loadElement.value) {
+          const fieldsList = JSON.parse(loadElement.value.getAttribute("data-tags"))
+            .map(model => {
+              const fields = { name: model.pk, ...model.fields }
+              return fields
+            })
+          return fieldsList
+        }
+        else {
+          return undefined
+        }
+      }),
+      tagNames = computed(() => {
+        if (dataList.value) {
+          return dataList.value.map(record => {
+            console.log(record)
+            return record.name
+          })
+        }
+        else { return [] }
       })
-          .then(async response => {
-              const tagsNameList = response.data.tags
-              return tagsNameList
-          }).catch(error => console.log('タグデータの取得に失敗しました。: ', error))
-  }
+
     onMounted(() => {
-      axios.defaults.xsrfCookieName = 'csrftoken'
-      axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-    });
+      console.log(dataList.value)
+      console.log(tagNames.value)
+    })
 
+    const tagInputElement = ref()
+    const
+      inputTag = ref(""),
+      historys = reactive([]),
+      searchTags = reactive([])
 
+    const
+      predict = event => {
+        console.log(event.target.innerText)
+        inputTag.value = event.target.innerText
+      },
 
-    const items = reactive(["1","テスト1","ヤドン"],["2","テスト2","カビゴン"],["3","テスト3","リオル"])
+      addSearchTag = () => {
+        if (inputTag.value) {
+          historys.unshift(inputTag.value)
+          searchTags.push({ name: inputTag.value, flag: false })
+          inputTag.value = ""
+        }
+      },
 
-    const item_all = reactive(["all1","all2","all3"])
-    const item_hot = reactive(["hot1","hot2","hot3"])
-    const item_new = reactive(["new1","new2","new3"])
-    const test = ref("test message")
+      toggleTagBefore = (tag) => {
+        console.log(tag)
+        tag.flag = !tag.flag
+      },
 
-    const cancel = (arg) => {
-      console.log('canceled', arg)
-    }
-
-    const search = () => {
-      console.log("searched")
-    }
-
-    const change = (event) => {
-      console.log(input.value, event)
-    }
-    
-    const input = ref("")
-    computed:[
-      search=function(){
-
+      deleteTag = (tag) => {
+        if (tag.flag) {
+          if (searchTags.indexOf(tag) >= 0) searchTags.splice(searchTags.indexOf(tag), 1)
+        }
       }
 
-    ]
+    const { results } = useFuse(inputTag, tagNames)
+
+    const
+      form = ref(),
+      search = () => {
+        if (searchTags.length) {
+          form.value.submit()
+        }
+        else {
+          alert("1つ以上")
+        }
+      }
 
     return {
-      items,
-      item_all,
-      item_hot,
-      item_new,
-      test,
-      cancel,
+      loadElement,
+      tagInputElement,
+      inputTag,
+      historys,
+      searchTags,
+      predict,
+      addSearchTag,
+      toggleTagBefore,
+      deleteTag,
+      results,
+      form,
       search,
-      change,
-      input,
-      testdata,
     }
   }
 });
 search.config.compilerOptions.delimiters = ['[[', ']]'];
-search.mount('#search')
-=======
-var tags = [
-    "hou",
-    "ren",
-    "sou",
-    "houchi",
-    "renkyu",
-    "soutai",
-    "h",
-    "r",
-    "s"
-  ];
-
-  var dropdownMenu = document.getElementById("dropdown-menu");
-  var tagList = document.getElementById("tag-list");
-
-  function populateDropdownMenu(tags) {
-    dropdownMenu.innerHTML = "";
-
-    if (tags.length > 0) {
-      tags.forEach(function(tag) {
-        var listItem = document.createElement("li");
-        listItem.textContent = tag;
-        dropdownMenu.appendChild(listItem);
-      });
-
-      dropdownMenu.style.display = "block";
-    } else {
-      dropdownMenu.style.display = "none";
-    }
-  }
-
-  function populateTagList(tags) {
-    tagList.innerHTML = "";
-
-    if (tags.length > 0) {
-      tags.forEach(function(tag) {
-        var listItem = document.createElement("li");
-        listItem.textContent = tag;
-        tagList.appendChild(listItem);
-      });
-
-      tagList.style.display = "block";
-    } else {
-      tagList.style.display = "none";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function() {
-    var searchInput = document.getElementById("search-input");
-    var searchButton = document.getElementById("search-button");
-
-    searchButton.addEventListener("click", function() {
-      var searchText = searchInput.value.trim();
-
-      if (searchText !== "") {
-        var matchingTags = tags.filter(function(tag) {
-          return tag.includes(searchText);
-        });
-
-        populateTagList(matchingTags);
-      }
-    });
-
-    searchInput.addEventListener("input", function() {
-      var searchText = searchInput.value.trim();
-
-      if (searchText === "") {
-        dropdownMenu.style.display = "none";
-        dropdownMenu.innerHTML = "";
-      } else {
-        var matchingTags = tags.filter(function(tag) {
-          return tag.includes(searchText);
-        });
-
-        populateDropdownMenu(matchingTags);
-      }
-    });
-  });
->>>>>>> 8bd16c2 (サーチ画面の追加)
+search.mount('#app')

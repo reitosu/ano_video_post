@@ -1,30 +1,362 @@
-const { createApp, ref, reactive, watch, computed, onMounted } = Vue;
-const { useDebounceFn } = VueUse;
+const { createApp, ref, reactive, watch, watchEffect, computed, onMounted, nextTick } = Vue;
+const { useDebounceFn, onClickOutside, useToggle, useEventListener, computedAsync, useShare } = VueUse;
+import { useModal } from "./modalComponent.js";
+import { fetchVideos, restrictAddVideoElement, restrictContextMenu, restrictDownload, restrictAddAttribute } from './utils.js'
+import { checkUserId } from "./assign-user-id.js"
+import { aes_gcm_encrypt, aes_gcm_decrypt } from "./aescrypt.js"
 
 const account = createApp({
     setup() {
-        onMounted(() => {
-        })
-        const opt = {
-            forceInjectProvider: typeof window.ethereum === 'undefined',
-        };
+        const { share, isSupported } = useShare()
+        const shareLink = async (event) => {
+            event.preventDefault()
+            const data = {
+                url: "https://127.0.0.1:8000/videopost/account",
+                text: "test url",
+                title: "test title",
+            }
+            share(data)
+        }
+        const videoElements = ref([])
+        restrictContextMenu()
+        restrictDownload()
+        restrictAddVideoElement(videoElements)
+        restrictAddAttribute(videoElements)
 
-        //const MMSDK = ref(new window.MetaMaskSDK.MetaMaskSDK(opt));
-        //const ethereum = ref(MMSDK.value.getProvider())
+        const
+            csrf = ref(),
+            loadName = ref(),
+            loadAddress = ref(),
+            saveNameOrAdress = () => {
+                const
+                    data = new FormData(),
+                    isName = !!name.value && loadName.value !== name.value,
+                    isAddress = !!address.value && loadAddress.value !== address.value
+                console.log(isName, isAddress)
+                if (isName || isAddress) {
+                    data.append('csrfmiddlewaretoken', csrf.value)
+                    if (isName) {
+                        data.append('name', name.value)
+                        loadName.value = name.value
+                    }
+                    if (isAddress) {
+                        data.append('address', address.value)
+                        loadAddress.value = address.value
+                    }
+                    console.log(Object.fromEntries(data.entries()))
+                    navigator.sendBeacon("/videopost/savenameoraddress/", data)
+                    window.location.reload(true)
+                }
+            }
+
+        const
+            loadElement = ref(),
+            dataList = computed(() => {
+                if (loadElement.value) {
+                    const fieldsList = JSON.parse(loadElement.value.getAttribute("data-test"))
+                        .map(model => {
+                            const fields = model.fields
+                            return fields
+                        })
+                    console.log(fieldsList)
+                    return fieldsList
+                }
+                else {
+                    return undefined
+                }
+            }),
+
+            blobVideos = reactive([]),
+
+            nftList = computed(() => {
+                if (loadElement.value) {
+                    const fieldsList = JSON.parse(loadElement.value.getAttribute("data-nft")).map(model => {
+                        const fields = model.fields
+                        inputMatic.push(fields.price)
+                        return fields
+                    })
+                    console.log(fieldsList)
+                    return fieldsList
+                }
+                else {
+                    return undefined
+                }
+            }),
+            blobNfts = reactive([])
+
+        const debouncedSave = useDebounceFn(saveNameOrAdress, 1000)
+        onMounted(async () => {
+            axios.defaults.xsrfCookieName = 'csrftoken'
+            axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+            window.addEventListener('beforeunload', saveNameOrAdress)
+            csrf.value = document.querySelector('input[name="csrfmiddlewaretoken"]').value
+            const load = document.querySelector("#load")
+            name.value = loadName.value = load.getAttribute("data-name")
+            address.value = loadAddress.value = load.getAttribute("data-address")
+            console.log(JSON.parse(load.getAttribute("data-test")))
+            blobVideos.push(...(await fetchVideos(dataList.value)).map(value => { return value.value }))
+            blobNfts.push(...((await fetchVideos(nftList.value)).map(value => { return value.value })))
+            window.ethereum.on('accountsChanged', request)
+        })
+
+        const address = ref()
 
         const request = () => {
-            ethereum.request({ method: 'eth_requestAccounts' })
-                .then(address => {
-                    console.log(address)
-                })
-            if (typeof window.ethereum !== 'undefined') {
-                console.log('MetaMask is installed!');
-            };
-            console.log("not")
+            console.log(typeof window.ethereum)
+            if (typeof window.ethereum !== "undefined") {
+                ethereum
+                    .request({ method: "eth_requestAccounts" })
+                    .then(async (accounts) => {
+                        const currentaccount = accounts[0]
+                        console.log(accounts)
+                        console.log(currentaccount)
+                        console.log(address.value)
+                        address.value = await currentaccount
+                        console.log(address.value)
+                        await debouncedSave()
+                        window.ethereum.request({
+                            method: "wallet_addEthereumChain",
+                            params: [{
+                                chainId: "0x89",
+                                rpcUrls: ["https://polygon-rpc.com/"],
+                                chainName: "Matic Mainnet",
+                                nativeCurrency: {
+                                    name: "MATIC",
+                                    symbol: "MATIC",
+                                    decimals: 18
+                                },
+                                blockExplorerUrls: ["https://polygonscan.com/"]
+                            }]
+                        });
+                    }).catch((error) => {
+                        // Handle error
+                        console.log(error, error.code);
+
+                        // 4001 - The request was rejected by the user
+                        // -32602 - The parameters were invalid
+                        // -32603- Internal error
+                    });
+            } else {
+                window.open("https://metamask.io/download/", "_blank");
+            }
         };
 
+        const nameElement = ref()
+        const name = ref()
+        const isSelected = ref(false)
+        const stop = ref()
+        const changeName = () => {
+            isSelected.value = true
+            stop.value = onClickOutside(nameElement, change)
+        }
+        const change = event => {
+            console.log(event)
+            console.log(loadName.value, name.value, loadAddress.value, address.value)
+            isSelected.value = false
+            debouncedSave()
+            stop.value()
+        }
+
+        const { result: deleteResult, openModal: checkDelete } = useModal({ title: "", message: "本当に削除しますか？", button: ["ok", "cancel"] })
+
+        const deleteVideo = event => {
+            checkDelete()
+            const cleanup = useEventListener(document, 'result', () => {
+                console.log(deleteResult.value)
+                if (deleteResult.value.select === "ok") {
+                    const cardElement = event.target.parentNode.parentNode
+                    const videoName = cardElement.className.split(" ")[1]
+                    console.log(document.querySelectorAll(`#tab-content2.${videoName}`), document.querySelectorAll(`#tab-content2.${videoName}`).length)
+                    if (document.querySelectorAll(`#tab-content2.${videoName}`).length < 1) {
+                        console.log(videoName)
+                        const data = new FormData()
+                        data.append('videoName', videoName)
+                        axios.post('/videopost/deletevideo/', data)
+                            .then(response => {
+                                console.log(response)
+                                cardElement.remove()
+                            })
+                            .catch(error => console.log("削除出来ませんでした。" + error))
+                    }
+                    else {
+                        alert("NFT化されているため削除することが出来ません。")
+                    }
+                }
+                else {
+                    console.log("cancel")
+                }
+                cleanup()
+            })
+        }
+
+        const { modal: metadataModal } = useModal({ title: "", message: '変更することは出来ません。<form>name: <input type="text" style="width:100%;" required></input>description: <textarea type="text" style="width:100%; resize:none;" required></textarea><button class="modal-default-button noClose">mint</button><button class="modal-default-button">cancel</buttom></form>', button: "" })
+
+        const mint = event => {
+            metadataModal.open()
+            const videoName = event.target.parentNode.parentNode.parentNode.className.split(" ")[1]
+            console.log(event.target.parentNode.parentNode.parentNode.className.split(" ")[1])
+            const submited = function (event, videoName) {
+                event.preventDefault()
+                metadataModal.close()
+                const name = event.target.childNodes[1].value
+                const description = event.target.childNodes[3].value
+                console.log(name, description, videoName)
+                const data = new FormData()
+                data.append("videoName", videoName)
+                data.append("name", name)
+                data.append("description", description)
+                data.append("walletAddress", address.value)
+                const { modal: metadataCheckModal } = useModal({ title: "確認", message: `name: ${name}\ndescription: ${description}\nでよろしいですか？`, button: ["ok", "cancel"] })
+                metadataCheckModal.open()
+                const cleanup = useEventListener(document, "result", event => {
+                    cleanup()
+                    console.log(metadataCheckModal.result.value)
+                    if (metadataCheckModal.result.value.select == "ok") {
+                        console.log("mint")
+                        console.log(Object.fromEntries(data.entries()))
+                        axios.post('/videopost/mintvideo/', data)
+                    }
+                })
+            }
+            const cleanup = useEventListener(window, "submit", event => {
+                submited(event, videoName)
+                cleanup()
+            })
+        }
+
+        //const publicFlags = reactive([])
+        const publicFlags = computed(() => {
+            return dataList.value.map(model => {
+                return model.ispublic
+            })
+        })
+        const changePublicNPrivate = async event => {
+            console.log(publicFlags.value)
+            console.log(event.target.classList)
+            const target = event.target
+            const loader = target.parentNode.childNodes[2].classList
+            console.log(loader)
+            loader.add("loader")
+            const targetClasses = target.classList
+            const index = parseInt(targetClasses[1])
+            console.log(index)
+            console.log(parseInt(index))
+            console.log(publicFlags[index])
+            const flag = !publicFlags[index]
+            console.log(flag)
+            const videoName = dataList.value[index].video.split("/")[2]
+            console.log(videoName)
+            const data = new FormData()
+            data.append("videoName", videoName)
+            if (flag) {
+                const response = await axios.post('/videopost/changepublic/', data)
+                    .catch(error => console.log(error))
+                console.log(response.data.response)
+            }
+            else {
+                const response = await axios.get('/videopost/changepublic/', { params: { "videoName": videoName } })
+                    .catch(error => console.log(error))
+                console.log(response.data.response)
+            }
+            loader.remove("loader")
+            publicFlags[index] = flag
+            console.log(publicFlags[index])
+            //console.log(event.target.parentNode.parentNode.className.split(" ")[1])
+            //ajaxChange(flag)
+        }
+
+        const playVideo = event => {
+            let element = event.target
+            while (element.className.split(" ")[0] !== "card") {
+                console.log(element)
+                element = element.parentNode
+            }
+            console.log(element.childNodes[2].childNodes[0])
+            element.childNodes[2].childNodes[0].requestFullscreen()
+        }
+        useEventListener(document, 'fullscreenchange', event => {
+            if (!document.fullscreenElement) {
+                event.target.pause()
+            }
+        })
+
+        const sellNft = index => {
+            const price = inputMatic[index]
+            if (price > 0) {
+                console.log(index)
+                console.log(nftList.value[index].video, inputMatic[index])
+                const data = new FormData()
+                data.append('video', nftList.value[index].video)
+                data.append('price', price)
+                axios.post('/videopost/sellandcancelnft/', data)
+                    .then(value => {
+                        const price = value.data.res
+                        nftList.value[index].price = price
+                        inputMatic[index] = price
+                    })
+                    .catch(error => { console.log(error) })
+            }
+            else {
+                alert("数値を入力してください。")
+            }
+        }
+
+        const cancelSellNft = index => {
+            const data = new FormData()
+            data.append('video', nftList.value[index].video)
+            axios.post('/videopost/sellandcancelnft/', data)
+                .then(value => {
+                    console.log(value.data.res)
+                    nftList.value[index].price = 0
+                    inputMatic[index] = 0
+                })
+        }
+
+        const inputMaticElement = reactive([])
+        const inputMaticMin = ref(0)
+        const inputMatic = reactive([])
+        const validate = index => {
+            inputMatic[index] = inputMatic[index] ? parseFloat(String(inputMatic[index]).substring(0, 6)) : 0
+        }
+
+        const increaseNumber = (index) => {
+            console.log(inputMatic[index])
+            inputMatic[index] = (Math.floor(inputMatic[index] * 10) + 1) / 10
+        }
+
+        const decreaseNumber = (index) => {
+            console.log(inputMatic[index])
+            inputMatic[index] = Math.max((Math.ceil(inputMatic[index] * 10) - 1) / 10, inputMaticMin.value)
+        }
+
+
         return {
+            shareLink,
+            videoElements,
+            loadElement,
+            blobVideos,
+            dataList,
+            nftList,
+            blobNfts,
+            address,
             request,
+            nameElement,
+            name,
+            isSelected,
+            changeName,
+            change,
+            deleteVideo,
+            mint,
+            publicFlags,
+            changePublicNPrivate,
+            playVideo,
+            sellNft,
+            cancelSellNft,
+            inputMaticElement,
+            inputMatic,
+            validate,
+            increaseNumber,
+            decreaseNumber,
         };
     }
 });

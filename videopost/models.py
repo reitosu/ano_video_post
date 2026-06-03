@@ -4,30 +4,50 @@ from django.utils import timezone
 # Create your models here.
 
 
-class whenClickQuerySet(models.QuerySet):
+class TagQuerySet(models.QuerySet):
+    def append_tag(self, tag):
+        if type(tag) is str:
+            tag = [tag]
+        self.bulk_create(objs=[Tag(name=t) for t in tag], ignore_conflicts=True)
+        return list(Tag.objects.filter(name__in=tag))
+
+
+class WhenClickQuerySet(models.QuerySet):
     def get_tag_click_value_per_day(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            li = list(query_set.filter(date__gte=one_day_ago, date__lte=now).values(
-                "tagid").annotate(models.Count("tagid")))
-            di = {}
-            list(map(lambda x: di.update({x["tagid"]: x["tagid__count"]}), li))
-            return di
+            return self.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
         else:
-            return query_set.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
+            li = list(self.filter(date__gte=one_day_ago, date__lte=now).values(
+                "tagid").annotate(models.Count("tagid")))
+            return {x["tagid"]: x["tagid__count"] for x in li}
 
 
 class VideoClickQuerySet(models.QuerySet):
     def get_tag_upload_value(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            return list(query_set.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
+            return self.filter(uploaded__gte=one_day_ago, uploaded__lte=now, tags__name=tag_name).count()
         else:
-            return query_set.filter(tagid__exact=tag_name).count()
+            return list(self.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
+
+
+class Account(models.Model):
+    accountid = models.CharField(max_length=400, primary_key=True)
+    walletaddress = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=30, blank=True)
+
+
+class DeviceMap(models.Model):
+    accountid = models.ForeignKey(Account, on_delete=models.CASCADE)
+    device = models.CharField(max_length=15)
+
+
+class BrowserMap(models.Model):
+    accountid = models.ForeignKey(Account, on_delete=models.CASCADE)
+    browser = models.CharField(max_length=15)
 
 
 class Tag(models.Model):
@@ -35,47 +55,40 @@ class Tag(models.Model):
     totalvalue = models.IntegerField(default=0)
     clickvalue = models.IntegerField(default=0)
 
+    objects = TagQuerySet.as_manager()
+
+
+class VideoQuerySet(models.QuerySet):
+    def get_nft_metadata(self):
+        return
+
 
 class Video(models.Model):
-    title = models.CharField(max_length=30, unique=True)
+    title = models.CharField(max_length=200, blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     video = CloudinaryField(resource_type='video')
+    tags = models.ManyToManyField(Tag, related_name="tags", blank=True)
     uploaded = models.DateTimeField(auto_now_add=True)
-    uploader = models.CharField(max_length=50)
+    uploader = models.ManyToManyField(
+        Account, related_name="uploader", blank=True)
+    tokenid = models.IntegerField(null=True, blank=True)
+    address = models.CharField(max_length=200, blank=True)
+    price = models.FloatField(default=0)
+    onedaydelete = models.BooleanField(default=False)
+    ispublic = models.BooleanField(default=True)
+    views = models.IntegerField(default=0)
+    thumbsup = models.IntegerField(default=0)
+
+    objects = VideoQuerySet.as_manager()
 
 
 class TagMap(models.Model):
-    videoid = models.ForeignKey(
-        "Video", on_delete=models.CASCADE, to_field="title")
+    videoid = models.ForeignKey("Video", on_delete=models.CASCADE)
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
 
 
-class whenClick(models.Model):
+class WhenClick(models.Model):
     date = models.DateTimeField(auto_now_add=True)
-<<<<<<< HEAD
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
-=======
-    tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
-<<<<<<< HEAD
-    
-    def get_tag_click_value_per_day(self,tag_name=""):
-        now = timezone.now()
-        one_day_ago = now - timezone.timedelta(days=1)
-        if tag_name:
-            li = list(self.objects.filter(date__gte=one_day_ago, date__lte=now).values("tagid").annotate(models.Count("tagid")))
-            di = {}
-            list(map(lambda x: di.update({x["tagid"]:x["tagid__count"]}), li))
-            return di
-        else:
-            return self.objects.filter(date__gte=one_day_ago, date__lte=now,tagid__exact=tag_name).count()
-            
-    def get_tag_click_value(self,tag_name=""):
-        if tag_name:
-            di = {}
-            list(map(lambda x: di.update({x["tagid"]:x["tagid__count"]}),list(self.objects.values('tagid').annotate(models.Count("tagid")))))
-            return di
-        else:
-            self.objects.filter(tagid__exact=tag_name).count()
->>>>>>> cedf199cb3e896a44663605c1013de472d640073
-=======
-    query = whenClickQuerySet.as_manager()
->>>>>>> 26cc031aad279610e7fe70c19e19e8d27cf903a6
+
+    objects = WhenClickQuerySet.as_manager()
