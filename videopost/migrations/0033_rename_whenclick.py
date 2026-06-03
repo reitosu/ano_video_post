@@ -6,9 +6,4 @@ class Migration(migrations.Migration):
         ("videopost", "0032_alter_video_price"),
     ]
 
-    operations = [
-        migrations.RenameModel(
-            old_name="whenClick",
-            new_name="WhenClick",
-        ),
-    ]
+    operations = []
