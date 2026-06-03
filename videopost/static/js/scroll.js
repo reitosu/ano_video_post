@@ -93,7 +93,7 @@ const infiniteScroll = createApp({
             }
           })
           // v-for で追加された <i data-lucide> タグをアイコンに変換
-          lucide.createIcons()
+          if (typeof lucide !== 'undefined') lucide.createIcons()
           console.log(videoElementVisibilities)
         }, 1000)
       },

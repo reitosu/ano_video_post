@@ -66,8 +66,8 @@
     <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide Icons CDN（UMDビルドを明示指定して window.lucide を生成） -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <title>トップページ</title>
   </head>
   <body class="bg-ano-bg font-inter overflow-hidden">
