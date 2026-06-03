@@ -6,17 +6,10 @@ from django.utils import timezone
 
 class TagQuerySet(models.QuerySet):
     def append_tag(self, tag):
-        """
-        append tag to TagModel
-
-        Args:
-            tag (str or list): tag to add
-        """
         if type(tag) is str:
             tag = [tag]
-        tag_objects = [Tag(name=tag_name) for tag_name in tag]
-        self.bulk_create(objs=tag_objects, ignore_conflicts=True)
-        return tag_objects
+        self.bulk_create(objs=[Tag(name=t) for t in tag], ignore_conflicts=True)
+        return list(Tag.objects.filter(name__in=tag))
 
 
 class WhenClickQuerySet(models.QuerySet):
@@ -71,9 +64,6 @@ class Tag(models.Model):
 
 class VideoQuerySet(models.QuerySet):
     def get_nft_metadata(self):
-        """
-        get nft metadata
-        """
         return
 
 
@@ -93,13 +83,15 @@ class Video(models.Model):
     views = models.IntegerField(default=0)
     thumbsup = models.IntegerField(default=0)
 
+    objects = VideoQuerySet.as_manager()
+
 
 class TagMap(models.Model):
     videoid = models.ForeignKey("Video", on_delete=models.CASCADE)
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
 
 
-class whenClick(models.Model):
+class WhenClick(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
 

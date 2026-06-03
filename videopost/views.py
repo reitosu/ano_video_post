@@ -7,7 +7,7 @@ from django.db.models import Case, When, Value, IntegerField, Count
 from django.core.paginator import Paginator
 from django.core.serializers import serialize
 from .storage import UpdateFileSystemStorage
-from .models import Video, Tag, whenClick, TagMap, Account
+from .models import Video, Tag, WhenClick, TagMap, Account
 from .forms import VideoForm
 from .nft import Nft
 from .aescrypt import aes_gcm_decrypt, aes_gcm_encrypt
@@ -31,10 +31,8 @@ import requests
 
 def get_cloudinary_source(video_name):
     if len(split := video_name.split("/")) != 1:
-        print(split)
         video_name = split[2]
     source = resource(video_name, resource_type="video")
-    print(source)
     cr = CloudinaryResource(
         source["public_id"], type=source["type"], resource_type=source["resource_type"])
     return cr
@@ -66,17 +64,13 @@ class IndexView(ListView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        print(self.request.session.get("user_id"))
         context = super().get_context_data(**kwargs)
         obj = self.model.objects.all().exclude(ispublic=False)
         if tags := self.request.GET.getlist("tag"):
-            print(tags)
             for tag in tags:
                 obj = obj.filter(tags=tag)
-                print(obj)
             context["tags"] = json.dumps(tags)
         elif video_name := self.request.GET.get('videoname'):
-            print(video_name)
             cs = get_cloudinary_source(video_name)
             obj = self.model.objects.filter(video=cs) | obj
             context["video_name"] = video_name
@@ -90,7 +84,6 @@ class IndexView(ListView):
 
 def pagenate_video_query(request):
     objects = Video.objects.all().exclude(ispublic=False).order_by('-uploaded')
-    print(request.GET)
     if tags := request.GET.get("tags"):
         tags = json.loads(tags)
         for tag in tags:
@@ -98,21 +91,22 @@ def pagenate_video_query(request):
     if video_name := request.GET.get("videoName"):
         if not objects.filter(video=video_name):
             video_name = get_cloudinary_source(video_name)
-        print(objects.filter(video=video_name))
         objects = objects.annotate(share=Case(
             When(video=video_name, then=Value(1)), default=Value(0), output_field=IntegerField())).order_by('-share')
-    print(objects.values())
     paginator = Paginator(objects, 5)
 
-    page_number = request.GET.get('page')
-    if int(page_number) in paginator.page_range:
+    try:
+        page_number = int(request.GET.get('page', 1))
+    except (TypeError, ValueError):
+        return JsonResponse({'results': False})
+    if page_number in paginator.page_range:
         page_obj = paginator.get_page(page_number)
         return JsonResponse({'results': serialize('json', page_obj.object_list)})
     else:
         return JsonResponse({'results': False})
 
 
-class SerchView(ListView):
+class SearchView(ListView):
     model = Tag
     template_name = 'search.html'
     context_object_name = 'tags'
@@ -151,16 +145,12 @@ class CheckView(TemplateView):
 
 def save_draft(request):
     if request.method == "POST":
-        print(request.POST.get("draft"))
         request.session["draft"] = request.POST.get("draft")
     return JsonResponse({"draft": "success"})
 
 
 def get_tags(request):
     tags = list(Tag.objects.values_list("name", flat=True))
-    print(tags)
-    video = Video()
-    print(TagMap.objects.filter(tagid__exact="test1(t100,c1500)").count())
     return JsonResponse({"tags": tags})
 
 
@@ -170,8 +160,6 @@ def trim_video(request):
         start_time = request.POST.get("startTime")
         end_time = request.POST.get("endTime")
         path = os.path.join(settings.STATIC_ROOT, video_path[8:].split("?")[0])
-        print(start_time)
-        print(end_time)
         clip = moviepy.editor.VideoFileClip(path)
         trimed = clip.subclip(float(start_time), float(end_time))
         trimed_path = os.path.join(os.path.dirname(path), "trimed.mp4")
@@ -185,14 +173,11 @@ def posting_video(request):
         video_path = request.POST.get("path")
         is_delete_one_day = request.POST.get("isDeleteOneDay")
         is_delete_one_day = False if is_delete_one_day == "false" else True
-        print(request.POST)
         tags = request.POST.get("tags")
         user_id = request.session.get("user_id")
-        print(user_id)
         account = Account.objects.get(accountid=user_id)
         video_path = os.path.join(
             settings.STATIC_ROOT, video_path.split("static/")[1])
-        print(video_path)
         upload_response = upload(file=video_path, resource_type="video")
         video_id = upload_response["public_id"]
         created = Video.objects.create(
@@ -218,23 +203,12 @@ class AccountView(ListView):
         context = super(AccountView, self).get_context_data(**kwargs)
         context['title'] = "アカウント"
         user_id = self.request.session.get("user_id")
+        account = Account.objects.get(accountid=user_id)
         nft_list = self.model.objects.filter(
             uploader__accountid=user_id).exclude(tokenid=None)
-        # nft = Nft()
-        # print(nft_list.values_list("tokenid")[0][0])
-        # metadata_list = [nft.get_nft_metadata(token_id[0]) for token_id in video_list.values_list("tokenid")]
-        # print(metadata_list)
-        print(nft_list)
-        print(self.request.session["user_id"])
         context['nft_list'] = serialize("json", nft_list)
-        account = Account.objects.get(accountid=user_id)
         context['address'] = account.walletaddress if account.walletaddress else ""
         context['name'] = account.name if account.name else ""
-
-        user_id = self.request.session.get("user_id")
-        account = Account.objects.get(accountid=user_id)
-        # context['test'] = json.dumps(list(map(Cloudinary.get_cloudinary_data, json.loads(serialize("json", self.model.objects.filter(
-        #     uploader=account).order_by('-uploaded'))))))
         context['test'] = serialize("json", self.model.objects.filter(
             uploader=account).order_by('-uploaded'))
 
@@ -246,31 +220,19 @@ class AccountView(ListView):
         return serialize("json", self.model.objects.filter(uploader=account).order_by('-uploaded'))
 
 
-def saveNameOrAddress(request):
+def save_name_or_address(request):
     name = request.POST.get('name')
     address = request.POST.get('address')
     user_id = request.session.get("user_id")
-    print(address, name)
     account = Account.objects.get(accountid=user_id)
     before_address_list = Account.objects.filter(
         walletaddress=account.walletaddress)
-    # before_address_list = get_account_list_from_wallet_address_of_user_id(user_id)
     if address:
         before_address_list.update(walletaddress=address)
         after_account_list = Account.objects.filter(walletaddress=address)
-        # print(set([video_object for acc in after_account_list if (
-        #     video_object := Video.objects.filter(uploader=acc))]))
-        user_video_queryset = Video.objects.filter(uploader=account)
-        user_video_queryset = Video.objects.filter(
-            uploader=after_account_list[0])
-        all_video_list = [video_object for acc in after_account_list if (
-            video_object := Video.objects.filter(uploader=acc))]
-        print(240, user_video_queryset)
-        print(241, all_video_list)
-        print(242, [user_video_queryset |
-              video_object for video_object in all_video_list])
-        print(243, all_video_list)
-        [obj.uploader.add(*after_account_list) for obj in user_video_queryset]
+        user_video_queryset = Video.objects.filter(uploader__in=after_account_list)
+        for obj in user_video_queryset:
+            obj.uploader.add(*after_account_list)
 
     if name:
         before_address_list.update(name=name)
@@ -279,7 +241,6 @@ def saveNameOrAddress(request):
 
 def delete_video(request):
     video_name = request.POST.get('videoName')
-    print(video_name)
     cloudinary_resource = get_cloudinary_source(video_name)
     obj = Video.objects.get(video=cloudinary_resource).delete()
     return JsonResponse({"response": str(obj)})
@@ -290,7 +251,6 @@ def mint_video(request):
     name = request.POST.get('name')
     description = request.POST.get('description')
     wallet_address = request.POST.get('walletAddress')
-    print(video_name)
     nft = Nft()
     token_id, address = nft.mint_nft(
         video_name, name, description, wallet_address)
@@ -307,7 +267,6 @@ def mint_video(request):
 def change_video_ispublic(video_name):
     cloudinary_resource = get_cloudinary_source(video_name)
     video_object = Video.objects.get(video=cloudinary_resource)
-    print(video_object.ispublic)
     video_object.ispublic = not video_object.ispublic
     video_object.save()
 
@@ -333,23 +292,17 @@ def sell_and_cancel_nft(request):
     else:
         video_object.price = 0
     video_object.save()
-    print(video_object.price)
     return JsonResponse({"res": video_object.price})
 
 
 def video_post(request):
     if request.method == 'POST':
-        video_file = request.FILES.get('videoData')  # 動画ファイルを取得
+        video_file = request.FILES.get('videoData')
         id = request.session.get("user_id")
-        print(request.POST)
-        print(request.FILES)
-        print(video_file)
-        print(type(settings.STATIC_ROOT))
         if video_file:
             path = os.path.join(settings.STATIC_ROOT, 'materials', id)
             fs = UpdateFileSystemStorage(location=path)
-            re = fs.save(video_file.name, video_file)
-            print(re)
+            fs.save(video_file.name, video_file)
             path = fs.path(video_file.name)
             clip = moviepy.editor.VideoFileClip(path)
             clip.write_videofile(os.path.join(
@@ -414,8 +367,5 @@ def test_ipfs(request):
 
 def test(request):
     url = request.GET.get("url")
-    print(request.GET)
-    print(url)
     r = requests.get(url)
-    print(str(r.content)[2:])
     return JsonResponse({"response": str(r.content)[2:]})
