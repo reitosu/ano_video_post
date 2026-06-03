@@ -49,13 +49,12 @@ jobs:
       - name: Semgrep (Django / Python / OWASP Top10)
         run: |
           touch semgrep-backend.sarif
-          semgrep \
+          semgrep scan \
             --config p/django \
             --config p/python \
             --config p/owasp-top-ten \
             --sarif \
             --output semgrep-backend.sarif \
-            --exit-zero \
             videopost/ env1/ || true
 
       - name: Semgrep Backend SARIF をアップロード
@@ -69,14 +68,21 @@ jobs:
       # Django の設定セキュリティチェック
       - name: Django 設定セキュリティチェック
         run: |
-          pip install \
-            "Django==4.2.1" \
-            "django-environ==0.11.2" \
-            "django-cloudinary-storage==0.3.0" \
-            "cloudinary==1.33.0" \
-            "ua-parser==0.18.0" \
-            "sqlparse==0.4.4" \
-            "pycryptodome==3.21.0"
+          python - <<'PYEOF'
+          content = open('requirements.txt', 'rb').read()
+          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
+              text = content.decode('utf-16')
+          else:
+              text = content.decode('utf-8', errors='replace')
+          lines = [
+              l.strip() for l in text.splitlines()
+              if l.strip()
+              and not l.strip().startswith('#')
+              and 'pywin32' not in l.lower()
+          ]
+          open('requirements-ci.txt', 'w').write('\n'.join(lines))
+          PYEOF
+          pip install -r requirements-ci.txt
           cat > .env << 'EOF'
           DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production
           CLOUDINARY_NAME=ci-dummy
@@ -103,13 +109,12 @@ jobs:
       - name: Semgrep (JavaScript / XSS)
         run: |
           touch semgrep-frontend.sarif
-          semgrep \
+          semgrep scan \
             --config p/javascript \
             --config p/xss \
             --config p/secrets \
             --sarif \
             --output semgrep-frontend.sarif \
-            --exit-zero \
             videopost/static/js/ videopost/templates/ || true
 
       - name: Semgrep Frontend SARIF をアップロード
@@ -172,11 +177,10 @@ jobs:
       - name: Semgrep (Secrets)
         run: |
           touch semgrep-nft.sarif
-          semgrep \
+          semgrep scan \
             --config p/secrets \
             --sarif \
             --output semgrep-nft.sarif \
-            --exit-zero \
             videopost/nft.py videopost/aescrypt.py videopost/rsacrypto.py \
             videopost/static/js/aescrypt.js videopost/static/js/rsacrypto.js || true
 
@@ -192,11 +196,10 @@ jobs:
       - name: カスタム NFT Semgrep ルール
         run: |
           touch semgrep-nft-custom.sarif
-          semgrep \
+          semgrep scan \
             --config .github/semgrep/nft-rules.yml \
             --sarif \
             --output semgrep-nft-custom.sarif \
-            --exit-zero \
             videopost/ || true
 
       - name: カスタム NFT SARIF をアップロード

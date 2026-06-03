@@ -107,16 +107,23 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install core Django dependencies
+      - name: Install dependencies from requirements.txt
         run: |
-          pip install \
-            "Django==4.2.1" \
-            "django-environ==0.11.2" \
-            "django-cloudinary-storage==0.3.0" \
-            "cloudinary==1.33.0" \
-            "ua-parser==0.18.0" \
-            "sqlparse==0.4.4" \
-            "pycryptodome==3.21.0"
+          python - <<'PYEOF'
+          content = open('requirements.txt', 'rb').read()
+          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
+              text = content.decode('utf-16')
+          else:
+              text = content.decode('utf-8', errors='replace')
+          lines = [
+              l.strip() for l in text.splitlines()
+              if l.strip()
+              and not l.strip().startswith('#')
+              and 'pywin32' not in l.lower()
+          ]
+          open('requirements-ci.txt', 'w').write('\n'.join(lines))
+          PYEOF
+          pip install -r requirements-ci.txt
 
       - name: Create CI .env
         run: |

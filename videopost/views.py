@@ -10,7 +10,6 @@ from .models import Video, Tag, Account
 from .forms import VideoForm
 import os
 import base64
-import moviepy.editor
 import json
 from cloudinary.uploader import upload
 from cloudinary.api import resource
@@ -147,6 +146,7 @@ def get_tags(request):
 
 
 def trim_video(request):
+    import moviepy.editor
     if request.method == "POST":
         video_path = request.POST.get("videoPath")
         start_time = request.POST.get("startTime")
@@ -292,6 +292,7 @@ def sell_and_cancel_nft(request):
 
 
 def video_post(request):
+    import moviepy.editor
     if request.method == 'POST':
         video_file = request.FILES.get('videoData')
         id = request.session.get("user_id")
