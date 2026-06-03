@@ -65,6 +65,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Uploaded media / materials (use cloud storage instead)
+videopost/static/materials/
+
 # Flask stuff:
 instance/
 .webassets-cache

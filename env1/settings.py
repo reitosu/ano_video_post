@@ -32,7 +32,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.10.106', '127.0.0.1',
-                 '10.228.179.236', '10.0.54.27', '192.168.2.208', "*"]
+                 '10.228.179.236', '10.0.54.27', '192.168.2.208']
 
 
 # Application definition
