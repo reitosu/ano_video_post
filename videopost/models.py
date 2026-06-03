@@ -21,28 +21,24 @@ class TagQuerySet(models.QuerySet):
 
 class WhenClickQuerySet(models.QuerySet):
     def get_tag_click_value_per_day(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            li = list(query_set.filter(date__gte=one_day_ago, date__lte=now).values(
-                "tagid").annotate(models.Count("tagid")))
-            di = {}
-            list(map(lambda x: di.update({x["tagid"]: x["tagid__count"]}), li))
-            return di
+            return self.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
         else:
-            return query_set.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
+            li = list(self.filter(date__gte=one_day_ago, date__lte=now).values(
+                "tagid").annotate(models.Count("tagid")))
+            return {x["tagid"]: x["tagid__count"] for x in li}
 
 
 class VideoClickQuerySet(models.QuerySet):
     def get_tag_upload_value(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            return list(query_set.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
+            return self.filter(uploaded__gte=one_day_ago, uploaded__lte=now, tags__name=tag_name).count()
         else:
-            return query_set.filter(tagid__exact=tag_name).count()
+            return list(self.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
 
 
 class Account(models.Model):
