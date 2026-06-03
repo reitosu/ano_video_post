@@ -96,7 +96,6 @@ ano_video_post/
 ├── scripts/
 │   └── check_cloudinary.py # Cloudinaryリソース確認スクリプト
 ├── manage.py              # Django管理スクリプト
-├── db.sqlite3            # SQLiteデータベース
 └── requirements.txt      # 依存関係
 ```
 
@@ -255,52 +254,74 @@ erDiagram
 ## 🚀 セットアップ・インストール
 
 ### 前提条件
-```bash
-Python 3.8+
-pip (Python package manager)
-```
+
+- Python 3.11
+- pip
 
 ### インストール手順
 
 1. **リポジトリのクローン**
+
 ```bash
 git clone <repository-url>
 cd ano_video_post
 ```
 
 2. **仮想環境の作成・有効化**
+
 ```bash
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
 ```
 
 3. **依存関係のインストール**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 4. **環境変数の設定**
+
 ```bash
-# .envファイルを作成し、以下を設定
-DJANGO_SECRET_KEY=your-secret-key
-CLOUDINARY_NAME=your-cloudinary-name
-CLOUDINARY_API_KEY=your-cloudinary-api-key
-CLOUDINARY_API_SECRET=your-cloudinary-api-secret
-NFT_STORAGE_API_KEY=your-nft-storage-api-key
-WALLET_PRIVATE_KEY=your-wallet-private-key
-CONTRACT_ADDRESS=your-contract-address
+# テンプレートをコピーして値を埋める
+cp .env.example .env
 ```
 
+`.env` を開き、各項目を設定してください。
+
+| 変数名 | 説明 | 必須 |
+|--------|------|------|
+| `DJANGO_SECRET_KEY` | Djangoの秘密鍵（任意の長い文字列） | ✅ |
+| `DEBUG` | 開発時は `True`、本番は `False` | ✅ |
+| `ALLOWED_HOSTS` | アクセス許可ホスト（カンマ区切り） | ✅ |
+| `CLOUDINARY_NAME` | Cloudinaryのクラウド名 | ✅ |
+| `CLOUDINARY_API_KEY` | CloudinaryのAPIキー | ✅ |
+| `CLOUDINARY_API_SECRET` | CloudinaryのAPIシークレット | ✅ |
+| `NFT_STORAGE_API_KEY` | NFT.StorageのAPIキー | NFT機能使用時 |
+| `WALLET_PRIVATE_KEY` | Ethereumウォレット秘密鍵 | NFT機能使用時 |
+| `CONTRACT_ADDRESS` | デプロイ済みスマートコントラクトのアドレス | NFT機能使用時 |
+
+> **`DJANGO_SECRET_KEY` の生成方法:**
+> ```bash
+> python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+> ```
+
 5. **データベース初期化**
+
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
 6. **開発サーバー起動**
+
 ```bash
 python manage.py runserver
 ```
+
+ブラウザで http://127.0.0.1:8000/videopost/ にアクセスして動作確認できます。
 
 ## 📋 API エンドポイント
 
@@ -308,7 +329,7 @@ python manage.py runserver
 |---------------|---------|------|
 | `/videopost/` | GET | メイン画面表示 |
 | `/videopost/edit` | GET/POST | 動画編集・投稿 |
-| `/videopost/serch` | GET | 動画検索画面 |
+| `/videopost/search` | GET | 動画検索画面 |
 | `/videopost/account` | GET | アカウント管理 |
 | `/videopost/vpost/` | POST | 動画ファイルアップロード |
 | `/videopost/ipost/` | POST | 画像ファイルアップロード |

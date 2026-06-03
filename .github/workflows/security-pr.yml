@@ -68,20 +68,7 @@ jobs:
       # Django の設定セキュリティチェック
       - name: Django 設定セキュリティチェック
         run: |
-          python - <<'PYEOF'
-          content = open('requirements.txt', 'rb').read()
-          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
-              text = content.decode('utf-16')
-          else:
-              text = content.decode('utf-8', errors='replace')
-          lines = [
-              l.strip() for l in text.splitlines()
-              if l.strip()
-              and not l.strip().startswith('#')
-              and 'pywin32' not in l.lower()
-          ]
-          open('requirements-ci.txt', 'w').write('\n'.join(lines))
-          PYEOF
+          grep -iv pywin32 requirements.txt > requirements-ci.txt
           pip install -r requirements-ci.txt
           cat > .env << 'EOF'
           DJANGO_SECRET_KEY=ci-only-placeholder-key-do-not-use-in-production

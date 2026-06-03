@@ -49,23 +49,8 @@ jobs:
       - name: Install security tools
         run: pip install bandit[toml] pip-audit
 
-      - name: Decode requirements to Linux format
-        run: |
-          python - <<'PYEOF'
-          content = open('requirements.txt', 'rb').read()
-          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
-              text = content.decode('utf-16')
-          else:
-              text = content.decode('utf-8', errors='replace')
-          lines = [
-              l.strip() for l in text.splitlines()
-              if l.strip()
-              and not l.strip().startswith('#')
-              and 'pywin32' not in l.lower()
-          ]
-          open('requirements-ci.txt', 'w').write('\n'.join(lines))
-          print(f"Wrote {len(lines)} requirements to requirements-ci.txt")
-          PYEOF
+      - name: Filter Windows-only packages
+        run: grep -iv pywin32 requirements.txt > requirements-ci.txt
 
       - name: Run Bandit (SAST)
         run: |
@@ -109,20 +94,7 @@ jobs:
 
       - name: Install dependencies from requirements.txt
         run: |
-          python - <<'PYEOF'
-          content = open('requirements.txt', 'rb').read()
-          if content[:2] in (b'\xff\xfe', b'\xfe\xff'):
-              text = content.decode('utf-16')
-          else:
-              text = content.decode('utf-8', errors='replace')
-          lines = [
-              l.strip() for l in text.splitlines()
-              if l.strip()
-              and not l.strip().startswith('#')
-              and 'pywin32' not in l.lower()
-          ]
-          open('requirements-ci.txt', 'w').write('\n'.join(lines))
-          PYEOF
+          grep -iv pywin32 requirements.txt > requirements-ci.txt
           pip install -r requirements-ci.txt
 
       - name: Create CI .env
