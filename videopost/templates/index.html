@@ -63,6 +63,9 @@
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Lucide Icons CDN: defer + scroll.js より前に置き、実行順を明示
+         defer 同士は DOM 順に実行されるため Lucide → scroll.js の順が保証される -->
+    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
     <script type="module" src="{% static 'js/scroll.js' %}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cloudinary-core@2.10.3/cloudinary-core-shrinkwrap.min.js"></script>
@@ -107,10 +110,7 @@
             <a href="{% url 'videopost:check' %}"
                class="flex items-center justify-center gap-2 h-12 w-full
                       bg-accent rounded-xl font-semibold text-[15px] text-ano-bg">
-              <!-- Plus icon -->
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-              </svg>
+              <i data-lucide="plus" class="w-5 h-5" aria-hidden="true"></i>
               投稿する
             </a>
           </div>
@@ -120,33 +120,25 @@
             <!-- ホーム（アクティブ） -->
             <a href="{% url 'videopost:index' %}"
                class="flex items-center gap-4 h-12 px-4 bg-surface-2 rounded-xl border-l-[3px] border-accent">
-              <svg class="w-[22px] h-[22px] text-accent flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
-              </svg>
+              <i data-lucide="home" class="w-[22px] h-[22px] text-accent flex-shrink-0" aria-hidden="true"></i>
               <span class="text-accent font-semibold text-[15px]">ホーム</span>
             </a>
             <!-- 検索 -->
             <a href="{% url 'videopost:search' %}"
                class="flex items-center gap-4 h-12 px-4 rounded-xl">
-              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-              </svg>
+              <i data-lucide="search" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
               <span class="text-text-2 font-medium text-[15px]">検索</span>
             </a>
             <!-- NFT -->
             <a href="#"
                class="flex items-center gap-4 h-12 px-4 rounded-xl">
-              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
-              </svg>
+              <i data-lucide="layout-grid" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
               <span class="text-text-2 font-medium text-[15px]">NFT</span>
             </a>
             <!-- マイ -->
             <a href="{% url 'videopost:account' %}"
                class="flex items-center gap-4 h-12 px-4 rounded-xl">
-              <svg class="w-[22px] h-[22px] text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-              </svg>
+              <i data-lucide="user" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
               <span class="text-text-2 font-medium text-[15px]">マイ</span>
             </a>
           </nav>
@@ -181,10 +173,8 @@
                   </button>
                   <button class="text-text-2 font-medium text-base pb-1.5">タグ</button>
                 </div>
-                <a href="{% url 'videopost:search' %}" class="text-text-1">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-                  </svg>
+                <a href="{% url 'videopost:search' %}" class="text-text-1" aria-label="検索">
+                  <i data-lucide="search" class="w-6 h-6" aria-hidden="true"></i>
                 </a>
               </div>
             </div>
@@ -208,9 +198,7 @@
                   <div class="hidden md:inline-flex absolute top-4 left-4 z-10
                               items-center gap-1.5 h-7 px-3
                               bg-black/45 border border-hairline rounded-pill">
-                    <svg class="w-3.5 h-3.5 text-text-1 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                    </svg>
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-text-1 flex-shrink-0" aria-hidden="true"></i>
                     <span class="text-text-1 text-caption">24時間で消去</span>
                   </div>
 
@@ -219,9 +207,7 @@
                               bg-gradient-to-t from-black/60 via-black/30 to-transparent">
                     <div class="px-4 pt-16 pb-3">
                       <div class="flex items-center gap-2 mb-1.5">
-                        <svg class="w-4 h-4 text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
-                        </svg>
+                        <i data-lucide="lock" class="w-4 h-4 text-text-2 flex-shrink-0" aria-hidden="true"></i>
                         <span class="text-text-1 text-meta font-semibold">@anon</span>
                         <span class="text-text-2 text-meta">· 匿名投稿</span>
                       </div>
@@ -241,25 +227,25 @@
                   <div class="absolute right-3 bottom-28 z-10 flex flex-col items-center gap-5 md:hidden">
                     <div class="flex flex-col items-center gap-1">
                       <button aria-label="いいね 12.4k" class="w-12 h-12 rounded-full bg-black/40 border border-hairline flex items-center justify-center text-text-1">
-                        <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+                        <i data-lucide="heart" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                       </button>
                       <span class="text-text-1 text-label text-center w-16" aria-hidden="true">12.4k</span>
                     </div>
                     <div class="flex flex-col items-center gap-1">
                       <button aria-label="コメント 318件" class="w-12 h-12 rounded-full bg-black/40 border border-hairline flex items-center justify-center text-text-1">
-                        <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
+                        <i data-lucide="message-circle" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                       </button>
                       <span class="text-text-1 text-label text-center w-16" aria-hidden="true">318</span>
                     </div>
                     <div class="flex flex-col items-center gap-1">
                       <button aria-label="共有" @click.stop="shareLink" class="w-12 h-12 rounded-full bg-black/40 border border-hairline flex items-center justify-center text-text-1">
-                        <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
+                        <i data-lucide="share-2" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                       </button>
                       <span class="text-text-1 text-label text-center w-16" aria-hidden="true">共有</span>
                     </div>
                     <div class="flex flex-col items-center gap-1">
                       <button aria-label="所有" class="w-12 h-12 rounded-full bg-surface-2/80 flex items-center justify-center text-accent">
-                        <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+                        <i data-lucide="layout-grid" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                       </button>
                       <span class="text-accent text-label text-center w-16" aria-hidden="true">所有</span>
                     </div>
@@ -271,15 +257,11 @@
                                 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
                       <div class="inline-flex items-center gap-1.5 h-7 px-3 mb-3
                                   bg-black/45 border border-hairline rounded-pill">
-                        <svg class="w-3.5 h-3.5 text-text-1 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                        </svg>
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-text-1 flex-shrink-0" aria-hidden="true"></i>
                         <span class="text-text-1 text-caption">24時間で消去</span>
                       </div>
                       <div class="flex items-center gap-2 mb-1.5">
-                        <svg class="w-4 h-4 text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
-                        </svg>
+                        <i data-lucide="lock" class="w-4 h-4 text-text-2 flex-shrink-0" aria-hidden="true"></i>
                         <span class="text-text-1 text-meta font-semibold">@anon</span>
                         <span class="text-text-2 text-meta">· 匿名投稿</span>
                       </div>
@@ -308,25 +290,25 @@
                 <div class="hidden md:flex flex-col items-center gap-5">
                   <div class="flex flex-col items-center gap-1">
                     <button aria-label="いいね 12.4k" class="w-[52px] h-[52px] rounded-full bg-surface-2/80 border border-hairline flex items-center justify-center text-text-1">
-                      <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+                      <i data-lucide="heart" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                     </button>
                     <span class="text-text-2 text-caption text-center w-20" aria-hidden="true">12.4k</span>
                   </div>
                   <div class="flex flex-col items-center gap-1">
                     <button aria-label="コメント 318件" class="w-[52px] h-[52px] rounded-full bg-surface-2/80 border border-hairline flex items-center justify-center text-text-1">
-                      <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
+                      <i data-lucide="message-circle" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                     </button>
                     <span class="text-text-2 text-caption text-center w-20" aria-hidden="true">318</span>
                   </div>
                   <div class="flex flex-col items-center gap-1">
                     <button aria-label="共有" @click.stop="shareLink" class="w-[52px] h-[52px] rounded-full bg-surface-2/80 border border-hairline flex items-center justify-center text-text-1">
-                      <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
+                      <i data-lucide="share-2" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                     </button>
                     <span class="text-text-2 text-caption text-center w-20" aria-hidden="true">共有</span>
                   </div>
                   <div class="flex flex-col items-center gap-1">
                     <button aria-label="所有" class="w-[52px] h-[52px] rounded-full bg-surface-2/80 flex items-center justify-center text-accent">
-                      <svg aria-hidden="true" class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+                      <i data-lucide="layout-grid" class="w-[26px] h-[26px]" aria-hidden="true"></i>
                     </button>
                     <span class="text-accent text-caption text-center w-20" aria-hidden="true">所有</span>
                   </div>
@@ -340,39 +322,30 @@
                         h-20 bg-surface-1 border-t border-hairline">
               <div class="flex items-center justify-around h-full px-4">
                 <!-- ホーム -->
-                <a href="{% url 'videopost:index' %}" class="flex flex-col items-center gap-1 w-14">
-                  <svg class="w-[22px] h-[22px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
-                  </svg>
-                  <span class="text-accent font-medium text-[10px]">ホーム</span>
+                <a href="{% url 'videopost:index' %}" class="flex flex-col items-center gap-1 w-14" aria-label="ホーム">
+                  <i data-lucide="home" class="w-[22px] h-[22px] text-accent" aria-hidden="true"></i>
+                  <span class="text-accent font-medium text-[10px]" aria-hidden="true">ホーム</span>
                 </a>
                 <!-- 検索 -->
-                <a href="{% url 'videopost:search' %}" class="flex flex-col items-center gap-1 w-14">
-                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-                  </svg>
-                  <span class="text-text-2 font-medium text-[10px]">検索</span>
+                <a href="{% url 'videopost:search' %}" class="flex flex-col items-center gap-1 w-14" aria-label="検索">
+                  <i data-lucide="search" class="w-[22px] h-[22px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 font-medium text-[10px]" aria-hidden="true">検索</span>
                 </a>
                 <!-- 投稿ボタン（アクセントボタン） -->
                 <a href="{% url 'videopost:check' %}"
-                   class="flex items-center justify-center w-14 h-[38px] bg-accent rounded-13">
-                  <svg class="w-6 h-6 text-ano-bg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                  </svg>
+                   class="flex items-center justify-center w-14 h-[38px] bg-accent rounded-13"
+                   aria-label="投稿する">
+                  <i data-lucide="plus" class="w-6 h-6 text-ano-bg" aria-hidden="true"></i>
                 </a>
                 <!-- NFT -->
-                <a href="#" class="flex flex-col items-center gap-1 w-14">
-                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
-                  </svg>
-                  <span class="text-text-2 font-medium text-[10px]">NFT</span>
+                <a href="#" class="flex flex-col items-center gap-1 w-14" aria-label="NFT">
+                  <i data-lucide="layout-grid" class="w-[22px] h-[22px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 font-medium text-[10px]" aria-hidden="true">NFT</span>
                 </a>
                 <!-- マイ -->
-                <a href="{% url 'videopost:account' %}" class="flex flex-col items-center gap-1 w-14">
-                  <svg class="w-[22px] h-[22px] text-text-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
-                  </svg>
-                  <span class="text-text-2 font-medium text-[10px]">マイ</span>
+                <a href="{% url 'videopost:account' %}" class="flex flex-col items-center gap-1 w-14" aria-label="マイページ">
+                  <i data-lucide="user" class="w-[22px] h-[22px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 font-medium text-[10px]" aria-hidden="true">マイ</span>
                 </a>
               </div>
             </nav>
@@ -387,9 +360,7 @@
 
                 <!-- 投稿者情報 -->
                 <div class="flex items-center gap-2 mb-3">
-                  <svg class="w-4 h-4 text-text-2 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
-                  </svg>
+                  <i data-lucide="lock" class="w-4 h-4 text-text-2 flex-shrink-0" aria-hidden="true"></i>
                   <span class="text-text-1 font-semibold text-[16px]">@anon</span>
                   <span class="text-text-2 text-meta">· 匿名投稿</span>
                 </div>
