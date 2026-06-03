@@ -6,43 +6,32 @@ from django.utils import timezone
 
 class TagQuerySet(models.QuerySet):
     def append_tag(self, tag):
-        """
-        append tag to TagModel
-
-        Args:
-            tag (str or list): tag to add
-        """
         if type(tag) is str:
             tag = [tag]
-        tag_objects = [Tag(name=tag_name) for tag_name in tag]
-        self.bulk_create(objs=tag_objects, ignore_conflicts=True)
-        return tag_objects
+        self.bulk_create(objs=[Tag(name=t) for t in tag], ignore_conflicts=True)
+        return list(Tag.objects.filter(name__in=tag))
 
 
 class WhenClickQuerySet(models.QuerySet):
     def get_tag_click_value_per_day(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            li = list(query_set.filter(date__gte=one_day_ago, date__lte=now).values(
-                "tagid").annotate(models.Count("tagid")))
-            di = {}
-            list(map(lambda x: di.update({x["tagid"]: x["tagid__count"]}), li))
-            return di
+            return self.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
         else:
-            return query_set.filter(date__gte=one_day_ago, date__lte=now, tagid__exact=tag_name).count()
+            li = list(self.filter(date__gte=one_day_ago, date__lte=now).values(
+                "tagid").annotate(models.Count("tagid")))
+            return {x["tagid"]: x["tagid__count"] for x in li}
 
 
 class VideoClickQuerySet(models.QuerySet):
     def get_tag_upload_value(self, tag_name=""):
-        query_set = self.get_queryset()
         now = timezone.now()
         one_day_ago = now - timezone.timedelta(days=1)
         if tag_name:
-            return list(query_set.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
+            return self.filter(uploaded__gte=one_day_ago, uploaded__lte=now, tags__name=tag_name).count()
         else:
-            return query_set.filter(tagid__exact=tag_name).count()
+            return list(self.filter(uploaded__gte=one_day_ago, uploaded__lte=now))
 
 
 class Account(models.Model):
@@ -71,9 +60,6 @@ class Tag(models.Model):
 
 class VideoQuerySet(models.QuerySet):
     def get_nft_metadata(self):
-        """
-        get nft metadata
-        """
         return
 
 
@@ -93,13 +79,15 @@ class Video(models.Model):
     views = models.IntegerField(default=0)
     thumbsup = models.IntegerField(default=0)
 
+    objects = VideoQuerySet.as_manager()
+
 
 class TagMap(models.Model):
     videoid = models.ForeignKey("Video", on_delete=models.CASCADE)
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
 
 
-class whenClick(models.Model):
+class WhenClick(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     tagid = models.ForeignKey("Tag", on_delete=models.CASCADE, to_field="name")
 
