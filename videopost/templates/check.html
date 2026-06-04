@@ -56,6 +56,84 @@
     <!-- CSS リセット -->
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         モーダル ダークテーマ
+         modalComponent.js の旧キャッシュを上書きするため !important 使用
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <style>
+    .modal-mask {
+        position: fixed !important;
+        z-index: 9998 !important;
+        top: 0 !important; left: 0 !important;
+        width: 100% !important; height: 100% !important;
+        background: rgba(0, 0, 0, 0.65) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+    }
+    .modal-container {
+        width: 100% !important;
+        max-width: 340px !important;
+        background: #141416 !important;
+        border: 1px solid #2E2E33 !important;
+        border-radius: 20px !important;
+        padding: 28px 24px 24px !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7) !important;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+        animation: anoModalIn 0.2s ease !important;
+    }
+    @keyframes anoModalIn {
+        from { opacity: 0; transform: scale(0.95) translateY(8px); }
+        to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
+    .modal-header h3 {
+        margin: 0 0 8px !important;
+        color: #F4F4F5 !important;
+        font-size: 17px !important;
+        font-weight: 600 !important;
+        line-height: 1.3 !important;
+    }
+    .modal-body {
+        margin: 0 0 24px !important;
+    }
+    .modal-body p {
+        margin: 0 !important;
+        color: #A1A1AA !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    .modal-footer {
+        display: flex !important;
+        gap: 10px !important;
+        justify-content: flex-end !important;
+    }
+    .modal-default-button {
+        float: none !important;
+        height: 44px !important;
+        padding: 0 20px !important;
+        border-radius: 12px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+        cursor: pointer !important;
+        border: none !important;
+        outline: none !important;
+        background: #26262B !important;
+        color: #F4F4F5 !important;
+        transition: opacity 0.15s ease !important;
+        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
+    }
+    .modal-default-button:hover { opacity: 0.75 !important; }
+    .modal-default-button:active { opacity: 0.55 !important; }
+    #modal復元, #modalOK { background: #CBFF3C !important; color: #0A0A0B !important; }
+    </style>
+
     <!-- Vue 3 + VueUse + Axios + Lucide (すべて同期ロード) -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>

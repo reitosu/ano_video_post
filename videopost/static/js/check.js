@@ -56,7 +56,15 @@ const check = createApp({
         const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["閉じる", "復元"] })
 
         onMounted(() => {
-            window.addEventListener('beforeunload', saveDraft)
+            window.addEventListener('beforeunload', (event) => {
+                saveDraft()
+                // 動画がアップロード済みの場合はページ離脱の確認ダイアログを表示する
+                // (モダンブラウザはカスタムメッセージを無視し汎用文言を表示する仕様)
+                if (videoSrc.value) {
+                    event.preventDefault()
+                    event.returnValue = ""
+                }
+            })
             document.addEventListener('touchmove', noscroll, { passive: false });
             document.addEventListener('wheel', noscroll, { passive: false });
             axios.defaults.xsrfCookieName = 'csrftoken'
