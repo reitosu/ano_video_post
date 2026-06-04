@@ -214,15 +214,30 @@
               </label>
 
               <!-- 再生 / 一時停止 オーバーレイ (動画選択済み)
-                   v-show で両アイコンを常に DOM に保持し Lucide の SVG 変換を維持する -->
+                   Lucide の createIcons() は <i> を <svg> に書き換えるため、
+                   v-if/v-show で出現する動的アイコンには使用できない。
+                   インライン SVG を直接記述して Vue の reactivity と競合させない。 -->
               <button v-if="videoSrc"
                       @click="playFlag ? pauseVideo() : playVideo()"
                       class="absolute inset-0 flex items-center justify-center">
                 <div class="w-16 h-16 rounded-full bg-black/45 flex items-center justify-center">
-                  <i v-show="!playFlag" data-lucide="play"
-                     class="w-9 h-9 text-text-1" aria-hidden="true"></i>
-                  <i v-show="playFlag" data-lucide="pause"
-                     class="w-9 h-9 text-text-1" aria-hidden="true"></i>
+                  <!-- Play icon -->
+                  <svg v-show="!playFlag"
+                       xmlns="http://www.w3.org/2000/svg" width="36" height="36"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="text-text-1" aria-hidden="true">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <!-- Pause icon -->
+                  <svg v-show="playFlag"
+                       xmlns="http://www.w3.org/2000/svg" width="36" height="36"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="text-text-1" aria-hidden="true">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
                 </div>
               </button>
 
@@ -254,11 +269,11 @@
 
           <!-- ────────────────────────────────────────
                右パネル: 編集ツール・タグ・公開設定
-               (desktop: 右カラム / mobile: 下部スクロール)
-               data-scrollable: check.js の noscroll が wheel/touchmove を許可する
+               (desktop: 右カラム・独立スクロール / mobile: 自然な高さでフロー)
+               mobile では flex-1 / overflow-y-auto を外し、外側の div のスクロールに委ねる
                ──────────────────────────────────────── -->
           <section data-scrollable
-                   class="flex-1 overflow-y-auto
+                   class="md:flex-1 md:overflow-y-auto
                           px-5 pb-28
                           md:px-8 md:py-8 md:pb-8">
 

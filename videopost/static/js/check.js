@@ -123,11 +123,6 @@ const check = createApp({
             intervalList.value = createInterval(duration)
         }
 
-        // 動画が選択された後に v-if で出現するアイコン要素を Lucide で描画する
-        watch(videoSrc, () => {
-            nextTick(() => { if (window.lucide) window.lucide.createIcons() })
-        })
-
         const maxTime = computed(() => {
             return displayCurrentTime.duration * (materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value
         })
@@ -146,14 +141,19 @@ const check = createApp({
                 const result = new Promise(function (resolve) {
                     if (videoPreview.value.currentTime + 0.1 >= maxTime.value) {
                         videoPreview.value.currentTime = minTime.value
-                        currentTimePosition.value = minTime.value
+                        // パーセント位置で正しくリセット（秒数ではなく0〜100の割合）
+                        currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
                     }
                     resolve("success")
                 })
                 result.then(res => {
                     console.log(res)
                     resume()
-                    videoPreview.value.play()
+                    videoPreview.value.play().catch(err => {
+                        // pause() が play() の完了より先に呼ばれた場合は正常な割り込みとして扱う
+                        if (err.name !== 'AbortError') console.error(err)
+                        pause()
+                    })
                 })
             }
         }
