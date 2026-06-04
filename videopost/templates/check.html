@@ -257,21 +257,27 @@
         </header>
 
         <!-- ── ボディ: 2カラム (desktop) / スクロール (mobile) ── -->
+        <!-- data-scrollable: noscroll が touchmove/wheel を許可する対象 -->
         <div class="flex-1 min-h-0
                     overflow-y-auto md:overflow-hidden
-                    flex flex-col md:flex-row">
+                    flex flex-col md:flex-row"
+             data-scrollable
+             @scroll.passive="onBodyScroll">
 
           <!-- ────────────────────────────────────────
                動画プレビュー (左カラム / モバイル上部)
                ──────────────────────────────────────── -->
           <section class="flex-shrink-0 flex flex-col items-center
-                          px-5 pt-6 pb-4
+                          px-5 pt-3 pb-2
                           md:w-auto md:px-8 md:py-8 md:items-start">
 
-            <!-- プレビューカード -->
+            <!-- プレビューカード
+                 mobile: h-[180px] 固定 → スクロール40px超で h-[120px] に縮小 (videoMobileStyle)
+                 desktop: md:h-[632px] が上書き -->
             <div class="relative bg-surface-2 rounded-20 overflow-hidden
-                        w-full max-w-[280px] aspect-[9/16]
-                        md:w-[360px] md:h-[632px] md:aspect-auto md:max-w-none">
+                        w-full max-w-[240px] h-[180px]
+                        md:w-[360px] md:h-[632px] md:max-w-none"
+                 :style="videoMobileStyle">
 
               <!-- 動画要素 (check.js: ref="videoPreview") -->
               <video ref="videoPreview"
@@ -353,7 +359,7 @@
                ──────────────────────────────────────── -->
           <section data-scrollable
                    class="md:flex-1 md:overflow-y-auto
-                          px-5 pb-28
+                          px-5 pt-3 pb-28
                           md:px-8 md:py-8 md:pb-8">
 
             <!-- 編集ツール -->
