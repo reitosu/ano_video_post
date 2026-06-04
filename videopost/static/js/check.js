@@ -53,7 +53,7 @@ const check = createApp({
                 }
                 else return undefined
             })
-        const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["復元", "閉じる"] })
+        const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["閉じる", "復元"] })
 
         onMounted(() => {
             window.addEventListener('beforeunload', saveDraft)
