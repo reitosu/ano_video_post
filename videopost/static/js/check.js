@@ -170,6 +170,13 @@ const check = createApp({
             videoPreview.value.pause()
         }
 
+        // 動画が末尾まで再生されたときにインターバルを止めて先頭に戻す
+        const onVideoEnded = () => {
+            pause()
+            videoPreview.value.currentTime = minTime.value
+            currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
+        }
+
         const timeSettings = reactive({
             videoLength: 12,
             interval: 1,
@@ -489,6 +496,7 @@ const check = createApp({
             trim,
             post,
             submitPost,
+            onVideoEnded,
             lastCheckVideo,
             isDeleteOneDay,
         }

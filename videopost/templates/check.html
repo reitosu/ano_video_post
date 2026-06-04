@@ -199,6 +199,7 @@
               <video ref="videoPreview"
                      :src="videoSrc"
                      @loadedmetadata="loadVideo"
+                     @ended="onVideoEnded"
                      playsinline
                      class="absolute inset-0 w-full h-full object-contain">
               </video>
