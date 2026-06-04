@@ -66,13 +66,8 @@ const check = createApp({
                 openModal()
                 document.addEventListener("result", loadDraft)
             }
-            // draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
-            // console.log(draft.value)
-            // if (draft.value.video) {
-            //     openModal()
-            //     document.addEventListener("result", loadDraft)
-            // }
             pause()
+            if (window.lucide) window.lucide.createIcons()
         });
 
         const tags = ref([])

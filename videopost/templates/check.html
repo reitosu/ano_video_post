@@ -1,91 +1,483 @@
-<!--ひとつ前のページへ戻る 好きに使って！-->
-
 <html>
   <head>
-    <title>サンプルページ</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% load static %}
-    {% csrf_token %}
+    <link rel="icon" href="{% static 'images/main-logo.svg' %}">
+
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        corePlugins: {
+          preflight: false
+        },
+        theme: {
+          extend: {
+            colors: {
+              'ano-bg':    '#0A0A0B',
+              'surface-1': '#141416',
+              'surface-2': '#1C1C1F',
+              'surface-3': '#26262B',
+              'hairline':  '#2E2E33',
+              'text-1':    '#F4F4F5',
+              'text-2':    '#A1A1AA',
+              'text-3':    '#6E6E76',
+              'accent':    '#CBFF3C',
+              'danger':    '#FF5A5F',
+            },
+            fontFamily: {
+              inter: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            fontSize: {
+              'label':   ['11px', { fontWeight: '500', letterSpacing: '0.04em' }],
+              'caption': ['12px', { lineHeight: '1.5' }],
+              'meta':    ['13px', { lineHeight: '1.4' }],
+              'body':    ['14px', { lineHeight: '1.5' }],
+              'title':   ['17px', { fontWeight: '600', lineHeight: '1.3' }],
+              'display': ['28px', { fontWeight: '700', lineHeight: '1.2' }],
+            },
+            borderRadius: {
+              '13':   '13px',
+              '20':   '20px',
+              '24':   '24px',
+              'pill': '9999px',
+            },
+          }
+        }
+      }
+    </script>
+
+    <!-- CSS リセット -->
     <link rel="stylesheet" href='https://unpkg.com/@acab/reset.css'>
-    <link rel="stylesheet" href="{% static 'css/check.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+
+    <!-- Vue 3 + VueUse + Axios + Lucide (すべて同期ロード) -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="module" src="{% static 'js/check.js' %}" defer></script>
-  </head>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
 
-  <body>
-    <div id="check">
-      <div id="sessions">
+    <!-- check.js は type="module" で非同期ロード -->
+    <script type="module" src="{% static 'js/check.js' %}"></script>
+
+    <title>新規投稿 | ano</title>
+  </head>
+  <body class="bg-ano-bg font-inter overflow-hidden">
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Vue マウントポイント
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div id="check" class="h-screen flex overflow-hidden">
+
+      <!-- セッションデータ・CSRF（check.js が参照する refs） -->
+      <div class="hidden" aria-hidden="true">
+        {% csrf_token %}
         <div id="draft" ref="draftElement" data-draft="{{ request.session.draft|default:'{}' }}"></div>
       </div>
 
-      <div id="header">
-        <a href="{{request.META.HTTP_REFERER}}">前のページに戻る</a>
-        <a href="{% url 'videopost:index' %}">×</a>
+      <!-- #lastCheck: check.js の togglelastcheck() が querySelector する要素
+           Phase 5 でポスト UI を統合するまでの互換性維持用 (非表示固定)
+           ref="lastCheckVideo" はここに置いて Vue スコープ内に保持する -->
+      <div id="lastCheck" style="display:none; position:fixed; left:100%; top:0;" aria-hidden="true">
+        <video ref="lastCheckVideo" style="display:none;"></video>
       </div>
 
-      <section id="preview">
-        <video id="ajvideoPlayer" :src="videoSrc" ref="videoPreview" @loadedmetadata="loadVideo"></video>
-      </section>
+      <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           デスクトップ: 左サイドバー (md 以上)
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      <aside class="hidden md:flex flex-col flex-shrink-0 w-60 h-full bg-surface-1 border-r border-hairline">
 
-      <section id="timelines">
-        <div id="util">
-          <div id="play" v-show="!playFlag" @click.stop="playVideo"></div>
-          <div id="stop" v-show="playFlag" @click.stop="pauseVideo">
-            <div></div>
-            <div></div>
-          </div>
-          <p>[[ displayCurrentTime.current ]] / [[ displayCurrentTime.duration ]]</p>
+        <!-- ロゴ -->
+        <div class="flex items-center gap-1.5 px-7 pt-8 pb-3">
+          <span class="text-text-1 text-2xl font-bold">ano</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-accent inline-block mt-1"></span>
         </div>
-        <div id="timeline" ref="timelineElement" @mousedown.prevent="moveCurrent" :style="{width:timelineWidth, left:timelineLeft}">
-          <div id="currentTime" :style="{left:currentTimePosition+'%'}"></div>
-          <div id="times">
-              <div v-for="(item,index) in intervalList" :style="{left:item.left}" :id="'time'+index" class="time">
-                  [[item.displayTime]]
+
+        <!-- 投稿ボタン (このページなのでアクティブ状態) -->
+        <div class="px-4 pb-3">
+          <div class="flex items-center justify-center gap-2 h-12 w-full
+                      bg-accent rounded-xl font-semibold text-[15px] text-ano-bg cursor-default select-none">
+            <i data-lucide="plus" class="w-5 h-5" aria-hidden="true"></i>
+            投稿する
+          </div>
+        </div>
+
+        <!-- ナビゲーション -->
+        <nav class="flex-1 px-3 space-y-0.5">
+          <a href="{% url 'videopost:index' %}"
+             class="flex items-center gap-4 h-12 px-4 rounded-xl">
+            <i data-lucide="home" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
+            <span class="text-text-2 font-medium text-[15px]">ホーム</span>
+          </a>
+          <a href="{% url 'videopost:search' %}"
+             class="flex items-center gap-4 h-12 px-4 rounded-xl">
+            <i data-lucide="search" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
+            <span class="text-text-2 font-medium text-[15px]">検索</span>
+          </a>
+          <a href="#"
+             class="flex items-center gap-4 h-12 px-4 rounded-xl">
+            <i data-lucide="layout-grid" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
+            <span class="text-text-2 font-medium text-[15px]">NFT</span>
+          </a>
+          <a href="{% url 'videopost:account' %}"
+             class="flex items-center gap-4 h-12 px-4 rounded-xl">
+            <i data-lucide="user" class="w-[22px] h-[22px] text-text-2 flex-shrink-0" aria-hidden="true"></i>
+            <span class="text-text-2 font-medium text-[15px]">マイ</span>
+          </a>
+        </nav>
+
+        <!-- ウォレット情報 -->
+        <div class="mx-4 mb-4">
+          <div class="flex items-center gap-3 px-4 py-3.5 bg-surface-2 rounded-xl">
+            <div class="w-5 h-5 rounded-full bg-surface-3 flex-shrink-0"></div>
+            <div class="min-w-0">
+              <p class="text-text-1 text-[13px] font-medium truncate">0x4a3f…e9c2</p>
+              <p class="text-text-3 text-caption">12.4 MATIC</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           メインコンテンツ
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+      <main class="flex-1 flex flex-col h-full overflow-hidden">
+
+        <!-- ── ヘッダー ── -->
+
+        <!-- デスクトップ: タイトル + ボタン群 -->
+        <header class="hidden md:flex items-center justify-between px-8 border-b border-hairline flex-shrink-0 h-[88px]">
+          <h1 class="text-text-1 text-[22px] font-semibold">新規投稿</h1>
+          <div class="flex items-center gap-3">
+            <button class="h-12 px-6 bg-surface-2 rounded-xl text-text-1 font-medium text-[13px]">
+              下書き保存
+            </button>
+            <button @click="trim"
+                    class="h-12 px-6 bg-accent rounded-xl text-ano-bg font-semibold text-[14px]">
+              投稿する
+            </button>
+          </div>
+        </header>
+
+        <!-- モバイル: 戻る + タイトル + 下書き保存 -->
+        <header class="md:hidden flex items-center justify-between px-5 flex-shrink-0 h-[88px]">
+          <a href="{% url 'videopost:index' %}" class="flex items-center text-text-1 w-8">
+            <i data-lucide="arrow-left" class="w-6 h-6" aria-hidden="true"></i>
+          </a>
+          <h1 class="text-text-1 text-[17px] font-semibold">新規投稿</h1>
+          <button class="h-8 px-4 bg-surface-2 rounded-pill text-text-1 font-medium text-[12px]">
+            下書き保存
+          </button>
+        </header>
+
+        <!-- ── ボディ: 2カラム (desktop) / スクロール (mobile) ── -->
+        <div class="flex-1 min-h-0
+                    overflow-y-auto md:overflow-hidden
+                    flex flex-col md:flex-row">
+
+          <!-- ────────────────────────────────────────
+               動画プレビュー (左カラム / モバイル上部)
+               ──────────────────────────────────────── -->
+          <section class="flex-shrink-0 flex flex-col items-center
+                          px-5 pt-6 pb-4
+                          md:w-auto md:px-8 md:py-8 md:items-start">
+
+            <!-- プレビューカード -->
+            <div class="relative bg-surface-2 rounded-20 overflow-hidden
+                        w-full max-w-[280px] aspect-[9/16]
+                        md:w-[360px] md:h-[632px] md:aspect-auto md:max-w-none">
+
+              <!-- 動画要素 (check.js: ref="videoPreview") -->
+              <video ref="videoPreview"
+                     :src="videoSrc"
+                     @loadedmetadata="loadVideo"
+                     playsinline
+                     class="absolute inset-0 w-full h-full object-contain">
+              </video>
+
+              <!-- プレースホルダー: 動画未選択 -->
+              <label v-if="!videoSrc"
+                     for="videoFileInput"
+                     class="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer">
+                <div class="w-16 h-16 rounded-full bg-surface-3 flex items-center justify-center">
+                  <i data-lucide="upload" class="w-7 h-7 text-text-2" aria-hidden="true"></i>
+                </div>
+                <span class="text-text-2 text-meta">動画を選択</span>
+              </label>
+
+              <!-- 再生 / 一時停止 オーバーレイ (動画選択済み) -->
+              <button v-if="videoSrc"
+                      @click="playFlag ? pauseVideo() : playVideo()"
+                      class="absolute inset-0 flex items-center justify-center">
+                <div class="w-16 h-16 rounded-full bg-black/45 flex items-center justify-center">
+                  <i :data-lucide="playFlag ? 'pause' : 'play'"
+                     class="w-9 h-9 text-text-1" aria-hidden="true"></i>
+                </div>
+              </button>
+
+              <!-- 差し替えボタン (右上) -->
+              <label v-if="videoSrc"
+                     for="videoFileInput"
+                     class="absolute top-4 right-4 cursor-pointer
+                            h-7 px-3 bg-black/45 rounded-pill
+                            flex items-center text-text-1 text-label whitespace-nowrap">
+                差し替え
+              </label>
+
+              <!-- 現在時刻表示 (左下) -->
+              <div v-if="videoSrc"
+                   class="absolute bottom-4 left-4
+                          h-6 px-3 bg-black/50 rounded-pill
+                          flex items-center text-text-1 text-label whitespace-nowrap">
+                [[ displayCurrentTime.current ]] / [[ displayCurrentTime.duration ]]
               </div>
-          </div>
-        </div>
-        <div id="material" ref="material" :style="{width:materialWidth, left:materialLeft}" @mousedown.prevent="move">
-          <div id="leftHandle" class="handle" ref="leftHandle" :style="{left:handleLefts.l}" @mousedown.prevent.stop="resize"></div>
-          <div id="rightHandle" class="handle" ref="rightHandle" :style="{left:handleLefts.r}" @mousedown.prevent.stop="resize"></div>
-        </div>
-      </section>
-      
-      <section id="footer">
-        <input id="videoInput" type='file' accept='video/*' @change="selectVideo" style="display: none;">
-        <label for="videoInput" class="custom-file-upload"><img src="{% static 'images/edit.png'%}" style="height: 20;"></label>
-        <button id="post" @click="trim">次へ</button>
-      </section>
+            </div><!-- /プレビューカード -->
 
-      <button @click="togglelastcheck" style="position:absolute; z-index:9998;">button</button>
-      <div id="lastCheck">
-        <button @click="togglelastcheck">toggle</button>
-        <div id="fuzzySearch">
-          <input type="search" v-model="inputTag" id="tagInput" ref="tagInputElement">
-          <button @click="addTag">追加</button>
-          <ul id="searchPrediction" @click="predict">
-            <li v-for="history in historys" v-show="inputTag"><div id="historyMark"></div>[[ history ]]</li>
-            <li v-for="tag in results">[[ tag.item ]]</li>
-          </ul>
-        </div>
-        <div id="tags" :style="{width:tagsWidth}">
-          <div v-for="name in tags" class="tag">
-            [[ name ]]
-            <p @click="tagDelete">×</p>
+            <!-- 隠しファイル入力 -->
+            <input id="videoFileInput"
+                   type="file"
+                   accept="video/*"
+                   @change="selectVideo"
+                   class="hidden">
+          </section><!-- /動画プレビュー -->
+
+          <!-- ────────────────────────────────────────
+               モバイル: トリミングタイムライン
+               (動画プレビューの直下、ツール類の上)
+               ──────────────────────────────────────── -->
+          <div class="md:hidden px-5 pb-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-text-2 text-meta">トリミング</span>
+              <span class="text-text-3 text-label">最大 12 秒</span>
+            </div>
+            <!-- タイムラインコンテナ -->
+            <div class="relative bg-surface-2 h-[56px] rounded-xl overflow-hidden">
+              <!-- タイムラインレール (Phase 3 で check.js の ref を接続) -->
+              <div class="absolute inset-0 flex gap-[4px] px-[6px] py-[6px]">
+                <div v-for="i in 8" :key="i" class="flex-1 bg-surface-3 rounded-[4px]"></div>
+              </div>
+            </div>
+            <div class="flex justify-between mt-1">
+              <span class="text-text-3 text-label">00:00</span>
+              <span class="text-text-3 text-label">[[ displayCurrentTime.duration ]]</span>
+            </div>
           </div>
-        </div>
-        <video id="lastCheckVideo" ref="lastCheckVideo" controls></video>
-        <div>
-          <label for="isDeleteOneDay" style="display:inline-flex; padding: 10;">1日で消す<input id="isDeleteOneDay" class="switch" type="checkbox" v-model="isDeleteOneDay"></input></label>
-          <button @click="post">投稿</button>
-        </div>
-      </div>
-      </div>
+
+          <!-- ────────────────────────────────────────
+               右パネル: 編集ツール・タグ・公開設定
+               (desktop: 右カラム / mobile: 下部スクロール)
+               ──────────────────────────────────────── -->
+          <section class="flex-1 overflow-y-auto
+                          px-5 pb-28
+                          md:px-8 md:py-8 md:pb-8">
+
+            <!-- 編集ツール -->
+            <div class="mb-6">
+              <p class="text-text-2 text-meta mb-3">編集ツール</p>
+              <div class="flex gap-3">
+                <!-- カット (アクティブ) -->
+                <button class="flex flex-col items-center justify-center gap-2
+                               w-[78px] h-[78px] md:w-[78px] md:h-[78px]
+                               w-[56px] h-[56px] rounded-[16px]
+                               bg-accent/14 border border-accent/50">
+                  <i data-lucide="scissors" class="w-[26px] h-[26px] text-accent" aria-hidden="true"></i>
+                  <span class="text-accent text-label">カット</span>
+                </button>
+                <!-- テキスト -->
+                <button class="flex flex-col items-center justify-center gap-2
+                               w-[56px] h-[56px] md:w-[78px] md:h-[78px] rounded-[16px]
+                               bg-surface-1">
+                  <i data-lucide="type" class="w-[24px] h-[24px] md:w-[26px] md:h-[26px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 text-label">テキスト</span>
+                </button>
+                <!-- 画像 -->
+                <button class="flex flex-col items-center justify-center gap-2
+                               w-[56px] h-[56px] md:w-[78px] md:h-[78px] rounded-[16px]
+                               bg-surface-1">
+                  <i data-lucide="image" class="w-[24px] h-[24px] md:w-[26px] md:h-[26px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 text-label">画像</span>
+                </button>
+                <!-- 音声 -->
+                <button class="flex flex-col items-center justify-center gap-2
+                               w-[56px] h-[56px] md:w-[78px] md:h-[78px] rounded-[16px]
+                               bg-surface-1">
+                  <i data-lucide="music" class="w-[24px] h-[24px] md:w-[26px] md:h-[26px] text-text-2" aria-hidden="true"></i>
+                  <span class="text-text-2 text-label">音声</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 区切り線 -->
+            <div class="h-px bg-hairline mb-6"></div>
+
+            <!-- タグ -->
+            <div class="mb-6">
+              <p class="text-text-2 text-meta mb-3">タグ</p>
+              <div class="flex gap-2">
+                <!-- 入力フィールド -->
+                <div class="relative flex-1">
+                  <input ref="tagInputElement"
+                         v-model="inputTag"
+                         type="text"
+                         placeholder="#タグを追加"
+                         class="w-full h-12 px-4 bg-surface-2 rounded-xl
+                                text-text-1 text-body placeholder:text-text-3
+                                outline-none border border-transparent focus:border-accent/40">
+                  <!-- 予測候補ドロップダウン -->
+                  <ul v-if="inputTag && (results.length || historys.length)"
+                      class="absolute top-full left-0 mt-1 w-full z-20
+                             bg-surface-2 rounded-xl overflow-hidden border border-hairline">
+                    <li v-for="history in historys"
+                        v-show="inputTag"
+                        @click="predict($event)"
+                        class="px-4 py-2.5 text-text-2 text-body cursor-pointer hover:bg-surface-3">
+                      [[ history ]]
+                    </li>
+                    <li v-for="tag in results"
+                        @click="predict($event)"
+                        class="px-4 py-2.5 text-text-1 text-body cursor-pointer hover:bg-surface-3">
+                      [[ tag.item ]]
+                    </li>
+                  </ul>
+                </div>
+                <!-- 追加ボタン -->
+                <button @click="addTag"
+                        class="h-12 px-5 bg-accent rounded-xl
+                               text-ano-bg font-semibold text-body flex-shrink-0">
+                  追加
+                </button>
+              </div>
+              <!-- タグチップ -->
+              <div v-if="tags.length" class="flex flex-wrap gap-2 mt-3">
+                <div v-for="name in tags"
+                     class="inline-flex items-center gap-1.5 h-[34px] px-3
+                            bg-surface-3 rounded-pill text-text-1 text-meta">
+                  #[[ name ]]
+                  <button @click="tagDelete($event)"
+                          class="text-text-3 hover:text-text-1 leading-none ml-0.5">×</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 区切り線 -->
+            <div class="h-px bg-hairline mb-6"></div>
+
+            <!-- 公開設定 -->
+            <div>
+              <p class="text-text-2 text-meta mb-3">公開設定</p>
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-text-1 text-[15px] font-medium mb-1">24時間で消す</p>
+                  <p class="text-text-3 text-meta">公開から24時間後に自動で削除されます</p>
+                </div>
+                <!-- トグルスイッチ -->
+                <label class="flex-shrink-0 cursor-pointer mt-0.5">
+                  <input type="checkbox" v-model="isDeleteOneDay" class="sr-only">
+                  <div :class="isDeleteOneDay ? 'bg-accent' : 'bg-surface-3'"
+                       class="relative w-[46px] h-[28px] rounded-[14px] transition-colors duration-200">
+                    <div :class="isDeleteOneDay ? 'translate-x-[18px]' : 'translate-x-[3px]'"
+                         class="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow transition-transform duration-200">
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+          </section><!-- /右パネル -->
+
+        </div><!-- /ボディ -->
+
+        <!-- ────────────────────────────────────────
+             デスクトップ: トリミングタイムライン (下部固定)
+             ──────────────────────────────────────── -->
+        <section class="hidden md:block flex-shrink-0 px-8 pb-8">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-text-2 text-meta">トリミング</span>
+            <span class="text-text-3 text-label">最大 12 秒</span>
+          </div>
+
+          <!-- タイムラインコンテナ (position: relative の基準) -->
+          <div class="relative bg-surface-2 h-[62px] rounded-xl overflow-hidden">
+
+            <!-- タイムラインレール (check.js: ref="timelineElement") -->
+            <div ref="timelineElement"
+                 @mousedown.prevent="moveCurrent"
+                 class="absolute top-0 bottom-0"
+                 :style="{width: timelineWidth, left: timelineLeft + 'px'}">
+
+              <!-- フレームサムネイル (静的プレースホルダー) -->
+              <div class="absolute inset-y-[6px] inset-x-[6px] flex gap-[7px] pointer-events-none">
+                <div v-for="i in 18" :key="i" class="flex-1 bg-surface-3 rounded-[6px]"></div>
+              </div>
+
+              <!-- 現在時刻インジケーター (白い縦線 + 上部ドット) -->
+              <div class="absolute bottom-0 w-0.5 bg-white z-20 pointer-events-none"
+                   style="top: -6px;"
+                   :style="{left: currentTimePosition + '%'}">
+                <div class="absolute top-[6px] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white"></div>
+              </div>
+
+              <!-- 時刻ラベル (hidden / JS 側から参照される) -->
+              <div id="times" class="hidden">
+                <div v-for="(item, index) in intervalList"
+                     :style="{left: item.left}"
+                     :id="'time' + index"
+                     class="absolute bottom-0 text-text-3 text-label">
+                  [[ item.displayTime ]]
+                </div>
+              </div>
+            </div><!-- /タイムラインレール -->
+
+            <!-- トリム範囲セレクター (check.js: ref="material") -->
+            <div ref="material"
+                 @mousedown.prevent="move"
+                 class="absolute top-0 bottom-0 border-2 border-accent rounded-xl z-10 cursor-grab active:cursor-grabbing"
+                 :style="{left: materialLeft + 'px', width: materialWidth + 'px'}">
+              <!-- 左ハンドル -->
+              <div id="leftHandle"
+                   ref="leftHandle"
+                   @mousedown.prevent.stop="resize"
+                   class="absolute left-0 top-0 bottom-0 w-1.5 bg-accent rounded-l-[10px] cursor-ew-resize">
+              </div>
+              <!-- 右ハンドル -->
+              <div id="rightHandle"
+                   ref="rightHandle"
+                   @mousedown.prevent.stop="resize"
+                   class="absolute right-0 top-0 bottom-0 w-1.5 bg-accent rounded-r-[10px] cursor-ew-resize">
+              </div>
+            </div><!-- /トリム範囲 -->
+
+          </div><!-- /タイムラインコンテナ -->
+
+          <!-- 開始・終了時刻ラベル -->
+          <div class="flex justify-between mt-1.5">
+            <span class="text-text-3 text-label">00:00</span>
+            <span class="text-text-3 text-label">[[ displayCurrentTime.duration ]]</span>
+          </div>
+        </section><!-- /デスクトップ タイムライン -->
+
+      </main><!-- /メインコンテンツ -->
+
+    </div><!-- /#check -->
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         モバイル: 下部固定「投稿する」ボタン
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-30
+                px-5 pb-8 pt-3
+                bg-gradient-to-t from-ano-bg/95 to-transparent">
+      <button @click="trim"
+              class="w-full h-[52px] bg-accent rounded-[14px]
+                     text-ano-bg font-semibold text-base">
+        投稿する
+      </button>
     </div>
+
   </body>
 </html>
