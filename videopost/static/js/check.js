@@ -1,5 +1,5 @@
 const { createApp, ref, reactive, watch, computed, onMounted, onBeforeUnmount, nextTick } = Vue;
-const { useIntervalFn, useMediaControls, useWindowSize } = VueUse;
+const { useIntervalFn, useMediaControls } = VueUse;
 import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
@@ -460,18 +460,6 @@ const check = createApp({
 
         const isDeleteOneDay = ref(false)
 
-        // ── スクロール連動: 動画エリアの高さをスクロール量に応じて縮小 ──
-        const { width: windowWidth } = useWindowSize()
-        const isMobile = computed(() => windowWidth.value < 768)
-        const bodyScrollY = ref(0)
-        const onBodyScroll = (e) => { bodyScrollY.value = e.currentTarget.scrollTop }
-        const videoMobileStyle = computed(() => {
-            if (!isMobile.value) return {}
-            return {
-                height: bodyScrollY.value > 40 ? '120px' : '180px',
-                transition: 'height 0.3s ease'
-            }
-        })
 
         return {
             togglelastcheck,
@@ -517,8 +505,6 @@ const check = createApp({
             post,
             submitPost,
             onVideoEnded,
-            onBodyScroll,
-            videoMobileStyle,
             lastCheckVideo,
             isDeleteOneDay,
         }
