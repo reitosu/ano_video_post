@@ -47,7 +47,7 @@ const infiniteScroll = createApp({
       tutorialFlag = ref(true),
       onTutorialClick = () => {
         tutorialFlag.value = false;
-        currentVideoElement.value.play()
+        currentVideoElement.value?.play()
       }
 
     const
