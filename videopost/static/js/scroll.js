@@ -110,6 +110,12 @@ const infiniteScroll = createApp({
           .catch(error => console.log('ページの取得に失敗しました: ', error))
       }
 
+    // dataList に項目が追加されるたびに v-for の新 <i data-lucide> を SVG へ変換する
+    watch(() => dataList.value.length, async () => {
+      await nextTick()
+      if (window.lucide) window.lucide.createIcons()
+    })
+
     onMounted(async () => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
