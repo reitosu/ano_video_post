@@ -4,6 +4,8 @@ import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
 const noscroll = (e) => {
+    // data-scrollable 属性を持つ祖先要素内のスクロールは許可する
+    if (e.target.closest('[data-scrollable]')) return
     e.preventDefault()
 }
 
@@ -80,6 +82,12 @@ const check = createApp({
             tags.value.splice(index, 1)
         }
 
+        // 新 UI 用: タグ名を直接受け取って削除する
+        const removeTag = (name) => {
+            const index = tags.value.indexOf(name)
+            if (index > -1) tags.value.splice(index, 1)
+        }
+
         const
             videoPreview = ref(),
             videoSrc = ref(),
@@ -114,6 +122,11 @@ const check = createApp({
             displayCurrentTime.duration = roundDecimalPlace(duration, roundBase.value)
             intervalList.value = createInterval(duration)
         }
+
+        // 動画が選択された後に v-if で出現するアイコン要素を Lucide で描画する
+        watch(videoSrc, () => {
+            nextTick(() => { if (window.lucide) window.lucide.createIcons() })
+        })
 
         const maxTime = computed(() => {
             return displayCurrentTime.duration * (materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value
@@ -320,6 +333,41 @@ const check = createApp({
         const { openModal: trimModal } = useModal({ title: "注意", message: "12秒以内にしてください。", button: "OK" })
         const { openModal: loadModal, closeModal } = useModal({ title: "ロード", message: "動画の準備中です。", button: "" })
 
+        // トリミング → 投稿 を一連で処理する（新 UI の「投稿する」ボタン用）
+        const submitPost = () => {
+            if (!videoSrc.value) return
+            const startTime = (materialLeft.value - timelineLeft.value) / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            const trimTime = materialWidth.value / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            if (trimTime > 12) { trimModal(); return }
+
+            loadModal()
+            const endTime = startTime + trimTime
+            const trimData = new FormData()
+            trimData.append('videoPath', videoSrc.value)
+            trimData.append('startTime', roundDecimalPlace(startTime, roundBase.value))
+            trimData.append('endTime', roundDecimalPlace(endTime, roundBase.value))
+            trimData.append('trimTime', roundDecimalPlace(trimTime, roundBase.value))
+
+            axios({ method: 'POST', url: '/videopost/trim/', responseType: 'json', data: trimData })
+                .then(trimRes => {
+                    if (tagDatas.length === 0) getTagDatas()
+                    const postData = new FormData()
+                    postData.append('path', trimRes.data.path)
+                    postData.append('isDeleteOneDay', isDeleteOneDay.value)
+                    postData.append('userId', localStorage.getItem('userId'))
+                    postData.append('tags', tags.value)
+                    return axios({ method: 'POST', url: '/videopost/posting/', responseType: 'json', data: postData })
+                })
+                .then(() => {
+                    closeModal()
+                    window.location.href = '/videopost/'
+                })
+                .catch(err => {
+                    closeModal()
+                    console.error('投稿に失敗しました:', err)
+                })
+        }
+
         const trim = () => {
             const startTime = (materialLeft.value - timelineLeft.value) / timelineWidth.value * parseFloat(displayCurrentTime.duration)
             const trimTime = materialWidth.value / timelineWidth.value * parseFloat(displayCurrentTime.duration)
@@ -392,12 +440,14 @@ const check = createApp({
 
         return {
             togglelastcheck,
+            saveDraft,
             results,
             loadDraft,
             draftElement,
             tags,
             tagsWidth,
             tagDelete,
+            removeTag,
             inputFlag,
             videoPreview,
             videoSrc,
@@ -430,6 +480,7 @@ const check = createApp({
             addTag,
             trim,
             post,
+            submitPost,
             lastCheckVideo,
             isDeleteOneDay,
         }

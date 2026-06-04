@@ -155,10 +155,11 @@
         <header class="hidden md:flex items-center justify-between px-8 border-b border-hairline flex-shrink-0 h-[88px]">
           <h1 class="text-text-1 text-[22px] font-semibold">新規投稿</h1>
           <div class="flex items-center gap-3">
-            <button class="h-12 px-6 bg-surface-2 rounded-xl text-text-1 font-medium text-[13px]">
+            <button @click="saveDraft"
+                    class="h-12 px-6 bg-surface-2 rounded-xl text-text-1 font-medium text-[13px]">
               下書き保存
             </button>
-            <button @click="trim"
+            <button @click="submitPost"
                     class="h-12 px-6 bg-accent rounded-xl text-ano-bg font-semibold text-[14px]">
               投稿する
             </button>
@@ -171,7 +172,8 @@
             <i data-lucide="arrow-left" class="w-6 h-6" aria-hidden="true"></i>
           </a>
           <h1 class="text-text-1 text-[17px] font-semibold">新規投稿</h1>
-          <button class="h-8 px-4 bg-surface-2 rounded-pill text-text-1 font-medium text-[12px]">
+          <button @click="saveDraft"
+                  class="h-8 px-4 bg-surface-2 rounded-pill text-text-1 font-medium text-[12px]">
             下書き保存
           </button>
         </header>
@@ -211,12 +213,15 @@
                 <span class="text-text-2 text-meta">動画を選択</span>
               </label>
 
-              <!-- 再生 / 一時停止 オーバーレイ (動画選択済み) -->
+              <!-- 再生 / 一時停止 オーバーレイ (動画選択済み)
+                   v-show で両アイコンを常に DOM に保持し Lucide の SVG 変換を維持する -->
               <button v-if="videoSrc"
                       @click="playFlag ? pauseVideo() : playVideo()"
                       class="absolute inset-0 flex items-center justify-center">
                 <div class="w-16 h-16 rounded-full bg-black/45 flex items-center justify-center">
-                  <i :data-lucide="playFlag ? 'pause' : 'play'"
+                  <i v-show="!playFlag" data-lucide="play"
+                     class="w-9 h-9 text-text-1" aria-hidden="true"></i>
+                  <i v-show="playFlag" data-lucide="pause"
                      class="w-9 h-9 text-text-1" aria-hidden="true"></i>
                 </div>
               </button>
@@ -248,32 +253,12 @@
           </section><!-- /動画プレビュー -->
 
           <!-- ────────────────────────────────────────
-               モバイル: トリミングタイムライン
-               (動画プレビューの直下、ツール類の上)
-               ──────────────────────────────────────── -->
-          <div class="md:hidden px-5 pb-2">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-text-2 text-meta">トリミング</span>
-              <span class="text-text-3 text-label">最大 12 秒</span>
-            </div>
-            <!-- タイムラインコンテナ -->
-            <div class="relative bg-surface-2 h-[56px] rounded-xl overflow-hidden">
-              <!-- タイムラインレール (Phase 3 で check.js の ref を接続) -->
-              <div class="absolute inset-0 flex gap-[4px] px-[6px] py-[6px]">
-                <div v-for="i in 8" :key="i" class="flex-1 bg-surface-3 rounded-[4px]"></div>
-              </div>
-            </div>
-            <div class="flex justify-between mt-1">
-              <span class="text-text-3 text-label">00:00</span>
-              <span class="text-text-3 text-label">[[ displayCurrentTime.duration ]]</span>
-            </div>
-          </div>
-
-          <!-- ────────────────────────────────────────
                右パネル: 編集ツール・タグ・公開設定
                (desktop: 右カラム / mobile: 下部スクロール)
+               data-scrollable: check.js の noscroll が wheel/touchmove を許可する
                ──────────────────────────────────────── -->
-          <section class="flex-1 overflow-y-auto
+          <section data-scrollable
+                   class="flex-1 overflow-y-auto
                           px-5 pb-28
                           md:px-8 md:py-8 md:pb-8">
 
@@ -283,8 +268,7 @@
               <div class="flex gap-3">
                 <!-- カット (アクティブ) -->
                 <button class="flex flex-col items-center justify-center gap-2
-                               w-[78px] h-[78px] md:w-[78px] md:h-[78px]
-                               w-[56px] h-[56px] rounded-[16px]
+                               w-[56px] h-[56px] md:w-[78px] md:h-[78px] rounded-[16px]
                                bg-accent/14 border border-accent/50">
                   <i data-lucide="scissors" class="w-[26px] h-[26px] text-accent" aria-hidden="true"></i>
                   <span class="text-accent text-label">カット</span>
@@ -359,7 +343,7 @@
                      class="inline-flex items-center gap-1.5 h-[34px] px-3
                             bg-surface-3 rounded-pill text-text-1 text-meta">
                   #[[ name ]]
-                  <button @click="tagDelete($event)"
+                  <button @click="removeTag(name)"
                           class="text-text-3 hover:text-text-1 leading-none ml-0.5">×</button>
                 </div>
               </div>
@@ -394,16 +378,19 @@
         </div><!-- /ボディ -->
 
         <!-- ────────────────────────────────────────
-             デスクトップ: トリミングタイムライン (下部固定)
+             トリミングタイムライン (全画面サイズで常時表示)
+             mobile: スクロール領域の下・固定ボタンの上
+             desktop: メインコンテンツ下部に固定
+             常時表示することで onMounted の clientWidth=0 問題を回避
              ──────────────────────────────────────── -->
-        <section class="hidden md:block flex-shrink-0 px-8 pb-8">
+        <section class="flex-shrink-0 px-5 pb-28 pt-2 md:px-8 md:pb-8 md:pt-0">
           <div class="flex items-center justify-between mb-2">
             <span class="text-text-2 text-meta">トリミング</span>
             <span class="text-text-3 text-label">最大 12 秒</span>
           </div>
 
           <!-- タイムラインコンテナ (position: relative の基準) -->
-          <div class="relative bg-surface-2 h-[62px] rounded-xl overflow-hidden">
+          <div class="relative bg-surface-2 h-[56px] md:h-[62px] rounded-xl overflow-hidden">
 
             <!-- タイムラインレール (check.js: ref="timelineElement") -->
             <div ref="timelineElement"
@@ -472,7 +459,7 @@
     <div class="md:hidden fixed bottom-0 left-0 right-0 z-30
                 px-5 pb-8 pt-3
                 bg-gradient-to-t from-ano-bg/95 to-transparent">
-      <button @click="trim"
+      <button @click="submitPost"
               class="w-full h-[52px] bg-accent rounded-[14px]
                      text-ano-bg font-semibold text-base">
         投稿する
