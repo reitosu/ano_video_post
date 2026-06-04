@@ -111,6 +111,11 @@ const check = createApp({
                     console.log('sucsess')
                     const path = response.data.path
                     videoSrc.value = path + '?t=' + Date.now()
+                    // timelineWidth が文字列 "97%" のままのケースに対応するため
+                    // 常に DOM から実ピクセル値を取得し直してから materialWidth へ反映する
+                    if (timelineElement.value) {
+                        timelineWidth.value = timelineElement.value.clientWidth
+                    }
                     materialWidth.value = timelineWidth.value
                     console.log(videoControls.value)
                 }).catch(error => console.log('動画ファイルの読み込みに失敗しました。: ', error))
@@ -130,7 +135,9 @@ const check = createApp({
             return displayCurrentTime.duration * (materialLeft.value - timelineLeft.value) / timelineWidth.value
         })
         const { pause, resume, isActive: playFlag } = useIntervalFn(() => {
-            if ((materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value * 100 <= currentTimePosition.value) pauseVideo()
+            const endPct = (materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value * 100
+            // endPct が 0 以下・NaN・Infinity の場合はトリム範囲が未設定なので pause しない
+            if (materialWidth.value > 0 && endPct > 0 && isFinite(endPct) && endPct <= currentTimePosition.value) pauseVideo()
             currentTimePosition.value = videoPreview.value.currentTime / displayCurrentTime.duration * 100
             displayCurrentTime.current = currentTime.value
         }, 1)
@@ -139,9 +146,10 @@ const check = createApp({
             if (videoPreview.value.readyState >= 1) {
                 console.log(videoPreview.value.currentTime + 0.1, maxTime.value, currentTime.value)
                 const result = new Promise(function (resolve) {
-                    if (videoPreview.value.currentTime + 0.1 >= maxTime.value) {
+                    // maxTime が正の有効値のときだけ末尾チェックを行う
+                    // (materialWidth 未設定時は maxTime が 0 以下になるためスキップ)
+                    if (maxTime.value > 0 && videoPreview.value.currentTime + 0.1 >= maxTime.value) {
                         videoPreview.value.currentTime = minTime.value
-                        // パーセント位置で正しくリセット（秒数ではなく0〜100の割合）
                         currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
                     }
                     resolve("success")
