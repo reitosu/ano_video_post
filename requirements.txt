@@ -26,7 +26,7 @@ frozenlist==1.4.0
 hexbytes==0.3.1
 idna==3.4
 imageio==2.31.1
-imageio-ffmpeg==0.4.8
+imageio-ffmpeg==0.6.0
 jsonschema==4.19.1
 jsonschema-specifications==2023.7.1
 lru-dict==1.2.0
