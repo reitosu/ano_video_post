@@ -1,12 +1,15 @@
 const { ref } = Vue;
 export function useModal({ title = "modal", message = "default message", button = "OK", }) {
     const createButton = (inputButton) => {
-        const button = Array.isArray(inputButton) ? inputButton : [inputButton]
+        if (!inputButton) return ""
+        const buttons = Array.isArray(inputButton) ? inputButton : [inputButton]
         let strButton = ""
-        button.forEach((b) => {
+        buttons.forEach((b) => {
+            if (!b) return
             if (b instanceof Object) {
                 if (b.noClose === true) {
                     strButton += `<button id="modal${b}" class="modal-default-button noClose">${b}</button>`
+                    return
                 }
             }
             strButton += `<button id="modal${b}" class="modal-default-button">${b}</button>`
@@ -17,7 +20,6 @@ export function useModal({ title = "modal", message = "default message", button 
         "title": title,
         "message": message.replaceAll("\n", "<br>"),
         "button": createButton(button)
-
     }
     const modalLayout = `
     <div class="modal-mask">
@@ -25,65 +27,83 @@ export function useModal({ title = "modal", message = "default message", button 
             <div class="modal-header">
                 <h3>${option.title}</h3>
             </div>
-
             <div class="modal-body">
                 <p>${option.message}</p>
             </div>
-
-            <div class="modal-footer">
-                ${option.button}
-            </div>
+            ${option.button ? `<div class="modal-footer">${option.button}</div>` : ""}
         </div>
     </div>
     <style>
     .modal-mask {
         position: fixed;
-        z-index: 19998; 
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.65);
         display: flex;
-        transition: opacity 0.3s ease;
-      }
-      
-      .modal-container {
-        width: 300px;
-        margin: auto;
-        padding: 20px 30px;
-        background-color: #fff;
-        border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
-        transition: all 0.3s ease;
-      }
-      
-      .modal-header h3 {
-        margin-top: 0;
-        color: #42b983;
-      }
-      
-      .modal-body {
-        margin: 20px 0;
-      }
-      
-      .modal-default-button {
-        float: right;
-      }
-
-      .modal-enter-from {
-        opacity: 0;
-      }
-      
-      .modal-leave-to {
-        opacity: 0;
-      }
-      
-      .modal-enter-from .modal-container,
-      .modal-leave-to .modal-container {
-        -webkit-transform: scale(1.1);
-        transform: scale(1.1);
-      }
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+    .modal-container {
+        width: 100%;
+        max-width: 340px;
+        background: #141416;
+        border: 1px solid #2E2E33;
+        border-radius: 20px;
+        padding: 28px 24px 24px;
+        box-sizing: border-box;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.95) translateY(8px); }
+        to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
+    .modal-header h3 {
+        margin: 0 0 8px;
+        color: #F4F4F5;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+    .modal-body {
+        margin: 0 0 24px;
+    }
+    .modal-body p {
+        margin: 0;
+        color: #A1A1AA;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    .modal-default-button {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        background: #26262B;
+        color: #F4F4F5;
+        transition: opacity 0.15s ease;
+        box-sizing: border-box;
+        flex-shrink: 0;
+    }
+    .modal-default-button:hover { opacity: 0.75; }
+    .modal-default-button:active { opacity: 0.55; }
+    #modal復元, #modalOK { background: #CBFF3C; color: #0A0A0B; }
     </style>
     `
     const show = ref(false)
@@ -132,4 +152,4 @@ export function useModal({ title = "modal", message = "default message", button 
         toggle,
         result,
     }
-} 
+}

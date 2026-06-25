@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ロゴアニメーションテスト</title>
+<style>
+  body { background: #f0f0f0; padding: 40px; font-family: sans-serif; }
+  h2 { margin-top: 40px; color: #333; }
+  .svg-wrap { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  button { padding: 8px 16px; margin: 8px 4px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+<h1>ロゴアニメーション確認</h1>
+
+<button onclick="reloadAll()">アニメーションをリプレイ</button>
+
+<h2>テキストロゴ (main_text.svg) — 文字が左から描かれていく</h2>
+<div class="svg-wrap">
+  <img id="mainText" src="main_text.svg" width="100%" style="max-width:900px; display:block;">
+</div>
+
+<h2>ヘッダーロゴ (header.svg) — 背景スクリブル描画 + テキスト描画 + うさぎ走り→バウンス</h2>
+<div class="svg-wrap">
+  <img id="headerSvg" src="header.svg" width="100%" style="max-width:1000px; display:block;">
+</div>
+
+<h2>アプリアイコン (main-logo.svg)</h2>
+<div class="svg-wrap" style="background:#222;">
+  <img id="mainLogo" src="main-logo.svg" width="160" height="160" style="display:block;">
+</div>
+
+<script>
+function reloadAll() {
+  const t = Date.now();
+  document.getElementById('mainText').src = 'main_text.svg?t=' + t;
+  document.getElementById('headerSvg').src = 'header.svg?t=' + t;
+  document.getElementById('mainLogo').src = 'main-logo.svg?t=' + t;
+}
+</script>
+</body>
+</html>
