@@ -5,9 +5,48 @@
 <style type="text/css">
 	.st0{fill:none;stroke:#898989;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 	.st1{fill:#231815;stroke:#231815;stroke-miterlimit:10;}
+	@keyframes rabbitJump {
+		0%, 72%, 100% { transform: translateY(0px); }
+		15% { transform: translateY(-22px); }
+		30% { transform: translateY(4px); }
+		45% { transform: translateY(-12px); }
+		60% { transform: translateY(2px); }
+	}
+	/* Hop from 'a' circle bottom (≈315px below natural pos) to upper-left natural pos */
+	@keyframes rabbitRunHeader {
+		0%   { transform: translate(-15px, 233px); opacity: 0; }
+		5%   { transform: translate(-15px, 233px); opacity: 1; }
+		15%  { transform: translate(-13px, 144px); }
+		25%  { transform: translate(-10px, 155px); }
+		28%  { transform: translate(-10px, 162px); }
+		33%  { transform: translate(-10px, 151px); }
+		45%  { transform: translate(-8px, 67px); }
+		55%  { transform: translate(-5px, 78px); }
+		58%  { transform: translate(-5px, 85px); }
+		63%  { transform: translate(-5px, 75px); }
+		75%  { transform: translate(-3px, -11px); }
+		88%  { transform: translate(0px, 4px); }
+		93%  { transform: translate(0px, -1px); }
+		100% { transform: translate(0px, 0px); }
+	}
+	#rabbitWrapper {
+		animation: rabbitRunHeader 2s linear 3.5s both;
+	}
+	#rabbit {
+		animation: rabbitJump 2.2s cubic-bezier(0.4, 0, 0.2, 1) 5.5s infinite;
+		transform-box: fill-box;
+		transform-origin: center bottom;
+	}
 </style>
+<defs>
+	<clipPath id="textReveal">
+		<rect x="0" y="0" width="0" height="559.8">
+			<animate attributeName="width" from="0" to="1281" dur="2.5s" begin="2.5s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1"/>
+		</rect>
+	</clipPath>
+</defs>
 <g id="_背景">
-	<path class="st0" d="M427.1,83.6c0.5,0.8,64.6-38.4,65.1-37.6c2.6,4.6-77.5,42.2-74.9,46.7s103.4-64.9,105.6-61
+	<path class="st0" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M427.1,83.6c0.5,0.8,64.6-38.4,65.1-37.6c2.6,4.6-77.5,42.2-74.9,46.7s103.4-64.9,105.6-61
 		c3.9,6.7-119.5,63.9-115.8,70.3c3.4,5.9,111.1-71.5,114.3-66c3.9,6.8-119.3,63.7-115.5,70.2c4,6.9,141.5-91.3,145.7-84.1
 		c5.4,9.3-159.2,83.9-154.2,92.5s138.4-91.5,143.4-82.8s-170,89.9-164.9,98.7S545.9,20.7,551,29.4c5.7,9.8-191.6,101.5-186.2,110.9
 		c5.8,10.1,192.5-125.4,198.7-114.7s-203.9,107.6-198,117.8S595.4-2.8,601.2,7.3C609.2,21.1,356,135,363.5,148
@@ -112,13 +151,17 @@
 		c8.1,14.1-244.3,128.3-237.3,140.5c6.1,10.6,218.9-139.8,224.7-129.7S704.9,525.9,710.9,536.2c5.8,10.1,203.2-130.2,208.8-120.5
 		c7.4,12.8-230.9,119.6-223.5,132.5C702.1,558.3,900.3,417,906.1,427c6,10.3-194.1,100.8-187.7,111.8c4.8,8.4,170.2-109.4,175-101.1
 		c5.9,10.2-182.5,96.1-177,105.6c4.2,7.2,161.5-104.1,166.2-96c4.4,7.7-148.3,77.8-143.4,86.3c3.4,5.8,133.7-85.4,137.3-79.2
-		c3.8,6.6-125.6,66.6-121.6,73.7c2.8,4.9,89.4-58,92.2-53.2c1.3,2.3-44,25.5-42.5,28c1,1.8,35.4-22.5,36.3-21"/>
+		c3.8,6.6-125.6,66.6-121.6,73.7c2.8,4.9,89.4-58,92.2-53.2c1.3,2.3-44,25.5-42.5,28c1,1.8,35.4-22.5,36.3-21">
+		<animate attributeName="stroke-dashoffset" from="1" to="0" dur="4.5s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1"/>
+	</path>
+	<g id="rabbit">
 	<path class="st1" d="M469.1,53.2c0,0-1.2-2.7,5.9-5.4c8.9-3.5,8.7-20.1-7.1-23.3c-18.8-3.8-30-25.1-37.3-23
 		c-3.4,1-5.9,13.1,11.1,19.6c21.8,8.2,8.2,11.2-17,16.8c-37.6,8.4-57,39.9-39.7,86c0,0,19-77.2,97.8-55.7
 		C482.9,68.1,492.8,58.9,469.1,53.2L469.1,53.2z"/>
 	<path class="st1" d="M382.3,78.6c0,0-10-2.1-11.5,4.9c-1.4,7,8.7,8.7,8.7,8.7"/>
+	</g>
 </g>
-<g id="_文字_">
+<g id="_文字_" clip-path="url(#textReveal)">
 	<path class="st1" d="M489.4,283.8c15.1,26.3,28.2,34.9,32.5,37.2c0.6,0.3,1.2-0.2,1-0.8l-24.8-92.3c-0.1-0.4-0.6-0.7-1-0.5
 		C492.2,229.6,466.3,243.7,489.4,283.8L489.4,283.8z"/>
 	<path class="st1" d="M547.3,227.9l-24.8,92.3c-0.2,0.6,0.5,1.2,1.1,0.9c4.3-2.3,17.3-11,32.4-37.2c23.1-40.1-2.7-54.2-7.7-56.5
