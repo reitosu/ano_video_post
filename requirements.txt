@@ -37,7 +37,7 @@ netaddr==0.9.0
 nft.storage @ git+https://github.com/nftstorage/python-client.git@7819a262fd08a301bff897e0736eb27891ed0c61
 numpy==1.24.3
 opencv-python==4.8.1.78
-parsimonious==0.9.0
+parsimonious==0.10.0
 Pillow==9.5.0
 proglog==0.1.10
 protobuf==4.24.4
