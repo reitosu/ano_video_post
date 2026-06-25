@@ -7,7 +7,7 @@ base58==2.1.1
 bitarray==2.8.2
 certifi==2023.5.7
 charset-normalizer==3.1.0
-cloudinary==1.33.0
+cloudinary==1.44.2
 colorama==0.4.6
 cytoolz==0.12.2
 decorator==4.4.2
