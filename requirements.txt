@@ -9,7 +9,7 @@ certifi==2023.5.7
 charset-normalizer==3.1.0
 cloudinary==1.44.2
 colorama==0.4.6
-cytoolz==0.12.2
+cytoolz==1.1.0
 decorator==4.4.2
 Django==5.0.14
 django-cloudinary-storage==0.3.0
