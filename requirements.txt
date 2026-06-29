@@ -24,7 +24,7 @@ eth-typing==3.5.0
 eth-utils==2.2.1
 frozenlist==1.4.0
 hexbytes==0.3.1
-idna==3.4
+idna==3.18
 imageio==2.31.1
 imageio-ffmpeg==0.6.0
 jsonschema==4.19.1
