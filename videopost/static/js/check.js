@@ -4,6 +4,8 @@ import { useModal } from './modalComponent.js'
 import { useFuse } from './fuseComponent.js'
 
 const noscroll = (e) => {
+    // data-scrollable 属性を持つ祖先要素内のスクロールは許可する
+    if (e.target.closest('[data-scrollable]')) return
     e.preventDefault()
 }
 
@@ -51,10 +53,18 @@ const check = createApp({
                 }
                 else return undefined
             })
-        const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["復元", "閉じる"] })
+        const { openModal } = useModal({ title: "注意", message: "下書きがあります。", button: ["閉じる", "復元"] })
 
         onMounted(() => {
-            window.addEventListener('beforeunload', saveDraft)
+            window.addEventListener('beforeunload', (event) => {
+                saveDraft()
+                // 動画がアップロード済みの場合はページ離脱の確認ダイアログを表示する
+                // (モダンブラウザはカスタムメッセージを無視し汎用文言を表示する仕様)
+                if (videoSrc.value) {
+                    event.preventDefault()
+                    event.returnValue = ""
+                }
+            })
             document.addEventListener('touchmove', noscroll, { passive: false });
             document.addEventListener('wheel', noscroll, { passive: false });
             axios.defaults.xsrfCookieName = 'csrftoken'
@@ -66,13 +76,8 @@ const check = createApp({
                 openModal()
                 document.addEventListener("result", loadDraft)
             }
-            // draft.value = JSON.parse(document.querySelector("#draft").getAttribute("data-draft"))
-            // console.log(draft.value)
-            // if (draft.value.video) {
-            //     openModal()
-            //     document.addEventListener("result", loadDraft)
-            // }
             pause()
+            if (window.lucide) window.lucide.createIcons()
         });
 
         const tags = ref([])
@@ -83,6 +88,12 @@ const check = createApp({
             const tagText = event.target.parentElement.textContent
             const index = tags.value.indexOf(tagText.replace(" ×", ""))
             tags.value.splice(index, 1)
+        }
+
+        // 新 UI 用: タグ名を直接受け取って削除する
+        const removeTag = (name) => {
+            const index = tags.value.indexOf(name)
+            if (index > -1) tags.value.splice(index, 1)
         }
 
         const
@@ -108,6 +119,11 @@ const check = createApp({
                     console.log('sucsess')
                     const path = response.data.path
                     videoSrc.value = path + '?t=' + Date.now()
+                    // timelineWidth が文字列 "97%" のままのケースに対応するため
+                    // 常に DOM から実ピクセル値を取得し直してから materialWidth へ反映する
+                    if (timelineElement.value) {
+                        timelineWidth.value = timelineElement.value.clientWidth
+                    }
                     materialWidth.value = timelineWidth.value
                     console.log(videoControls.value)
                 }).catch(error => console.log('動画ファイルの読み込みに失敗しました。: ', error))
@@ -127,7 +143,9 @@ const check = createApp({
             return displayCurrentTime.duration * (materialLeft.value - timelineLeft.value) / timelineWidth.value
         })
         const { pause, resume, isActive: playFlag } = useIntervalFn(() => {
-            if ((materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value * 100 <= currentTimePosition.value) pauseVideo()
+            const endPct = (materialLeft.value + materialWidth.value - timelineLeft.value) / timelineWidth.value * 100
+            // endPct が 0 以下・NaN・Infinity の場合はトリム範囲が未設定なので pause しない
+            if (materialWidth.value > 0 && endPct > 0 && isFinite(endPct) && endPct <= currentTimePosition.value) pauseVideo()
             currentTimePosition.value = videoPreview.value.currentTime / displayCurrentTime.duration * 100
             displayCurrentTime.current = currentTime.value
         }, 1)
@@ -136,22 +154,35 @@ const check = createApp({
             if (videoPreview.value.readyState >= 1) {
                 console.log(videoPreview.value.currentTime + 0.1, maxTime.value, currentTime.value)
                 const result = new Promise(function (resolve) {
-                    if (videoPreview.value.currentTime + 0.1 >= maxTime.value) {
+                    // maxTime が正の有効値のときだけ末尾チェックを行う
+                    // (materialWidth 未設定時は maxTime が 0 以下になるためスキップ)
+                    if (maxTime.value > 0 && videoPreview.value.currentTime + 0.1 >= maxTime.value) {
                         videoPreview.value.currentTime = minTime.value
-                        currentTimePosition.value = minTime.value
+                        currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
                     }
                     resolve("success")
                 })
                 result.then(res => {
                     console.log(res)
                     resume()
-                    videoPreview.value.play()
+                    videoPreview.value.play().catch(err => {
+                        // pause() が play() の完了より先に呼ばれた場合は正常な割り込みとして扱う
+                        if (err.name !== 'AbortError') console.error(err)
+                        pause()
+                    })
                 })
             }
         }
         const pauseVideo = () => {
             pause()
             videoPreview.value.pause()
+        }
+
+        // 動画が末尾まで再生されたときにインターバルを止めて先頭に戻す
+        const onVideoEnded = () => {
+            pause()
+            videoPreview.value.currentTime = minTime.value
+            currentTimePosition.value = ((materialLeft.value - timelineLeft.value) / timelineWidth.value) * 100
         }
 
         const timeSettings = reactive({
@@ -325,6 +356,41 @@ const check = createApp({
         const { openModal: trimModal } = useModal({ title: "注意", message: "12秒以内にしてください。", button: "OK" })
         const { openModal: loadModal, closeModal } = useModal({ title: "ロード", message: "動画の準備中です。", button: "" })
 
+        // トリミング → 投稿 を一連で処理する（新 UI の「投稿する」ボタン用）
+        const submitPost = () => {
+            if (!videoSrc.value) return
+            const startTime = (materialLeft.value - timelineLeft.value) / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            const trimTime = materialWidth.value / timelineWidth.value * parseFloat(displayCurrentTime.duration)
+            if (trimTime > 12) { trimModal(); return }
+
+            loadModal()
+            const endTime = startTime + trimTime
+            const trimData = new FormData()
+            trimData.append('videoPath', videoSrc.value)
+            trimData.append('startTime', roundDecimalPlace(startTime, roundBase.value))
+            trimData.append('endTime', roundDecimalPlace(endTime, roundBase.value))
+            trimData.append('trimTime', roundDecimalPlace(trimTime, roundBase.value))
+
+            axios({ method: 'POST', url: '/videopost/trim/', responseType: 'json', data: trimData })
+                .then(trimRes => {
+                    if (tagDatas.length === 0) getTagDatas()
+                    const postData = new FormData()
+                    postData.append('path', trimRes.data.path)
+                    postData.append('isDeleteOneDay', isDeleteOneDay.value)
+                    postData.append('userId', localStorage.getItem('userId'))
+                    postData.append('tags', tags.value)
+                    return axios({ method: 'POST', url: '/videopost/posting/', responseType: 'json', data: postData })
+                })
+                .then(() => {
+                    closeModal()
+                    window.location.href = '/videopost/'
+                })
+                .catch(err => {
+                    closeModal()
+                    console.error('投稿に失敗しました:', err)
+                })
+        }
+
         const trim = () => {
             const startTime = (materialLeft.value - timelineLeft.value) / timelineWidth.value * parseFloat(displayCurrentTime.duration)
             const trimTime = materialWidth.value / timelineWidth.value * parseFloat(displayCurrentTime.duration)
@@ -397,12 +463,14 @@ const check = createApp({
 
         return {
             togglelastcheck,
+            saveDraft,
             results,
             loadDraft,
             draftElement,
             tags,
             tagsWidth,
             tagDelete,
+            removeTag,
             inputFlag,
             videoPreview,
             videoSrc,
@@ -435,6 +503,8 @@ const check = createApp({
             addTag,
             trim,
             post,
+            submitPost,
+            onVideoEnded,
             lastCheckVideo,
             isDeleteOneDay,
         }

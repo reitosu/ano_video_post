@@ -23,10 +23,11 @@ const infiniteScroll = createApp({
     fadeDownFlag = ref(false),
     loadedFlag = ref(false),
     fadeUp = () => {
-      const videoEl = document.querySelector('video')
-      if (videoEl) {
-        videoEl.addEventListener('loadeddata', fadeDown)
+      const firstVideo = document.querySelector('video')
+      if (firstVideo) {
+        firstVideo.addEventListener('loadeddata', fadeDown)
       } else {
+        // 動画要素が存在しない場合はロード済みとして扱い、タイムアウトで確実にフェードアウト
         loadedFlag.value = true
       }
       setTimeout(() => {
@@ -46,7 +47,7 @@ const infiniteScroll = createApp({
       tutorialFlag = ref(true),
       onTutorialClick = () => {
         tutorialFlag.value = false;
-        currentVideoElement.value.play()
+        currentVideoElement.value?.play()
       }
 
     const
@@ -76,7 +77,7 @@ const infiniteScroll = createApp({
           blobVideos.push(validateCloudinaryUrl(video.video))
         })
         setTimeout(() => {
-          const videoElementList = Array.from(document.querySelectorAll(".infinite-item > video"))
+          const videoElementList = Array.from(document.querySelectorAll(".infinite-item video"))
           videoElementList.forEach(ele => {
             if (!(videoElementVisibilities.map(ele => { return ele.element }).includes(ele))) {
               ele.load()
@@ -85,6 +86,8 @@ const infiniteScroll = createApp({
               watch(videoElementVisibilities.slice(-1)[0], scrollPlay)
             }
           })
+          // v-for で追加された <i data-lucide> タグをアイコンに変換
+          if (window.lucide) window.lucide.createIcons()
           console.log(videoElementVisibilities)
         }, 1000)
       },
@@ -107,13 +110,20 @@ const infiniteScroll = createApp({
           .catch(error => console.log('ページの取得に失敗しました: ', error))
       }
 
+    // dataList に項目が追加されるたびに v-for の新 <i data-lucide> を SVG へ変換する
+    watch(() => dataList.value.length, async () => {
+      await nextTick()
+      if (window.lucide) window.lucide.createIcons()
+    })
+
     onMounted(async () => {
       axios.defaults.xsrfCookieName = 'csrftoken'
       axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
       await addVideos()
-      await nextTick()
+      await nextTick()  // v-for による <video> 要素の DOM 反映を待つ
+      if (window.lucide) window.lucide.createIcons()  // サイドバー・ボトムナビ・初回 v-for アイテムのアイコンを描画
       fadeUp()
-      currentVideoElement.value = document.querySelector(".infinite-item > video")
+      currentVideoElement.value = document.querySelector(".infinite-item video")
       console.log(currentVideoElement.value)
       console.log(videoElementVisibilities)
       console.log(dataList.value)
